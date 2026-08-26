@@ -104,7 +104,7 @@ blocks:
 - name: pilot_bearing
   id: variable
   parameters:
-    comment: Set to the measured B210 bearing before starting
+    comment: Relative reference axis pointing from the array centre to the B210
     value: '0.0'
   states:
     bus_sink: false
@@ -116,8 +116,8 @@ blocks:
 - name: element0_bearing
   id: variable
   parameters:
-    comment: Physical bearing of antenna element 0
-    value: '0.0'
+    comment: 4.1 RX1 is bottom-right, 225 degrees CCW from the B210 reference
+    value: '225.0'
   states:
     bus_sink: false
     bus_source: false
@@ -128,8 +128,8 @@ blocks:
 - name: element_bearing_step
   id: variable
   parameters:
-    comment: Use -90 if channel order runs in the opposite direction
-    value: '90.0'
+    comment: Existing element order proceeds clockwise around the array
+    value: '-90.0'
   states:
     bus_sink: false
     bus_source: false
@@ -229,7 +229,7 @@ blocks:
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '32768'
-    comment: 'Global channels 0 and 1: connect these to UCA elements 0 and 1.'
+    comment: 'Existing wiring: RX1 bottom-right is element 0; RX2 bottom-left is element 1.'
     filter: ''
     filter_source: '''Auto'''
     fpass: '0'
@@ -265,7 +265,7 @@ blocks:
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '32768'
-    comment: 'Global channels 2 and 3: connect these to UCA elements 2 and 3.'
+    comment: 'Existing wiring is permuted below: RX2 top-left is element 2; RX1 top-right is element 3.'
     filter: ''
     filter_source: '''Auto'''
     fpass: '0'
@@ -648,8 +648,8 @@ blocks:
 connections:
 - [libresdr_a, '0', ota_calibration, '0']
 - [libresdr_a, '1', ota_calibration, '1']
-- [libresdr_b, '0', ota_calibration, '2']
-- [libresdr_b, '1', ota_calibration, '3']
+- [libresdr_b, '1', ota_calibration, '2']
+- [libresdr_b, '0', ota_calibration, '3']
 - [ota_calibration, '0', covariance, '0']
 - [ota_calibration, '1', covariance, '1']
 - [ota_calibration, '2', covariance, '2']

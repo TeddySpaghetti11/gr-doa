@@ -12,14 +12,20 @@ The supplied defaults assume:
 - 162.63 mm adjacent chord spacing;
 - 903 MHz center frequency;
 - 114.997 mm circle radius, or `0.346379923` wavelengths;
-- `192.168.4.1` RX1/RX2 are elements 0/1;
-- `192.168.5.1` RX1/RX2 are elements 2/3;
-- element indices advance by +90 degrees around the circle.
+- the B210 direction from the array centre defines the relative `0` degree axis;
+- `192.168.4.1` RX1 at bottom-right is element 0 at 225 degrees;
+- `192.168.4.1` RX2 at bottom-left is element 1 at 135 degrees;
+- `192.168.5.1` RX2 at top-left is element 2 at 45 degrees;
+- `192.168.5.1` RX1 at top-right is element 3 at 315 degrees; and
+- element indices advance clockwise with `element_bearing_step = -90.0`.
 
-Set `element0_bearing` to the physical bearing from the array center toward
-element 0. If the numbered elements run in the opposite direction, change
-`element_bearing_step` from `90.0` to `-90.0`. All pilot and MUSIC bearings use
-this same coordinate system.
+The graph intentionally swaps the two `192.168.5.1` source outputs before
+calibration so this physical wiring does not need to change. The default
+`element0_bearing = 225.0` assumes the B210 is centred above the array as drawn
+in the setup diagram. If the B210 is displaced sideways, change only
+`element0_bearing` to the measured counterclockwise angle from the actual B210
+direction to the bottom-right element. All MUSIC bearings are reported relative
+to that B210 direction.
 
 ## Build and install
 
@@ -46,8 +52,9 @@ analogue bandwidth is important to a measurement.
 
 ## Measurement procedure
 
-1. Set `pilot_bearing` in `run_MUSIC_uca_live_cal.grc` to the measured bearing
-   of the B210 from the array center.
+1. Leave `pilot_bearing = 0.0` to use the B210 direction as the relative zero
+   axis. Confirm `element0_bearing` describes the angle from that axis to the
+   bottom-right `192.168.4.1` RX1 element.
 2. Confirm the element-to-channel order above and use the same manual gain on
    all four receiver channels.
 3. Start the B210 calibration tone with

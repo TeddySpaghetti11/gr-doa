@@ -75,8 +75,8 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.num_targets = num_targets = 1
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = 0.346379923
-        self.element_bearing_step = element_bearing_step = 90.0
-        self.element0_bearing = element0_bearing = 0.0
+        self.element_bearing_step = element_bearing_step = -90.0
+        self.element0_bearing = element0_bearing = 225.0
         self.center_freq = center_freq = int(903e6)
         self.calibration_skip = calibration_skip = 2**14
         self.calibration_samples = calibration_samples = 2**16
@@ -272,18 +272,18 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.covariance, 0), (self.music_uca, 0))
         self.connect((self.libresdr_a, 1), (self.ota_calibration, 1))
         self.connect((self.libresdr_a, 0), (self.ota_calibration, 0))
-        self.connect((self.libresdr_b, 1), (self.ota_calibration, 3))
-        self.connect((self.libresdr_b, 0), (self.ota_calibration, 2))
+        self.connect((self.libresdr_b, 1), (self.ota_calibration, 2))
+        self.connect((self.libresdr_b, 0), (self.ota_calibration, 3))
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
-        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
-        self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
+        self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
         self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
+        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
         self.connect((self.ota_calibration, 0), (self.covariance, 0))
-        self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
+        self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
 
