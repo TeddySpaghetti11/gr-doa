@@ -1,4 +1,0 @@
-var dir_eb7570e12286864083ec2c450b189261 =
-[
-    [ "doa", "dir_6ee36a5c8468540411163c7be3ff403a.html", "dir_6ee36a5c8468540411163c7be3ff403a" ]
-];

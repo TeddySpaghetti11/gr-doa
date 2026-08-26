@@ -1,3 +1,0 @@
-qa_MUSIC_uca 2 0.155457
-qa_uca_pilot_calibration 1 0.32126
----

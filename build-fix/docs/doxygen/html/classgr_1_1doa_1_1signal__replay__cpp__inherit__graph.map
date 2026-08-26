@@ -1,7 +1,0 @@
-<map id="gr::doa::signal_replay_cpp" name="gr::doa::signal_replay_cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,81,197,109"/>
-<area shape="rect" id="Node000003" href="$classgr_1_1doa_1_1signal__replay__cpp__impl.html" title=" " alt="" coords="20,157,182,201"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="103,123,103,157,99,155,99,127"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="44,5,158,33"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,46,104,81,98,80,100,51"/>
-</map>

@@ -1,7 +1,0 @@
-var python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h =
-[
-    [ "D", "python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h.html#a74021f021dcdfbb22891787b79c5529d", null ],
-    [ "__doc_gr_doa_calibrate_lin_array", "python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h.html#a5d7f3ccd9e474d7c5d3d89b54f3dcf2e", null ],
-    [ "__doc_gr_doa_calibrate_lin_array_calibrate_lin_array_0", "python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h.html#a1c18a76449a37f3b8c7b070093d1dfb5", null ],
-    [ "__doc_gr_doa_calibrate_lin_array_make", "python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h.html#a1ea625eaa86b6912bef6c346224f0c46", null ]
-];
