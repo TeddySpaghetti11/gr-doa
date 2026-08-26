@@ -52,8 +52,10 @@ MUSIC_uca_impl::MUSIC_uca_impl(float norm_radius,
       d_element_angle_step_deg(element_angle_step_deg)
 {
     // UCA geometry is the only intentional algorithmic difference from the
-    // Ettus MUSIC_lin_array constructor.  Positions are expressed in
-    // wavelengths and projected onto each candidate bearing.
+    // Ettus MUSIC_lin_array constructor.  Angles here are SOURCE bearings:
+    // theta points from the array centre towards the transmitter/source.
+    // For an analytic received signal, the far-field spatial phase at element m
+    // is exp(+j*k*r_m dot u_source), hence the positive sign below.
     const float pi = static_cast<float>(arma::datum::pi);
     const float degrees_to_radians = pi / 180.0F;
     const gr_complex j(0.0F, 1.0F);
@@ -68,7 +70,7 @@ MUSIC_uca_impl::MUSIC_uca_impl(float norm_radius,
                                degrees_to_radians;
             const float projected_position = d_norm_radius * std::cos(theta - beta);
             d_manifold(element, angle_index) =
-                std::exp(j * (-2.0F * pi * projected_position));
+                std::exp(j * (2.0F * pi * projected_position));
         }
     }
     d_manifold_h = arma::trans(d_manifold);
