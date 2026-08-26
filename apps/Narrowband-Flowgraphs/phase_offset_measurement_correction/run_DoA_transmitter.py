@@ -75,7 +75,7 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
 
             'TxAddr': "serial=310C4AE",
 
-            'Gain': 89,
+            'Gain': 60,
 
 
 
