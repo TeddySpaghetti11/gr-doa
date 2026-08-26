@@ -79,7 +79,9 @@ documentation: |-
 
   Keep both IIO sources and this flowgraph running after calibration. Reopening
   or retuning either LibreSDR can invalidate the corrections. The console prints
-  when calibration is complete and the pilot may be switched off.
+  when calibration is complete and the pilot may be switched off. When a log
+  filename is supplied, the saved radians are directly compatible with Ettus's
+  Phase Correct Chains block (channel 0 is the reference and is omitted).
 
   A pure tone corrects fixed delay only at that tone frequency; this block is
   intended for narrowband MUSIC and is not a wideband sample synchronizer.

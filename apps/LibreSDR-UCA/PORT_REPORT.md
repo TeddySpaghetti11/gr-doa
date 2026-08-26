@@ -15,8 +15,11 @@ differences:
    channel phase without removing the UCA manifold phase; and
 3. MUSIC uses physical four-element UCA positions and scans 0-360 degrees.
 
-No smoothing, tracking, AGC, filter, gain, frequency, or covariance rewrite was
-added.
+The repair restores Ettus's `32768/16384` covariance window, removes the two
+independent GUI smoothers, and reuses Ettus's `Phase Offset Est` block before
+and after same-session OTA correction. The three AD9361 tracking loops are
+disabled because they can move relative phase after calibration. No covariance
+or MUSIC subspace rewrite was added.
 
 ## Files changed by the correction
 
@@ -24,7 +27,8 @@ added.
   the Ettus eigendecomposition, subspace, reciprocal spectrum, and normalization
   behavior.
 - `python/doa/uca_pilot_calibration.py`: made calibration phase-only, retained
-  expected geometry, and added measured/geometry/hardware pairwise phase output.
+  expected geometry, added measured/geometry/hardware pairwise phase output,
+  and writes an Ettus `phase_correct_hier`-compatible phase file.
 - `python/doa/qa_MUSIC_uca.py`: added an end-to-end test through the unchanged
   Ettus covariance block.
 - `python/doa/qa_uca_pilot_calibration.py`: verifies phase removal, geometry
@@ -32,8 +36,11 @@ added.
 - `grc/doa_uca_pilot_calibration.block.yml`, `README.md`, and
   `apps/LibreSDR-UCA/README.md`: corrected the calibration contract and recorded
   equations, ordering, and limitations.
-- `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.py`: regenerated connection order
-  from its authoritative GRC file; behavior is unchanged.
+- `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc`: restored Ettus covariance and
+  display parameters, disabled phase-moving AD9361 tracking loops, and added
+  continuous raw/corrected phase panels using the upstream estimator.
+- `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.py`: regenerated from its
+  authoritative GRC file.
 - `apps/LibreSDR-UCA/UPSTREAM_AUDIT.md`: pre-change classification and failure
   chain.
 
@@ -129,7 +136,8 @@ different startup phase.
 ## Ettus algorithm preservation
 
 - Covariance implementation: unchanged from upstream. Snapshot length, overlap,
-  matrix layout, and `X^T conj(X) / N` calculation remain Ettus code.
+  matrix layout, and `X^T conj(X) / N` calculation remain Ettus code. The active
+  graph again uses Ettus's `32768` snapshot and `16384` overlap values.
 - Averaging selection: forward-only for the UCA. Ettus forward-backward mode
   uses a reversal matrix for ULA ordering. With UCA order 0, 90, 180, 270
   degrees, that reversal introduces the manifold for `90 degrees - theta`; it
@@ -173,19 +181,19 @@ unstable. The first unverified point is the four live streams entering
 calibration: physical cable order, sample correspondence, and phase stability.
 
 On the next hardware run, compare the block's printed ch1/ch0, ch2/ch0, and
-ch3/ch0 measured phases with their predicted geometric phases. If the printed
-hardware corrections freeze but the spectrum later becomes flat without motion,
-record those same pairwise phases again; drift or jumps concentrated in ch2/ch0
-and ch3/ch0 would isolate the fault to the cross-LibreSDR boundary.
+ch3/ch0 measured phases with their predicted geometric phases. The new raw and
+corrected phase panels continue plotting those relationships after calibration;
+drift or jumps concentrated in ch2/ch0 and ch3/ch0 isolate the fault to the
+cross-LibreSDR boundary.
 
 ## Test summary
 
 ```text
-cmake --build build-libresdr -j2
+cmake --build build-fix -j2
   PASS
 
-ctest --test-dir build-libresdr -R 'qa_(MUSIC_uca|uca_pilot_calibration)'
-  2/2 test programs passed (3 test cases total)
+ctest --test-dir build-fix -R 'qa_(MUSIC_uca|uca_pilot_calibration)'
+  2/2 test programs passed (4 test cases total)
 
 grcc -o /tmp apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc
   PASS

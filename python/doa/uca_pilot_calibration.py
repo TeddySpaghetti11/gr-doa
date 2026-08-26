@@ -142,16 +142,16 @@ class uca_pilot_calibration(gr.sync_block):
         directory = os.path.dirname(os.path.abspath(self.config_filename))
         os.makedirs(directory, exist_ok=True)
         with open(self.config_filename, "w", encoding="utf-8") as config_file:
-            config_file.write("# UCA OTA unit-magnitude phase correction coefficients\n")
-            config_file.write(
-                "# channel real imag magnitude phase_degrees\n"
-            )
-            for channel, coefficient in enumerate(coefficients):
+            config_file.write("# UCA OTA phase corrections in radians\n")
+            config_file.write("# Compatible with Ettus phase_correct_hier\n")
+            config_file.write("# Channel 0 is the reference and is not listed\n")
+            for channel, coefficient in enumerate(coefficients[1:], start=1):
+                phase_radians = numpy.angle(coefficient)
                 config_file.write(
-                    f"{channel} {coefficient.real:.12g} {coefficient.imag:.12g} "
-                    f"{abs(coefficient):.12g} "
-                    f"{numpy.angle(coefficient, deg=True):.12g}\n"
+                    f"# ch{channel}/ch0 correction: "
+                    f"{numpy.rad2deg(phase_radians):.6f} degrees\n"
                 )
+                config_file.write(f"{phase_radians:.12g}\n")
 
     def work(self, input_items, output_items):
         item_count = min(len(items) for items in input_items)

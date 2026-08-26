@@ -165,7 +165,7 @@ blocks:
   id: variable
   parameters:
     comment: Samples per MUSIC covariance estimate
-    value: 2**12
+    value: 2**15
   states:
     bus_sink: false
     bus_source: false
@@ -177,7 +177,7 @@ blocks:
   id: variable
   parameters:
     comment: Covariance snapshot overlap
-    value: 2**11
+    value: 2**14
   states:
     bus_sink: false
     bus_source: false
@@ -227,7 +227,7 @@ blocks:
     affinity: ''
     alias: ''
     bandwidth: rf_bandwidth
-    bbdc: 'True'
+    bbdc: 'False'
     buffer_size: '32768'
     comment: 'Existing wiring: RX1 bottom-right is element 0; RX2 bottom-left is element 1.'
     filter: ''
@@ -242,9 +242,9 @@ blocks:
     manual_gain2: rx_gain
     maxoutbuf: '0'
     minoutbuf: '0'
-    quadrature: 'True'
+    quadrature: 'False'
     rf_port_select: '''A_BALANCED'''
-    rfdc: 'True'
+    rfdc: 'False'
     rx1_en: 'True'
     rx2_en: 'True'
     samplerate: samp_rate
@@ -263,7 +263,7 @@ blocks:
     affinity: ''
     alias: ''
     bandwidth: rf_bandwidth
-    bbdc: 'True'
+    bbdc: 'False'
     buffer_size: '32768'
     comment: 'Existing wiring is permuted below: RX2 top-left is element 2; RX1 top-right is element 3.'
     filter: ''
@@ -278,9 +278,9 @@ blocks:
     manual_gain2: rx_gain
     maxoutbuf: '0'
     minoutbuf: '0'
-    quadrature: 'True'
+    quadrature: 'False'
     rf_port_select: '''A_BALANCED'''
-    rfdc: 'True'
+    rfdc: 'False'
     rx1_en: 'True'
     rx2_en: 'True'
     samplerate: samp_rate
@@ -314,6 +314,40 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [352, 360]
+    rotation: 0
+    state: enabled
+- name: raw_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Uncorrected x0*conj(xi) phase. Stable traces are required for coherent MUSIC.'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 568]
+    rotation: 0
+    state: enabled
+- name: corrected_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Corrected x0*conj(xi) phase. With the pilot present this should match the predicted UCA geometry and remain stable.'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip + calibration_samples
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 568]
     rotation: 0
     state: enabled
 - name: covariance
@@ -416,7 +450,7 @@ blocks:
     affinity: ''
     alias: ''
     autoscale: 'False'
-    avg: '0.15'
+    avg: '0'
     color1: ("black", "black")
     color10: ("black", "black")
     color2: ("black", "black")
@@ -489,7 +523,7 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'False'
-    average: '0.2'
+    average: '1.0'
     color1: '"blue"'
     color10: '"dark blue"'
     color2: '"red"'
@@ -644,12 +678,210 @@ blocks:
     coordinate: [600, 640]
     rotation: 0
     state: enabled
+- name: raw_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: 'Continuous raw pairwise phases from the unchanged Ettus estimator.'
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: '2,0,1,1'
+    label1: Raw ch1/ch0
+    label10: ''
+    label2: Raw ch2/ch0
+    label3: Raw ch3/ch0
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Raw relative phase"'
+    nconnections: '3'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [816, 688]
+    rotation: 0
+    state: enabled
+- name: corrected_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: 'Continuous corrected pairwise phases from the unchanged Ettus estimator.'
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: '2,1,1,1'
+    label1: Corrected ch1/ch0
+    label10: ''
+    label2: Corrected ch2/ch0
+    label3: Corrected ch3/ch0
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Corrected relative phase"'
+    nconnections: '3'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 688]
+    rotation: 0
+    state: enabled
 
 connections:
 - [libresdr_a, '0', ota_calibration, '0']
 - [libresdr_a, '1', ota_calibration, '1']
 - [libresdr_b, '1', ota_calibration, '2']
 - [libresdr_b, '0', ota_calibration, '3']
+- [libresdr_a, '0', raw_phase_estimator, '0']
+- [libresdr_a, '1', raw_phase_estimator, '1']
+- [libresdr_b, '1', raw_phase_estimator, '2']
+- [libresdr_b, '0', raw_phase_estimator, '3']
 - [ota_calibration, '0', covariance, '0']
 - [ota_calibration, '1', covariance, '1']
 - [ota_calibration, '2', covariance, '2']
@@ -658,6 +890,16 @@ connections:
 - [ota_calibration, '1', corrected_channels, '1']
 - [ota_calibration, '2', corrected_channels, '2']
 - [ota_calibration, '3', corrected_channels, '3']
+- [ota_calibration, '0', corrected_phase_estimator, '0']
+- [ota_calibration, '1', corrected_phase_estimator, '1']
+- [ota_calibration, '2', corrected_phase_estimator, '2']
+- [ota_calibration, '3', corrected_phase_estimator, '3']
+- [raw_phase_estimator, '0', raw_phase_display, '0']
+- [raw_phase_estimator, '1', raw_phase_display, '1']
+- [raw_phase_estimator, '2', raw_phase_display, '2']
+- [corrected_phase_estimator, '0', corrected_phase_display, '0']
+- [corrected_phase_estimator, '1', corrected_phase_display, '1']
+- [corrected_phase_estimator, '2', corrected_phase_display, '2']
 - [covariance, '0', music_uca, '0']
 - [music_uca, '0', peak_finder, '0']
 - [music_uca, '0', spectrum_display, '0']

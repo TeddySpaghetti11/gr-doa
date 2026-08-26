@@ -50,6 +50,12 @@ runtime setter in the generated Python. The flowgraph therefore requests
 `rf_bandwidth` IIO attribute (or set it outside this source block) when exact
 analogue bandwidth is important to a measurement.
 
+The live graph now keeps the important Ettus defaults: `32768`-sample
+covariance snapshots, `16384`-sample overlap, an unsmoothed MUSIC spectrum, and
+an unsmoothed peak readout. AD9361 quadrature, RF-DC, and baseband-DC tracking
+are disabled on both radios so those adaptive loops cannot change relative
+phase after calibration. Gain remains manual and identical on all channels.
+
 ## Measurement procedure
 
 1. Leave `pilot_bearing = 0.0` to use the B210 direction as the relative zero
@@ -65,10 +71,18 @@ analogue bandwidth is important to a measurement.
    zero while the two sources settle and pilot samples are accumulated.
 5. Wait for `UCA calibration complete`. The block prints the measured pairwise
    phase, predicted geometric phase, and frozen hardware-phase correction for
-   every channel relative to channel 0.
-6. Switch off the B210 transmitter without stopping the receiver flowgraph.
-7. Activate the target transmitter. The GUI shows the calibrated channel traces,
-   full 0–360 degree MUSIC spectrum, and estimated bearing.
+   every channel relative to channel 0. It also writes three correction phases,
+   in radians, to `/tmp/gr-doa-uca-903MHz.cfg`; this file can be read directly by
+   Ettus's `Phase Correct Chains` block.
+6. With the pilot still on, inspect the two relative-phase panels. Each uses
+   Ettus's unchanged `Phase Offset Est` block and shows `x0*conj(xi)` in radians.
+   The raw and corrected traces should be approximately horizontal. Corrected
+   phases retain the predicted UCA geometry; they are not expected to all be
+   zero.
+7. Switch off the B210 transmitter without stopping the receiver flowgraph.
+8. Activate the target transmitter. The GUI shows the calibrated channel traces,
+   full 0–360 degree MUSIC spectrum, estimated bearing, and continuing raw versus
+   corrected relative-phase diagnostics.
 
 Do not restart or retune either LibreSDR between steps 5 and 7. With the current
 firmware, a new start or retune can change inter-device timing or RF phase and
@@ -92,6 +106,11 @@ repair a sample discontinuity or relative drift that occurs after calibration.
 Indoor multipath also affects OTA calibration. Keep the B210 in the far field
 with a clear line of sight where practical, and repeat measurements at several
 known bearings to validate the assumed UCA manifold and bearing convention.
+
+If same-radio pairs remain stable while `ch2/ch0` and `ch3/ch0` wander or jump,
+the failure is across the two LibreSDRs rather than inside MUSIC. A flat MUSIC
+spectrum is not a trustworthy bearing; use the phase panels to localize that
+condition before interpreting the numerical maximum.
 
 ## Equations
 

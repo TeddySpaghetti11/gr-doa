@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import numpy
+import os
+import tempfile
 from gnuradio import doa
 from gnuradio import gr_unittest
 
@@ -63,6 +65,49 @@ class qa_uca_pilot_calibration(gr_unittest.TestCase):
             numpy.testing.assert_allclose(
                 corrected[channel], expected, rtol=2e-5, atol=2e-5
             )
+
+    def test_saved_phases_match_ettus_phase_correct_format(self):
+        num_elements = 4
+        sample_count = 256
+        hardware_phases = numpy.asarray([0.0, 0.4, -1.1, 2.2])
+        tone = numpy.ones(sample_count, dtype=numpy.complex64)
+        inputs = [
+            (numpy.exp(1j * phase) * tone).astype(numpy.complex64)
+            for phase in hardware_phases
+        ]
+
+        with tempfile.TemporaryDirectory() as directory:
+            config_filename = os.path.join(directory, "phase_offsets.cfg")
+            calibration = doa.uca_pilot_calibration(
+                num_inputs=num_elements,
+                norm_radius=0.25,
+                pilot_angle=0.0,
+                element0_angle=0.0,
+                element_angle_step=90.0,
+                skip_samples=0,
+                calibration_samples=sample_count,
+                config_filename=config_filename,
+            )
+            outputs = [
+                numpy.empty(sample_count, dtype=numpy.complex64)
+                for _ in range(num_elements)
+            ]
+            calibration.work(inputs, outputs)
+
+            with open(config_filename, "r", encoding="utf-8") as config_file:
+                saved_phases = [
+                    float(line)
+                    for line in config_file
+                    if not line.lstrip().startswith("#")
+                ]
+
+        self.assertEqual(len(saved_phases), num_elements - 1)
+        numpy.testing.assert_allclose(
+            numpy.exp(1j * numpy.asarray(saved_phases)),
+            calibration.coefficients()[1:],
+            rtol=0.0,
+            atol=1e-6,
+        )
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from gnuradio import qtgui
 from gnuradio import blocks
 from gnuradio import doa
 from gnuradio import iio
+import gnuradio.doa as doa
 import sip
 import threading
 from gnuradio import gr
@@ -65,13 +66,13 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.snapshot_size = snapshot_size = 2**12
+        self.snapshot_size = snapshot_size = 2**15
         self.samp_rate = samp_rate = int(2.8e6)
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
         self.pspectrum_len = pspectrum_len = 720
         self.pilot_bearing = pilot_bearing = 0.0
-        self.overlap_size = overlap_size = 2**11
+        self.overlap_size = overlap_size = 2**14
         self.num_targets = num_targets = 1
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = 0.346379923
@@ -129,6 +130,59 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.raw_phase_estimator = doa.phase_offset_est(num_elements, calibration_skip)
+        self.raw_phase_display = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "Raw relative phase", #name
+            3, #number of inputs
+            None # parent
+        )
+        self.raw_phase_display.set_update_time(0.10)
+        self.raw_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.raw_phase_display.set_y_label('Phase', 'radians')
+
+        self.raw_phase_display.enable_tags(False)
+        self.raw_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.raw_phase_display.enable_autoscale(False)
+        self.raw_phase_display.enable_grid(True)
+        self.raw_phase_display.enable_axis_labels(True)
+        self.raw_phase_display.enable_control_panel(False)
+        self.raw_phase_display.enable_stem_plot(False)
+
+
+        labels = ['Raw ch1/ch0', 'Raw ch2/ch0', 'Raw ch3/ch0', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(3):
+            if len(labels[i]) == 0:
+                self.raw_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.raw_phase_display.set_line_label(i, labels[i])
+            self.raw_phase_display.set_line_width(i, widths[i])
+            self.raw_phase_display.set_line_color(i, colors[i])
+            self.raw_phase_display.set_line_style(i, styles[i])
+            self.raw_phase_display.set_line_marker(i, markers[i])
+            self.raw_phase_display.set_line_alpha(i, alphas[i])
+
+        self._raw_phase_display_win = sip.wrapinstance(self.raw_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._raw_phase_display_win, 2, 0, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.peak_magnitude_discard = blocks.null_sink(gr.sizeof_float*num_targets)
         self.peak_finder = doa.find_local_max(num_targets, pspectrum_len, 0.0, 360.0)
         self.ota_calibration = doa.uca_pilot_calibration(
@@ -151,9 +205,9 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         if True:
             self.libresdr_b.set_gain_mode(1, 'manual')
             self.libresdr_b.set_gain(1, rx_gain)
-        self.libresdr_b.set_quadrature(True)
-        self.libresdr_b.set_rfdc(True)
-        self.libresdr_b.set_bbdc(True)
+        self.libresdr_b.set_quadrature(False)
+        self.libresdr_b.set_rfdc(False)
+        self.libresdr_b.set_bbdc(False)
         self.libresdr_b.set_filter_params('Auto', '', 0, 0)
         self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 32768)
         self.libresdr_a.set_len_tag_key('packet_len')
@@ -165,11 +219,64 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         if True:
             self.libresdr_a.set_gain_mode(1, 'manual')
             self.libresdr_a.set_gain(1, rx_gain)
-        self.libresdr_a.set_quadrature(True)
-        self.libresdr_a.set_rfdc(True)
-        self.libresdr_a.set_bbdc(True)
+        self.libresdr_a.set_quadrature(False)
+        self.libresdr_a.set_rfdc(False)
+        self.libresdr_a.set_bbdc(False)
         self.libresdr_a.set_filter_params('Auto', '', 0, 0)
         self.covariance = doa.autocorrelate(num_elements, snapshot_size, overlap_size, 0)
+        self.corrected_phase_estimator = doa.phase_offset_est(num_elements, (calibration_skip + calibration_samples))
+        self.corrected_phase_display = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "Corrected relative phase", #name
+            3, #number of inputs
+            None # parent
+        )
+        self.corrected_phase_display.set_update_time(0.10)
+        self.corrected_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.corrected_phase_display.set_y_label('Phase', 'radians')
+
+        self.corrected_phase_display.enable_tags(False)
+        self.corrected_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.corrected_phase_display.enable_autoscale(False)
+        self.corrected_phase_display.enable_grid(True)
+        self.corrected_phase_display.enable_axis_labels(True)
+        self.corrected_phase_display.enable_control_panel(False)
+        self.corrected_phase_display.enable_stem_plot(False)
+
+
+        labels = ['Corrected ch1/ch0', 'Corrected ch2/ch0', 'Corrected ch3/ch0', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(3):
+            if len(labels[i]) == 0:
+                self.corrected_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.corrected_phase_display.set_line_label(i, labels[i])
+            self.corrected_phase_display.set_line_width(i, widths[i])
+            self.corrected_phase_display.set_line_color(i, colors[i])
+            self.corrected_phase_display.set_line_style(i, styles[i])
+            self.corrected_phase_display.set_line_marker(i, markers[i])
+            self.corrected_phase_display.set_line_alpha(i, alphas[i])
+
+        self._corrected_phase_display_win = sip.wrapinstance(self.corrected_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._corrected_phase_display_win, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.corrected_channels = qtgui.time_sink_c(
             1024, #size
             samp_rate, #samp_rate
@@ -228,7 +335,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.bearing_streams = blocks.vector_to_streams(gr.sizeof_float*1, num_targets)
         self.bearing_display = qtgui.number_sink(
             gr.sizeof_float,
-            0.15,
+            0,
             qtgui.NUM_GRAPH_HORIZ,
             1,
             None # parent
@@ -269,23 +376,37 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.bearing_streams, 0), (self.bearing_display, 0))
+        self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
+        self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
+        self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
         self.connect((self.covariance, 0), (self.music_uca, 0))
         self.connect((self.libresdr_a, 1), (self.ota_calibration, 1))
         self.connect((self.libresdr_a, 0), (self.ota_calibration, 0))
+        self.connect((self.libresdr_a, 1), (self.raw_phase_estimator, 1))
+        self.connect((self.libresdr_a, 0), (self.raw_phase_estimator, 0))
         self.connect((self.libresdr_b, 1), (self.ota_calibration, 2))
         self.connect((self.libresdr_b, 0), (self.ota_calibration, 3))
+        self.connect((self.libresdr_b, 1), (self.raw_phase_estimator, 2))
+        self.connect((self.libresdr_b, 0), (self.raw_phase_estimator, 3))
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
+        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
         self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
         self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
-        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
+        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
+        self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
+        self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
         self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
-        self.connect((self.ota_calibration, 2), (self.covariance, 2))
         self.connect((self.ota_calibration, 3), (self.covariance, 3))
+        self.connect((self.ota_calibration, 2), (self.covariance, 2))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
+        self.connect((self.raw_phase_estimator, 1), (self.raw_phase_display, 1))
+        self.connect((self.raw_phase_estimator, 2), (self.raw_phase_display, 2))
+        self.connect((self.raw_phase_estimator, 0), (self.raw_phase_display, 0))
 
 
     def closeEvent(self, event):
@@ -310,6 +431,8 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.libresdr_a.set_samplerate(self.samp_rate)
         self.libresdr_b.set_samplerate(self.samp_rate)
         self.corrected_channels.set_samp_rate(self.samp_rate)
+        self.raw_phase_display.set_samp_rate(self.samp_rate)
+        self.corrected_phase_display.set_samp_rate(self.samp_rate)
 
     def get_rx_gain(self):
         return self.rx_gain
