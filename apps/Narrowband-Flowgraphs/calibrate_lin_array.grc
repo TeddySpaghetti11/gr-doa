@@ -40,6 +40,30 @@ blocks:
     coordinate: [528, 24.0]
     rotation: 0
     state: enabled
+- name: bandwidth
+  id: variable
+  parameters:
+    comment: ''
+    value: '2800000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 24.0]
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: ''
+    value: int(1.24086e9)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 24.0]
+    rotation: 0
+    state: enabled
 - name: input_variables
   id: variable_struct
   parameters:
@@ -79,11 +103,11 @@ blocks:
     value2: 2.495e9
     value3: '"addr=10.94.17.65"'
     value4: '0'
-    value5: '4'
-    value6: '0.5'
+    value5: '2'
+    value6: '0.1208'
     value7: 2**11
     value8: 2**10
-    value9: '120'
+    value9: '90'
   states:
     bus_sink: false
     bus_source: false
@@ -103,6 +127,18 @@ blocks:
     coordinate: [336, 24.0]
     rotation: 0
     state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 24.0]
+    rotation: 0
+    state: enabled
 - name: blocks_complex_to_magphase_0
   id: blocks_complex_to_magphase
   parameters:
@@ -117,6 +153,22 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [944, 272.0]
+    rotation: 180
+    state: disabled
+- name: blocks_complex_to_magphase_0_0
+  id: blocks_complex_to_magphase
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: input_variables.NumArrayElements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 672.0]
     rotation: 180
     state: enabled
 - name: doa_autocorrelate_0
@@ -137,6 +189,25 @@ blocks:
     bus_structure: null
     coordinate: [672, 112.0]
     rotation: 0
+    state: disabled
+- name: doa_autocorrelate_0_0
+  id: doa_autocorrelate
+  parameters:
+    affinity: ''
+    alias: ''
+    avg_method: Forward-Backward
+    comment: ''
+    inputs: input_variables.NumArrayElements
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    overlap_size: input_variables.OverlapSize
+    snapshot_size: input_variables.SnapshotSize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [728, 512.0]
+    rotation: 0
     state: enabled
 - name: doa_calibrate_lin_array_0
   id: doa_calibrate_lin_array
@@ -155,6 +226,24 @@ blocks:
     bus_structure: null
     coordinate: [952, 128]
     rotation: 0
+    state: disabled
+- name: doa_calibrate_lin_array_0_0
+  id: doa_calibrate_lin_array
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    norm_spacing: input_variables.NormSpacing
+    num_ant_ele: input_variables.NumArrayElements
+    pilot_angle: input_variables.PilotAngle
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1016, 520.0]
+    rotation: 0
     state: enabled
 - name: doa_phase_correct_hier_0
   id: doa_phase_correct_hier
@@ -172,6 +261,23 @@ blocks:
     bus_structure: null
     coordinate: [416, 112.0]
     rotation: 0
+    state: disabled
+- name: doa_phase_correct_hier_0_0
+  id: doa_phase_correct_hier
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    config_filename: rel_phase_offsets_file_name
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: input_variables.NumArrayElements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [472, 528.0]
+    rotation: 0
     state: enabled
 - name: doa_save_antenna_calib_0
   id: doa_save_antenna_calib
@@ -187,6 +293,22 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [642, 256]
+    rotation: 180
+    state: disabled
+- name: doa_save_antenna_calib_0_0
+  id: doa_save_antenna_calib
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    config_filename: antenna_calibration_file_name
+    num_inputs: input_variables.NumArrayElements
+    samples_to_average: input_variables.Samples2Avg
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [728, 664.0]
     rotation: 180
     state: enabled
 - name: doa_x440_usrp_source_0
@@ -208,6 +330,42 @@ blocks:
     bus_structure: null
     coordinate: [168, 112.0]
     rotation: 0
+    state: disabled
+- name: iio_fmcomms2_source_0
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: bandwidth
+    bbdc: 'True'
+    buffer_size: '32768'
+    comment: ''
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: freq
+    fstop: '0'
+    gain1: '''slow_attack'''
+    gain2: '''slow_attack'''
+    len_tag_key: packet_len
+    manual_gain1: '64'
+    manual_gain2: '64'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.1.10
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [168, 424.0]
+    rotation: 0
     state: enabled
 - name: import_0
   id: import
@@ -226,17 +384,21 @@ blocks:
 connections:
 - [blocks_complex_to_magphase_0, '0', doa_save_antenna_calib_0, '0']
 - [blocks_complex_to_magphase_0, '1', doa_save_antenna_calib_0, '1']
+- [blocks_complex_to_magphase_0_0, '0', doa_save_antenna_calib_0_0, '0']
+- [blocks_complex_to_magphase_0_0, '1', doa_save_antenna_calib_0_0, '1']
 - [doa_autocorrelate_0, '0', doa_calibrate_lin_array_0, '0']
+- [doa_autocorrelate_0_0, '0', doa_calibrate_lin_array_0_0, '0']
 - [doa_calibrate_lin_array_0, '0', blocks_complex_to_magphase_0, '0']
+- [doa_calibrate_lin_array_0_0, '0', blocks_complex_to_magphase_0_0, '0']
 - [doa_phase_correct_hier_0, '0', doa_autocorrelate_0, '0']
 - [doa_phase_correct_hier_0, '1', doa_autocorrelate_0, '1']
-- [doa_phase_correct_hier_0, '2', doa_autocorrelate_0, '2']
-- [doa_phase_correct_hier_0, '3', doa_autocorrelate_0, '3']
+- [doa_phase_correct_hier_0_0, '0', doa_autocorrelate_0_0, '0']
+- [doa_phase_correct_hier_0_0, '1', doa_autocorrelate_0_0, '1']
 - [doa_x440_usrp_source_0, '0', doa_phase_correct_hier_0, '0']
 - [doa_x440_usrp_source_0, '1', doa_phase_correct_hier_0, '1']
-- [doa_x440_usrp_source_0, '2', doa_phase_correct_hier_0, '2']
-- [doa_x440_usrp_source_0, '3', doa_phase_correct_hier_0, '3']
+- [iio_fmcomms2_source_0, '0', doa_phase_correct_hier_0_0, '0']
+- [iio_fmcomms2_source_0, '1', doa_phase_correct_hier_0_0, '1']
 
 metadata:
   file_format: 1
-  grc_version: v3.11.0.0git-992-ga7b5ef78
+  grc_version: 3.10.12.0
