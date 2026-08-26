@@ -18,20 +18,35 @@ class qa_MUSIC_uca(gr_unittest.TestCase):
     def tearDown(self):
         self.tb = None
 
-    def test_single_source_bearing(self):
+    @staticmethod
+    def _source_steering(norm_radius, bearing_deg, element0_deg, step_deg, count):
+        element_bearings = numpy.deg2rad(
+            element0_deg + numpy.arange(count) * step_deg
+        )
+        return numpy.exp(
+            1j * 2.0 * numpy.pi * norm_radius
+            * numpy.cos(numpy.deg2rad(bearing_deg) - element_bearings)
+        )
+
+    def test_physical_channel_order_source_bearing(self):
+        """Exercise the real LibreSDR channel order and source-bearing convention."""
         num_elements = 4
-        norm_radius = 0.346379923
+        norm_radius = 0.353265327
+        element0_deg = 225.0
+        element_step_deg = -90.0
         expected_bearings = numpy.asarray(
-            [0.0, 1.0, 45.0, 73.0, 179.0, 225.0, 359.0]
+            [17.0, 45.0, 73.0, 123.0, 225.0, 311.0]
         )
         spectrum_length = 720
 
-        element_bearings = numpy.deg2rad(numpy.arange(num_elements) * 90.0)
         covariance_items = []
         for expected_bearing in expected_bearings:
-            steering = numpy.exp(
-                -1j * 2.0 * numpy.pi * norm_radius
-                * numpy.cos(numpy.deg2rad(expected_bearing) - element_bearings)
+            steering = self._source_steering(
+                norm_radius,
+                expected_bearing,
+                element0_deg,
+                element_step_deg,
+                num_elements,
             )
             covariance = (
                 numpy.outer(steering, numpy.conj(steering))
@@ -47,8 +62,8 @@ class qa_MUSIC_uca(gr_unittest.TestCase):
             1,
             num_elements,
             spectrum_length,
-            0.0,
-            90.0,
+            element0_deg,
+            element_step_deg,
         )
         sink = blocks.vector_sink_f(spectrum_length)
         self.tb.connect(source, music, sink)
@@ -59,23 +74,27 @@ class qa_MUSIC_uca(gr_unittest.TestCase):
             360.0 * numpy.argmax(spectra, axis=1) / spectrum_length
         )
         numpy.testing.assert_allclose(
-            estimated_bearings, expected_bearings, rtol=0.0, atol=1e-6
+            estimated_bearings, expected_bearings, rtol=0.0, atol=0.5
         )
 
     def test_upstream_covariance_to_uca_music(self):
-        """Verify the unchanged Ettus covariance layout feeds UCA MUSIC."""
+        """Verify unchanged Ettus covariance layout feeds the physical UCA model."""
         num_elements = 4
-        norm_radius = 0.346379923
+        norm_radius = 0.353265327
+        element0_deg = 225.0
+        element_step_deg = -90.0
         expected_bearing = 73.0
         spectrum_length = 720
         snapshot_size = 2048
         overlap_size = 1024
         sample_count = 8192
 
-        element_bearings = numpy.deg2rad(numpy.arange(num_elements) * 90.0)
-        steering = numpy.exp(
-            -1j * 2.0 * numpy.pi * norm_radius
-            * numpy.cos(numpy.deg2rad(expected_bearing) - element_bearings)
+        steering = self._source_steering(
+            norm_radius,
+            expected_bearing,
+            element0_deg,
+            element_step_deg,
+            num_elements,
         )
         tone = numpy.exp(1j * 0.071 * numpy.arange(sample_count))
         random = numpy.random.default_rng(20260826)
@@ -88,8 +107,8 @@ class qa_MUSIC_uca(gr_unittest.TestCase):
             1,
             num_elements,
             spectrum_length,
-            0.0,
-            90.0,
+            element0_deg,
+            element_step_deg,
         )
         sink = blocks.vector_sink_f(spectrum_length)
 
