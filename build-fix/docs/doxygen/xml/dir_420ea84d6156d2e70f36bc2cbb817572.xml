@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="dir_420ea84d6156d2e70f36bc2cbb817572" kind="dir">
+    <compoundname>doa</compoundname>
+    <innerdir refid="dir_ad9d56c277f9fb99432704599c4113f4">bindings</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/"/>
+  </compounddef>
+</doxygen>

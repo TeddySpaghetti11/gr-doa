@@ -1,0 +1,63 @@
+Start testing: Aug 26 18:27 AEST
+----------------------------------------------------------
+4/7 Testing: qa_MUSIC_uca
+4/7 Test: qa_MUSIC_uca
+Command: "/usr/bin/sh" "qa_MUSIC_uca_test.sh"
+Directory: /home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/python/doa
+"qa_MUSIC_uca" start time: Aug 26 18:27 AEST
+Output:
+----------------------------------------------------------
+buffer :warning: allocate_buffer: tried to allocate   22 items of size 2880. Due to alignment requirements   64 were allocated.  If this isn't OK, consider padding   your structure to a power-of-two bytes.   On this platform, our allocation granularity is 4096 bytes.
+.buffer :warning: allocate_buffer: tried to allocate   22 items of size 2880. Due to alignment requirements   64 were allocated.  If this isn't OK, consider padding   your structure to a power-of-two bytes.   On this platform, our allocation granularity is 4096 bytes.
+.
+----------------------------------------------------------------------
+Ran 2 tests in 0.045s
+
+OK
+<end of output>
+Test time =   0.31 sec
+----------------------------------------------------------
+Test Passed.
+"qa_MUSIC_uca" end time: Aug 26 18:27 AEST
+"qa_MUSIC_uca" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/7 Testing: qa_uca_pilot_calibration
+5/7 Test: qa_uca_pilot_calibration
+Command: "/usr/bin/sh" "qa_uca_pilot_calibration_test.sh"
+Directory: /home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/python/doa
+"qa_uca_pilot_calibration" start time: Aug 26 18:27 AEST
+Output:
+----------------------------------------------------------
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.017s
+
+OK
+UCA calibration: waiting for 4096 pilot samples after skipping 0 samples
+UCA calibration ch1/ch0: measured=-59.493 deg, geometry=-24.543 deg, hardware correction=-34.950 deg
+UCA calibration ch2/ch0: measured=-137.295 deg, geometry=160.825 deg, hardware correction=61.879 deg
+UCA calibration ch3/ch0: measured=62.755 deg, geometry=-174.632 deg, hardware correction=-122.613 deg
+UCA calibration ch0: magnitude=1.000000, phase=0.000 deg
+UCA calibration ch1: magnitude=1.000000, phase=-34.950 deg
+UCA calibration ch2: magnitude=1.000000, phase=61.879 deg
+UCA calibration ch3: magnitude=1.000000, phase=-122.613 deg
+UCA calibration complete. Coefficients are frozen; the pilot may now be switched off without stopping this flowgraph.
+UCA calibration: waiting for 256 pilot samples after skipping 0 samples
+UCA calibration ch1/ch0: measured=-22.918 deg, geometry=-90.000 deg, hardware correction=67.082 deg
+UCA calibration ch2/ch0: measured=63.025 deg, geometry=-180.000 deg, hardware correction=-116.975 deg
+UCA calibration ch3/ch0: measured=-126.051 deg, geometry=-90.000 deg, hardware correction=-36.051 deg
+UCA calibration ch0: magnitude=1.000000, phase=0.000 deg
+UCA calibration ch1: magnitude=1.000000, phase=67.082 deg
+UCA calibration ch2: magnitude=1.000000, phase=-116.975 deg
+UCA calibration ch3: magnitude=1.000000, phase=-36.051 deg
+UCA calibration complete. Coefficients are frozen; the pilot may now be switched off without stopping this flowgraph.
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"qa_uca_pilot_calibration" end time: Aug 26 18:27 AEST
+"qa_uca_pilot_calibration" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 26 18:27 AEST

@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1MUSIC__lin__array" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::MUSIC_lin_array</compoundname>
+    <basecompoundref prot="public" virt="virtual">gr::sync_block</basecompoundref>
+    <derivedcompoundref refid="classgr_1_1doa_1_1MUSIC__lin__array__impl" prot="public" virt="non-virtual">gr::doa::MUSIC_lin_array_impl</derivedcompoundref>
+    <includes refid="MUSIC__lin__array_8h" local="no">MUSIC_lin_array.h</includes>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classgr_1_1doa_1_1MUSIC__lin__array_1ae3c687f9310f65c756bf175ca29149ef" prot="public" static="no">
+        <type>std::shared_ptr&lt; <ref refid="classgr_1_1doa_1_1MUSIC__lin__array" kindref="compound">MUSIC_lin_array</ref> &gt;</type>
+        <definition>typedef std::shared_ptr&lt;MUSIC_lin_array&gt; gr::doa::MUSIC_lin_array::sptr</definition>
+        <argsstring></argsstring>
+        <name>sptr</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array::sptr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/MUSIC_lin_array.h" line="25" column="29" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/MUSIC_lin_array.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__lin__array_1af7d18cf4976d11aa35998f4e815d56dd" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classgr_1_1doa_1_1MUSIC__lin__array_1ae3c687f9310f65c756bf175ca29149ef" kindref="member">sptr</ref></type>
+        <definition>static sptr gr::doa::MUSIC_lin_array::make</definition>
+        <argsstring>(float norm_spacing, int num_targets, int inputs, int pspectrum_len)</argsstring>
+        <name>make</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array::make</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>norm_spacing</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_targets</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>pspectrum_len</declname>
+        </param>
+        <briefdescription>
+<para>Return a shared_ptr to a new instance of <ref refid="classgr_1_1doa_1_1MUSIC__lin__array" kindref="compound">doa::MUSIC_lin_array</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>norm_spacing</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Normalized spacing between antenna elements </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>num_targets</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Known number of targets </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>inputs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of input streams (antenna elements) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>pspectrum_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Length of the Pseudo-Spectrum length </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/MUSIC_lin_array.h" line="35" column="17"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>&lt;+description of block+&gt; </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>gr::doa::MUSIC_lin_array</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::doa::MUSIC_lin_array_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array__impl"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>gr::doa::MUSIC_lin_array</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/MUSIC_lin_array.h" line="22" column="1" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/MUSIC_lin_array.h" bodystart="23" bodyend="36"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1af7d18cf4976d11aa35998f4e815d56dd" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1ae3c687f9310f65c756bf175ca29149ef" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array</scope><name>sptr</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

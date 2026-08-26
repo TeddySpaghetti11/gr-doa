@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="signal__replay__cpp__impl_8h" kind="file" language="C++">
+    <compoundname>signal_replay_cpp_impl.h</compoundname>
+    <includes refid="signal__replay__cpp_8h" local="no">gnuradio/doa/signal_replay_cpp.h</includes>
+    <includes local="no">vector</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>gnuradio/doa/api.h</label>
+        <link refid="api_8h"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gnuradio/doa/signal_replay_cpp.h</label>
+        <link refid="signal__replay__cpp_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>signal_replay_cpp_impl.h</label>
+        <link refid="signal__replay__cpp__impl_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>gnuradio/attributes.h</label>
+      </node>
+      <node id="5">
+        <label>gnuradio/sync_block.h</label>
+      </node>
+      <node id="6">
+        <label>string</label>
+      </node>
+      <node id="7">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <innerclass refid="classgr_1_1doa_1_1signal__replay__cpp__impl" prot="public">gr::doa::signal_replay_cpp_impl</innerclass>
+    <innernamespace refid="namespacegr">gr</innernamespace>
+    <innernamespace refid="namespacegr_1_1doa">gr::doa</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/signal_replay_cpp_impl.h"/>
+  </compounddef>
+</doxygen>

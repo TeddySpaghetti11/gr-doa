@@ -1,0 +1,576 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.15.0" xml:lang="en-US">
+  <compound refid="classgr_1_1doa_1_1antenna__correction" kind="class"><name>gr::doa::antenna_correction</name>
+    <member refid="classgr_1_1doa_1_1antenna__correction_1a9e5b10a66138d265d1cf684cc5b3b360" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1antenna__correction_1a81db45b1a7a2586825b9387f21288c48" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1antenna__correction__impl" kind="class"><name>gr::doa::antenna_correction_impl</name>
+    <member refid="classgr_1_1doa_1_1antenna__correction__impl_1af7e0f567445025093d6cd768f04e95f7" kind="variable"><name>d_ComplexGain</name></member>
+    <member refid="classgr_1_1doa_1_1antenna__correction__impl_1a4ec930762812bba568849ecd10b81fd4" kind="variable"><name>d_num_ant_ele</name></member>
+    <member refid="classgr_1_1doa_1_1antenna__correction__impl_1abfc3ce2e6dfc4ec12923a10070f32e65" kind="function"><name>antenna_correction_impl</name></member>
+    <member refid="classgr_1_1doa_1_1antenna__correction__impl_1abd982965646f744d1bf4aff18dd932cb" kind="function"><name>~antenna_correction_impl</name></member>
+    <member refid="classgr_1_1doa_1_1antenna__correction__impl_1aaa6bc5deb64e584301cfa64687cfd6d5" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1autocorrelate" kind="class"><name>gr::doa::autocorrelate</name>
+    <member refid="classgr_1_1doa_1_1autocorrelate_1ae5dcfe9deb0b6db1932c6bedc2d52941" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate_1a3d46af28e611261dfa787a6fad155aa7" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1autocorrelate__impl" kind="class"><name>gr::doa::autocorrelate_impl</name>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a9d0dbcaa0e0e4953684e80d8595bb916" kind="variable"><name>d_num_inputs</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1ad35877616970291228611dc37c95e378" kind="variable"><name>d_snapshot_size</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a1fbaf0408c94fe644b7e9ee933120856" kind="variable"><name>d_overlap_size</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a15285e80a2c188386fb9d327fa67c61c" kind="variable"><name>d_avg_method</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a040ba27ebb2425bb365acb30a1445ec6" kind="variable"><name>d_nonoverlap_size</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a92905514813c2fd0504ccdb582ac5941" kind="variable"><name>d_J</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a111dd569c013772f3759836c0b6c1358" kind="variable"><name>d_input_matrix</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a68b296078430e282477213c82cb06a8e" kind="function"><name>autocorrelate_impl</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1ae20c74f967ae62fad6bda6d941a1a6f1" kind="function"><name>~autocorrelate_impl</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a224ecee8e5664ce1e027ca83b86af61d" kind="function"><name>forecast</name></member>
+    <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a031eab8e84ec0e2930eac339d78ec0b9" kind="function"><name>general_work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1calibrate__lin__array" kind="class"><name>gr::doa::calibrate_lin_array</name>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array_1a3e61fe1f1084aeb3533673a5b7f09254" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array_1a2c9998cfc361c07b40377af2b302a105" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1calibrate__lin__array__impl" kind="class"><name>gr::doa::calibrate_lin_array_impl</name>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a683e737f759b474a129c698d80018ab0" kind="variable"><name>d_norm_spacing</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a015240e33e4aa597a48bee1dd4013570" kind="variable"><name>d_num_ant_ele</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1ab6ba71745abeec5276187f70efcc4ee1" kind="variable"><name>d_pilot_angle</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1ada046db12f6378a98a5cf759f98dc590" kind="variable"><name>d_array_loc</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a55c39f5a32eed250d547a3d2f9497807" kind="variable"><name>d_diagmat_v_vec</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a092cf6e21abc6376ea72ed4f31aef8f4" kind="variable"><name>d_diagmat_v_vec_conj</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1aae21bc49606d01ceaa176699b153435e" kind="function"><name>amv</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1aa2da13ddc65950eac17dafeed5ee34e9" kind="function"><name>calibrate_lin_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a1bbd4cdccd2058c57431209d08e136c5" kind="function"><name>~calibrate_lin_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a788aae35e3d065bde70e1c6eb2bb73bf" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1find__local__max" kind="class"><name>gr::doa::find_local_max</name>
+    <member refid="classgr_1_1doa_1_1find__local__max_1ac53786e11df867036b138a61fd9c5435" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max_1a3ed6d317d3979cd40c1c6432e82598f1" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1find__local__max__impl" kind="class"><name>gr::doa::find_local_max_impl</name>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a0ae4ecba2022097957dce2b183a4ee76" kind="variable"><name>d_num_max_vals</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1adb112340bb4fa37c5727db3bf2c4e0c0" kind="variable"><name>d_vector_len</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a2cafae9ab06775456d3de2e4fa36acf9" kind="variable"><name>d_x_min</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1afd41d85e3becf8d9e0402009f7ccd959" kind="variable"><name>d_x_max</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a0d47d1eff6be6750cd9ac7e03d7375a0" kind="variable"><name>d_x_axis</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1ae0ccf1c0499d3a79ab9734473f10239a" kind="variable"><name>find_local_peak_indxs</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a1e71dbba4e9493a5ebabc06ea33ed99b" kind="function"><name>find_local_max_impl</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1aaa5a335625c0d6bf539653343cc61ddf" kind="function"><name>~find_local_max_impl</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1ab416b91145b8d990df6f1a6c1d2307bf" kind="function"><name>work</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a08f0432f467fec7fdf7def3f0c45bc48" kind="function"><name>find_one_local_peak_indx</name></member>
+    <member refid="classgr_1_1doa_1_1find__local__max__impl_1a6414f4aee9c76cbfbe333d6382add799" kind="function"><name>find_more_than_one_local_peak_indxs</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1MUSIC__lin__array" kind="class"><name>gr::doa::MUSIC_lin_array</name>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1ae3c687f9310f65c756bf175ca29149ef" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1af7d18cf4976d11aa35998f4e815d56dd" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1MUSIC__lin__array__impl" kind="class"><name>gr::doa::MUSIC_lin_array_impl</name>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6e2f298389799aaef1138dd99a75b149" kind="variable"><name>d_norm_spacing</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a78526a910edd021515a2df834d30a1d5" kind="variable"><name>d_num_targets</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2512e58473762a7af7c896617a1a6836" kind="variable"><name>d_num_ant_ele</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a21589f5e5a2e07282a48f1bee3cdac86" kind="variable"><name>d_pspectrum_len</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1ab6198a23949ec7b34b1bc12a464cb6f7" kind="variable"><name>d_theta</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a93149124d27128fb87b541227ad55304" kind="variable"><name>d_array_loc</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a685a1718356bf9b88be3722e64740225" kind="variable"><name>d_vii_matrix</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a0bdc32286c376cb603fcd5063340e9e1" kind="variable"><name>d_vii_matrix_trans</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2320a040619567413654a52641dad72e" kind="function"><name>MUSIC_lin_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6a42baec5940ae9578856eebb43f1004" kind="function"><name>~MUSIC_lin_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a16a2b658601c72620a11cceae129b203" kind="function"><name>amv</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1af4f4f356f5767138a8b6389d58c1fbb8" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1MUSIC__uca" kind="class"><name>gr::doa::MUSIC_uca</name>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca_1afe06938a4a4ce16b8b12f555a46827c7" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca_1a95dc533baa200a8ca0be46c3fc4ef391" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1MUSIC__uca__impl" kind="class"><name>gr::doa::MUSIC_uca_impl</name>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a0175858e28ac8a948196856fea301ddb" kind="variable"><name>d_norm_radius</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a2fe4030f7e0dcadfbca59ce06e571e60" kind="variable"><name>d_num_targets</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a5b793367702517fe3070b26ad14e72e1" kind="variable"><name>d_num_ant_ele</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a16a0f3fc87335006993d676b64bcf816" kind="variable"><name>d_pspectrum_len</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1aeef8db7807fa87cdcc5d948b5f4b2c7f" kind="variable"><name>d_element0_angle_deg</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a4b88e35c7f1fc10200c5966709385386" kind="variable"><name>d_element_angle_step_deg</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a1f2b174e10425fe4a021432e08cf8d68" kind="variable"><name>d_manifold</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a8b22d376feb07ff4edbcb12663ffc629" kind="variable"><name>d_manifold_h</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1aea2514763e7b524d4edb450ca52a05c9" kind="function"><name>MUSIC_uca_impl</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a9fd2de266f246eb200bf26277b7af35f" kind="function"><name>~MUSIC_uca_impl</name></member>
+    <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a4605253c9b7be676b3f9e3b4d49271cf" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1power__detection__cpp" kind="class"><name>gr::doa::power_detection_cpp</name>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9bbb996910dde1a041183236e7301986" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9c2d33cecc937e528184fd5fdc0b0a38" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1power__detection__cpp__impl" kind="class"><name>gr::doa::power_detection_cpp_impl</name>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1afaf89f0ad33e8f0271fc2b80da59ae09" kind="variable"><name>d_num_inputs</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a879232b1f3952ba0158316eadb3820c4" kind="variable"><name>d_sample_rate</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1ad9511144f3f93d4b9a65e2be7e714bdf" kind="variable"><name>d_buffer_size</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1aad7c7172e3c56b697b22ae99d4d0e4e5" kind="variable"><name>d_capture_buffer</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1abf3c1672e577a9312fb0089456ae5168" kind="variable"><name>d_playback_buffer</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a76a1785b1f09b41786fdde76e0e98830" kind="variable"><name>d_power_buffer</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a43385f2c35604a7b7a648a4c80a97311" kind="variable"><name>d_capture_index</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1ab443154b0dc0f1ee8fa52f2e4078b3c5" kind="variable"><name>d_playback_index</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a3841a2bdf78807f5b57b356b745d3809" kind="variable"><name>d_playback_size</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a072b7c0fe6d96d88c2c028051a6d7e77" kind="variable"><name>d_power_buffer_index</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a9624f6c935ecdc8a2737d95f940f0184" kind="variable"><name>d_capturing</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a49d09044bafb6361168897c939523fa4" kind="variable"><name>d_playback_buffer_valid</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a07193c547c64eac5bb9a5fd27e0343b6" kind="variable"><name>d_buffer_fill_complete</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1aab7b75efb7c60ea109ce4f497d489925" kind="variable"><name>d_averaging_window</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a37b20e589cbc2b590fc4ff5bb8f8ca19" kind="variable"><name>d_power_sum</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a01c3154aa1f69f614ed9adad3a2aa1de" kind="variable"><name>d_lowest_power_sum</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a2ed8beaa16077160b6e0dc3150b74e49" kind="variable"><name>d_threshold</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a803a40af690bf8cf1a3eff7997ad3e10" kind="variable"><name>d_threshold_multiplier</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1af5593bbf0a665f38a1d3dccfd775c220" kind="function"><name>validate_and_promote_buffer</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a0527925e31aa5329037b1aad29270b67" kind="function"><name>power_detection_cpp_impl</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a1629126c1bb8cb21f3232a05cafcd9ec" kind="function"><name>~power_detection_cpp_impl</name></member>
+    <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a5dbde3e3b2404185ab1fd4f8d23f4369" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1rootMUSIC__linear__array" kind="class"><name>gr::doa::rootMUSIC_linear_array</name>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array_1a8763c6bca4aaf5c126aa03454a131641" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array_1a03807eaabfb944e6d7c5504beaf1b3b0" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl" kind="class"><name>gr::doa::rootMUSIC_linear_array_impl</name>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a01a400ad172af0d9ce1b4d614a2dd7c8" kind="variable"><name>d_norm_spacing</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a527a515b8218f490303aa4a67a528f5c" kind="variable"><name>d_num_targets</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1addebbed4f70ffd0a31787c78d982b6d2" kind="variable"><name>d_num_ant_ele</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a27433cbf6afd22c1375b46ab0bfdd759" kind="variable"><name>d_comp_mat</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a08a3061559cecf7741c0bb4f17d06fc4" kind="function"><name>rootMUSIC_linear_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a10620fb1abe971d81b1bb2221968129f" kind="function"><name>~rootMUSIC_linear_array_impl</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a5362773774e54fd3ef0478fb86a59fd2" kind="function"><name>work</name></member>
+    <member refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl_1a9d6f74019e18d0a632080368c4942e6a" kind="function"><name>get_roots_polynomial</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1signal__replay__cpp" kind="class"><name>gr::doa::signal_replay_cpp</name>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp_1ab7bf1a0edffe50d7e4c6842064a1f5f5" kind="typedef"><name>sptr</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp_1a417ec02fda2b5d15da082735eb774a10" kind="function"><name>make</name></member>
+  </compound>
+  <compound refid="classgr_1_1doa_1_1signal__replay__cpp__impl" kind="class"><name>gr::doa::signal_replay_cpp_impl</name>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1a2c6de13c9c84d58374a9b57c32f7caa1" kind="variable"><name>d_signal_data</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1aff01707d387a02757a7150453df1a54f" kind="variable"><name>d_position</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1ac31fc9c685ebf380c214e41c4a6096fe" kind="variable"><name>d_repeat</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1a4c513651d783a280d65bf66463967386" kind="variable"><name>d_interpolation</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1a0097c46db693963967c7de65be2d0248" kind="variable"><name>d_filename</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1ae0cc72546fc6e482da73ce43c466b0f1" kind="function"><name>load_numpy_file</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1a2bbc52e0f982babc2b9026a9b4fe1fdf" kind="function"><name>signal_replay_cpp_impl</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1aa3cfac67f5826119f491fba0445297ad" kind="function"><name>~signal_replay_cpp_impl</name></member>
+    <member refid="classgr_1_1doa_1_1signal__replay__cpp__impl_1ab4a431f9daf39b01a19d2a10af2b29b3" kind="function"><name>work</name></member>
+  </compound>
+  <compound refid="namespacearma" kind="namespace"><name>arma</name>
+  </compound>
+  <compound refid="namespacegr" kind="namespace"><name>gr</name>
+  </compound>
+  <compound refid="namespacegr_1_1doa" kind="namespace"><name>gr::doa</name>
+  </compound>
+  <compound refid="namespacestd" kind="namespace"><name>std</name>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/antenna_correction_pydoc.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2python_2doa_2bindings_2antenna__correction__pydoc_8h" kind="file"><name>build-libresdr/python/doa/bindings/antenna_correction_pydoc.h</name>
+    <member refid="build-libresdr_2python_2doa_2bindings_2antenna__correction__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2antenna__correction__pydoc_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2antenna__correction__pydoc_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2antenna__correction__pydoc_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/antenna_correction_pydoc.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2antenna__correction__pydoc_8h" kind="file"><name>python/doa/bindings/antenna_correction_pydoc.h</name>
+    <member refid="python_2doa_2bindings_2antenna__correction__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2antenna__correction__pydoc_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="python_2doa_2bindings_2antenna__correction__pydoc_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="python_2doa_2bindings_2antenna__correction__pydoc_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="autocorrelate__pydoc_8h" kind="file"><name>autocorrelate_pydoc.h</name>
+    <member refid="autocorrelate__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="autocorrelate__pydoc_8h_1ac27aeb69f7671c676099248abc13d4ca" kind="variable"><name>__doc_gr_doa_autocorrelate</name></member>
+    <member refid="autocorrelate__pydoc_8h_1a16e5f2e8db7f103fd46eca5d742981b2" kind="variable"><name>__doc_gr_doa_autocorrelate_autocorrelate_0</name></member>
+    <member refid="autocorrelate__pydoc_8h_1a0d3b0daf28f235c2a611d7c03e1bf888" kind="variable"><name>__doc_gr_doa_autocorrelate_make</name></member>
+  </compound>
+  <compound refid="calibrate__lin__array__pydoc_8h" kind="file"><name>calibrate_lin_array_pydoc.h</name>
+    <member refid="calibrate__lin__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="calibrate__lin__array__pydoc_8h_1a5d7f3ccd9e474d7c5d3d89b54f3dcf2e" kind="variable"><name>__doc_gr_doa_calibrate_lin_array</name></member>
+    <member refid="calibrate__lin__array__pydoc_8h_1a1c18a76449a37f3b8c7b070093d1dfb5" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_calibrate_lin_array_0</name></member>
+    <member refid="calibrate__lin__array__pydoc_8h_1a1ea625eaa86b6912bef6c346224f0c46" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_make</name></member>
+  </compound>
+  <compound refid="find__local__max__pydoc_8h" kind="file"><name>find_local_max_pydoc.h</name>
+    <member refid="find__local__max__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="find__local__max__pydoc_8h_1a808790f56cc2b2c4880c7626b152e3a6" kind="variable"><name>__doc_gr_doa_find_local_max</name></member>
+    <member refid="find__local__max__pydoc_8h_1a51ae0f9677f18b788a42a99ca9166ffb" kind="variable"><name>__doc_gr_doa_find_local_max_find_local_max_0</name></member>
+    <member refid="find__local__max__pydoc_8h_1aeeb95a65b118170c90a860b32bb8a37c" kind="variable"><name>__doc_gr_doa_find_local_max_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/MUSIC_lin_array_pydoc.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h" kind="file"><name>build-libresdr/python/doa/bindings/MUSIC_lin_array_pydoc.h</name>
+    <member refid="build-libresdr_2python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/MUSIC_lin_array_pydoc.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h" kind="file"><name>python/doa/bindings/MUSIC_lin_array_pydoc.h</name>
+    <member refid="python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="python_2doa_2bindings_2MUSIC__lin__array__pydoc_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="MUSIC__uca__pydoc_8h" kind="file"><name>MUSIC_uca_pydoc.h</name>
+    <member refid="MUSIC__uca__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="MUSIC__uca__pydoc_8h_1a4e29dd4f322e961c6f18b3ba99f1dbd6" kind="variable"><name>__doc_gr_doa_MUSIC_uca</name></member>
+    <member refid="MUSIC__uca__pydoc_8h_1af4574aac9575d79bbfc8cf39c579a0b6" kind="variable"><name>__doc_gr_doa_MUSIC_uca_MUSIC_uca_0</name></member>
+    <member refid="MUSIC__uca__pydoc_8h_1a8f515d2d53ed7e0618e399938347c21d" kind="variable"><name>__doc_gr_doa_MUSIC_uca_make</name></member>
+  </compound>
+  <compound refid="power__detection__cpp__pydoc_8h" kind="file"><name>power_detection_cpp_pydoc.h</name>
+    <member refid="power__detection__cpp__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="power__detection__cpp__pydoc_8h_1a0f327e6005ff062f06f0ecaeb8e236c6" kind="variable"><name>__doc_gr_doa_power_detection_cpp</name></member>
+    <member refid="power__detection__cpp__pydoc_8h_1ab7e3a797dcfec1ab914b5ff3596e032d" kind="variable"><name>__doc_gr_doa_power_detection_cpp_power_detection_cpp_0</name></member>
+    <member refid="power__detection__cpp__pydoc_8h_1a25ef6528f2520170270f66f78a930e11" kind="variable"><name>__doc_gr_doa_power_detection_cpp_make</name></member>
+  </compound>
+  <compound refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h" kind="file"><name>build-fix/python/doa/bindings/pydoc_macros.h</name>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1afa7cf06549cf7fd295f622ef6f376357" kind="define"><name>__EXPAND</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a251b23a2efed48ff2ba2d6f449ed33a3" kind="define"><name>__COUNT</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a2815f7ab197591ba9559415c694f9ce0" kind="define"><name>__VA_SIZE</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1afdd58e017733f2235c227ef8dd3b2de8" kind="define"><name>__CAT1</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1af08fe30f2a41cef10658f6a892d20543" kind="define"><name>__CAT2</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a43c147206df4346db5e9d6445aab28ae" kind="define"><name>__DOC1</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a53738db606593bc1554371d718695fed" kind="define"><name>__DOC2</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a21baf08c04d32485764f227c32b5bf5d" kind="define"><name>__DOC3</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a9463ba0ad86bcb4c59b5aecf8a37174c" kind="define"><name>__DOC4</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a942579d548421ddb2906af7094e5789c" kind="define"><name>__DOC5</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a31ea356761360e78d16525aa69d2dae6" kind="define"><name>__DOC6</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a6f1e731f1c6d2893ff1bf98582a7de6e" kind="define"><name>__DOC7</name></member>
+    <member refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kind="define"><name>DOC</name></member>
+  </compound>
+  <compound refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h" kind="file"><name>build-libresdr/python/doa/bindings/pydoc_macros.h</name>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1afa7cf06549cf7fd295f622ef6f376357" kind="define"><name>__EXPAND</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a251b23a2efed48ff2ba2d6f449ed33a3" kind="define"><name>__COUNT</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a2815f7ab197591ba9559415c694f9ce0" kind="define"><name>__VA_SIZE</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1afdd58e017733f2235c227ef8dd3b2de8" kind="define"><name>__CAT1</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1af08fe30f2a41cef10658f6a892d20543" kind="define"><name>__CAT2</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a43c147206df4346db5e9d6445aab28ae" kind="define"><name>__DOC1</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a53738db606593bc1554371d718695fed" kind="define"><name>__DOC2</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a21baf08c04d32485764f227c32b5bf5d" kind="define"><name>__DOC3</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a9463ba0ad86bcb4c59b5aecf8a37174c" kind="define"><name>__DOC4</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a942579d548421ddb2906af7094e5789c" kind="define"><name>__DOC5</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a31ea356761360e78d16525aa69d2dae6" kind="define"><name>__DOC6</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a6f1e731f1c6d2893ff1bf98582a7de6e" kind="define"><name>__DOC7</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kind="define"><name>DOC</name></member>
+  </compound>
+  <compound refid="docs_2doxygen_2pydoc__macros_8h" kind="file"><name>docs/doxygen/pydoc_macros.h</name>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1afa7cf06549cf7fd295f622ef6f376357" kind="define"><name>__EXPAND</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a251b23a2efed48ff2ba2d6f449ed33a3" kind="define"><name>__COUNT</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a2815f7ab197591ba9559415c694f9ce0" kind="define"><name>__VA_SIZE</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1afdd58e017733f2235c227ef8dd3b2de8" kind="define"><name>__CAT1</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1af08fe30f2a41cef10658f6a892d20543" kind="define"><name>__CAT2</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a43c147206df4346db5e9d6445aab28ae" kind="define"><name>__DOC1</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a53738db606593bc1554371d718695fed" kind="define"><name>__DOC2</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a21baf08c04d32485764f227c32b5bf5d" kind="define"><name>__DOC3</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a9463ba0ad86bcb4c59b5aecf8a37174c" kind="define"><name>__DOC4</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a942579d548421ddb2906af7094e5789c" kind="define"><name>__DOC5</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a31ea356761360e78d16525aa69d2dae6" kind="define"><name>__DOC6</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a6f1e731f1c6d2893ff1bf98582a7de6e" kind="define"><name>__DOC7</name></member>
+    <member refid="docs_2doxygen_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kind="define"><name>DOC</name></member>
+  </compound>
+  <compound refid="rootMUSIC__linear__array__pydoc_8h" kind="file"><name>rootMUSIC_linear_array_pydoc.h</name>
+    <member refid="rootMUSIC__linear__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="rootMUSIC__linear__array__pydoc_8h_1a12f952bc08c899a7c4629978fb8c893a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array</name></member>
+    <member refid="rootMUSIC__linear__array__pydoc_8h_1a7a580e27032b161f5c1970a1ba9fec23" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</name></member>
+    <member refid="rootMUSIC__linear__array__pydoc_8h_1a2f5c0629be50ccfd9228f6b3bfb4315a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/signal_replay_cpp_pydoc.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1afd3aa01f10a466096f78acebaebd9546" kind="variable"><name>__doc_signal_replay_cpp</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1a892586e5f463865a10778f87265994b7" kind="variable"><name>__doc_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2python_2doa_2bindings_2signal__replay__cpp__pydoc_8h" kind="file"><name>build-libresdr/python/doa/bindings/signal_replay_cpp_pydoc.h</name>
+    <member refid="build-libresdr_2python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1a0d83571f4e84097fbf838d11554588c4" kind="variable"><name>__doc_gr_doa_signal_replay_cpp</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1aeb0ad36c40828fe9661b61a90b956c60" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_signal_replay_cpp_0</name></member>
+    <member refid="build-libresdr_2python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1ab20f3d4eed849561a8ea9538b4db66d3" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/signal_replay_cpp_pydoc.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1afd3aa01f10a466096f78acebaebd9546" kind="variable"><name>__doc_signal_replay_cpp</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1a892586e5f463865a10778f87265994b7" kind="variable"><name>__doc_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2signal__replay__cpp__pydoc_8h" kind="file"><name>python/doa/bindings/signal_replay_cpp_pydoc.h</name>
+    <member refid="python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1afd3aa01f10a466096f78acebaebd9546" kind="variable"><name>__doc_signal_replay_cpp</name></member>
+    <member refid="python_2doa_2bindings_2signal__replay__cpp__pydoc_8h_1a892586e5f463865a10778f87265994b7" kind="variable"><name>__doc_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/antenna_correction_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/antenna_correction_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/antenna_correction_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a2164aef06263f67cbac458e5ee3b437c" kind="variable"><name>__doc_gr_doa_antenna_correction</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a7618defc2443adfcf7bb7744152cf695" kind="variable"><name>__doc_gr_doa_antenna_correction_antenna_correction_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2antenna__correction__pydoc__template_8h_1a899fd04b32d956cc211b02a52d0aef19" kind="variable"><name>__doc_gr_doa_antenna_correction_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1ac27aeb69f7671c676099248abc13d4ca" kind="variable"><name>__doc_gr_doa_autocorrelate</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a16e5f2e8db7f103fd46eca5d742981b2" kind="variable"><name>__doc_gr_doa_autocorrelate_autocorrelate_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a0d3b0daf28f235c2a611d7c03e1bf888" kind="variable"><name>__doc_gr_doa_autocorrelate_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1ac27aeb69f7671c676099248abc13d4ca" kind="variable"><name>__doc_gr_doa_autocorrelate</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a16e5f2e8db7f103fd46eca5d742981b2" kind="variable"><name>__doc_gr_doa_autocorrelate_autocorrelate_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a0d3b0daf28f235c2a611d7c03e1bf888" kind="variable"><name>__doc_gr_doa_autocorrelate_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/autocorrelate_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1ac27aeb69f7671c676099248abc13d4ca" kind="variable"><name>__doc_gr_doa_autocorrelate</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a16e5f2e8db7f103fd46eca5d742981b2" kind="variable"><name>__doc_gr_doa_autocorrelate_autocorrelate_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a0d3b0daf28f235c2a611d7c03e1bf888" kind="variable"><name>__doc_gr_doa_autocorrelate_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/calibrate_lin_array_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a5d7f3ccd9e474d7c5d3d89b54f3dcf2e" kind="variable"><name>__doc_gr_doa_calibrate_lin_array</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1c18a76449a37f3b8c7b070093d1dfb5" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_calibrate_lin_array_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1ea625eaa86b6912bef6c346224f0c46" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/calibrate_lin_array_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a5d7f3ccd9e474d7c5d3d89b54f3dcf2e" kind="variable"><name>__doc_gr_doa_calibrate_lin_array</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1c18a76449a37f3b8c7b070093d1dfb5" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_calibrate_lin_array_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1ea625eaa86b6912bef6c346224f0c46" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/calibrate_lin_array_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a5d7f3ccd9e474d7c5d3d89b54f3dcf2e" kind="variable"><name>__doc_gr_doa_calibrate_lin_array</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1c18a76449a37f3b8c7b070093d1dfb5" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_calibrate_lin_array_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2calibrate__lin__array__pydoc__template_8h_1a1ea625eaa86b6912bef6c346224f0c46" kind="variable"><name>__doc_gr_doa_calibrate_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/find_local_max_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a808790f56cc2b2c4880c7626b152e3a6" kind="variable"><name>__doc_gr_doa_find_local_max</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a51ae0f9677f18b788a42a99ca9166ffb" kind="variable"><name>__doc_gr_doa_find_local_max_find_local_max_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1aeeb95a65b118170c90a860b32bb8a37c" kind="variable"><name>__doc_gr_doa_find_local_max_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/find_local_max_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a808790f56cc2b2c4880c7626b152e3a6" kind="variable"><name>__doc_gr_doa_find_local_max</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a51ae0f9677f18b788a42a99ca9166ffb" kind="variable"><name>__doc_gr_doa_find_local_max_find_local_max_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1aeeb95a65b118170c90a860b32bb8a37c" kind="variable"><name>__doc_gr_doa_find_local_max_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/find_local_max_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a808790f56cc2b2c4880c7626b152e3a6" kind="variable"><name>__doc_gr_doa_find_local_max</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1a51ae0f9677f18b788a42a99ca9166ffb" kind="variable"><name>__doc_gr_doa_find_local_max_find_local_max_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2find__local__max__pydoc__template_8h_1aeeb95a65b118170c90a860b32bb8a37c" kind="variable"><name>__doc_gr_doa_find_local_max_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_lin_array_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_lin_array_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/MUSIC_lin_array_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1a9a529db4e324ace50b3f29a2c3790057" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1ab8f6fc552f113070d74b859897f82493" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_MUSIC_lin_array_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__lin__array__pydoc__template_8h_1aad6905a141525de38336b698e92d49f1" kind="variable"><name>__doc_gr_doa_MUSIC_lin_array_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a4e29dd4f322e961c6f18b3ba99f1dbd6" kind="variable"><name>__doc_gr_doa_MUSIC_uca</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1af4574aac9575d79bbfc8cf39c579a0b6" kind="variable"><name>__doc_gr_doa_MUSIC_uca_MUSIC_uca_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a8f515d2d53ed7e0618e399938347c21d" kind="variable"><name>__doc_gr_doa_MUSIC_uca_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a4e29dd4f322e961c6f18b3ba99f1dbd6" kind="variable"><name>__doc_gr_doa_MUSIC_uca</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1af4574aac9575d79bbfc8cf39c579a0b6" kind="variable"><name>__doc_gr_doa_MUSIC_uca_MUSIC_uca_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a8f515d2d53ed7e0618e399938347c21d" kind="variable"><name>__doc_gr_doa_MUSIC_uca_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a4e29dd4f322e961c6f18b3ba99f1dbd6" kind="variable"><name>__doc_gr_doa_MUSIC_uca</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1af4574aac9575d79bbfc8cf39c579a0b6" kind="variable"><name>__doc_gr_doa_MUSIC_uca_MUSIC_uca_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a8f515d2d53ed7e0618e399938347c21d" kind="variable"><name>__doc_gr_doa_MUSIC_uca_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/power_detection_cpp_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a0f327e6005ff062f06f0ecaeb8e236c6" kind="variable"><name>__doc_gr_doa_power_detection_cpp</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1ab7e3a797dcfec1ab914b5ff3596e032d" kind="variable"><name>__doc_gr_doa_power_detection_cpp_power_detection_cpp_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a25ef6528f2520170270f66f78a930e11" kind="variable"><name>__doc_gr_doa_power_detection_cpp_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/power_detection_cpp_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a0f327e6005ff062f06f0ecaeb8e236c6" kind="variable"><name>__doc_gr_doa_power_detection_cpp</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1ab7e3a797dcfec1ab914b5ff3596e032d" kind="variable"><name>__doc_gr_doa_power_detection_cpp_power_detection_cpp_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a25ef6528f2520170270f66f78a930e11" kind="variable"><name>__doc_gr_doa_power_detection_cpp_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/power_detection_cpp_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a0f327e6005ff062f06f0ecaeb8e236c6" kind="variable"><name>__doc_gr_doa_power_detection_cpp</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1ab7e3a797dcfec1ab914b5ff3596e032d" kind="variable"><name>__doc_gr_doa_power_detection_cpp_power_detection_cpp_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2power__detection__cpp__pydoc__template_8h_1a25ef6528f2520170270f66f78a930e11" kind="variable"><name>__doc_gr_doa_power_detection_cpp_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/rootMUSIC_linear_array_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a12f952bc08c899a7c4629978fb8c893a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a7a580e27032b161f5c1970a1ba9fec23" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a2f5c0629be50ccfd9228f6b3bfb4315a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/rootMUSIC_linear_array_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a12f952bc08c899a7c4629978fb8c893a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a7a580e27032b161f5c1970a1ba9fec23" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a2f5c0629be50ccfd9228f6b3bfb4315a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/rootMUSIC_linear_array_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a12f952bc08c899a7c4629978fb8c893a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a7a580e27032b161f5c1970a1ba9fec23" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2rootMUSIC__linear__array__pydoc__template_8h_1a2f5c0629be50ccfd9228f6b3bfb4315a" kind="variable"><name>__doc_gr_doa_rootMUSIC_linear_array_make</name></member>
+  </compound>
+  <compound refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h" kind="file"><name>build-fix/test_modules/gnuradio/doa/bindings/docstrings/signal_replay_cpp_pydoc_template.h</name>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a0d83571f4e84097fbf838d11554588c4" kind="variable"><name>__doc_gr_doa_signal_replay_cpp</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1aeb0ad36c40828fe9661b61a90b956c60" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_signal_replay_cpp_0</name></member>
+    <member refid="build-fix_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1ab20f3d4eed849561a8ea9538b4db66d3" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h" kind="file"><name>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/signal_replay_cpp_pydoc_template.h</name>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a0d83571f4e84097fbf838d11554588c4" kind="variable"><name>__doc_gr_doa_signal_replay_cpp</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1aeb0ad36c40828fe9661b61a90b956c60" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_signal_replay_cpp_0</name></member>
+    <member refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1ab20f3d4eed849561a8ea9538b4db66d3" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="python_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h" kind="file"><name>python/doa/bindings/docstrings/signal_replay_cpp_pydoc_template.h</name>
+    <member refid="python_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" kind="define"><name>D</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1a0d83571f4e84097fbf838d11554588c4" kind="variable"><name>__doc_gr_doa_signal_replay_cpp</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1aeb0ad36c40828fe9661b61a90b956c60" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_signal_replay_cpp_0</name></member>
+    <member refid="python_2doa_2bindings_2docstrings_2signal__replay__cpp__pydoc__template_8h_1ab20f3d4eed849561a8ea9538b4db66d3" kind="variable"><name>__doc_gr_doa_signal_replay_cpp_make</name></member>
+  </compound>
+  <compound refid="group__defs_8dox" kind="file"><name>group_defs.dox</name>
+  </compound>
+  <compound refid="main__page_8dox" kind="file"><name>main_page.dox</name>
+  </compound>
+  <compound refid="antenna__correction_8h" kind="file"><name>antenna_correction.h</name>
+  </compound>
+  <compound refid="api_8h" kind="file"><name>api.h</name>
+    <member refid="api_8h_1acc5ad8d0bf949d9414f9573e796fab8b" kind="define"><name>DOA_API</name></member>
+  </compound>
+  <compound refid="autocorrelate_8h" kind="file"><name>autocorrelate.h</name>
+  </compound>
+  <compound refid="calibrate__lin__array_8h" kind="file"><name>calibrate_lin_array.h</name>
+  </compound>
+  <compound refid="find__local__max_8h" kind="file"><name>find_local_max.h</name>
+  </compound>
+  <compound refid="MUSIC__lin__array_8h" kind="file"><name>MUSIC_lin_array.h</name>
+  </compound>
+  <compound refid="MUSIC__uca_8h" kind="file"><name>MUSIC_uca.h</name>
+  </compound>
+  <compound refid="power__detection__cpp_8h" kind="file"><name>power_detection_cpp.h</name>
+  </compound>
+  <compound refid="rootMUSIC__linear__array_8h" kind="file"><name>rootMUSIC_linear_array.h</name>
+  </compound>
+  <compound refid="signal__replay__cpp_8h" kind="file"><name>signal_replay_cpp.h</name>
+  </compound>
+  <compound refid="antenna__correction__impl_8h" kind="file"><name>antenna_correction_impl.h</name>
+  </compound>
+  <compound refid="autocorrelate__impl_8h" kind="file"><name>autocorrelate_impl.h</name>
+  </compound>
+  <compound refid="calibrate__lin__array__impl_8h" kind="file"><name>calibrate_lin_array_impl.h</name>
+  </compound>
+  <compound refid="find__local__max__impl_8h" kind="file"><name>find_local_max_impl.h</name>
+  </compound>
+  <compound refid="MUSIC__lin__array__impl_8h" kind="file"><name>MUSIC_lin_array_impl.h</name>
+  </compound>
+  <compound refid="MUSIC__uca__impl_8h" kind="file"><name>MUSIC_uca_impl.h</name>
+  </compound>
+  <compound refid="power__detection__cpp__impl_8h" kind="file"><name>power_detection_cpp_impl.h</name>
+  </compound>
+  <compound refid="rootMUSIC__linear__array__impl_8h" kind="file"><name>rootMUSIC_linear_array_impl.h</name>
+  </compound>
+  <compound refid="signal__replay__cpp__impl_8h" kind="file"><name>signal_replay_cpp_impl.h</name>
+  </compound>
+  <compound refid="group__block" kind="group"><name>block</name>
+  </compound>
+  <compound refid="dir_009fe55df8547e00d9cb9e3f486c29a3" kind="dir"><name>bindings</name>
+  </compound>
+  <compound refid="dir_38ba65d471729c12727ea318cf191de9" kind="dir"><name>bindings</name>
+  </compound>
+  <compound refid="dir_955132a126ca3333825e3e1c86304640" kind="dir"><name>bindings</name>
+  </compound>
+  <compound refid="dir_ad9d56c277f9fb99432704599c4113f4" kind="dir"><name>bindings</name>
+  </compound>
+  <compound refid="dir_c66b3bd7dcda1ca8c2214fb11c2a41e3" kind="dir"><name>bindings</name>
+  </compound>
+  <compound refid="dir_b25a3ef16e28a70ccbbcf2eda8f76187" kind="dir"><name>build-libresdr</name>
+  </compound>
+  <compound refid="dir_6ee36a5c8468540411163c7be3ff403a" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_6bba15438be9fa9e09bdf2553bbacbaf" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_6c766b1e9875ab8e5949d04c1b6c0aa0" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_420ea84d6156d2e70f36bc2cbb817572" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_852deb1ae50008fb37debdde36a3651d" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_43deb7b758cab9219a2d20da8126fefb" kind="dir"><name>doa</name>
+  </compound>
+  <compound refid="dir_49e56c817e5e54854c35e136979f97ca" kind="dir"><name>docs</name>
+  </compound>
+  <compound refid="dir_4686162d85d3506a060a566c2ed488ca" kind="dir"><name>docstrings</name>
+  </compound>
+  <compound refid="dir_5b3c7acae2e841cd6edeb0d438096860" kind="dir"><name>docstrings</name>
+  </compound>
+  <compound refid="dir_98bd949d35f09a0792fb0e0754fd6dc4" kind="dir"><name>docstrings</name>
+  </compound>
+  <compound refid="dir_359d2bec989c9a8deeeb9aee335c1c76" kind="dir"><name>doxygen</name>
+  </compound>
+  <compound refid="dir_a91e7f6772ef528225b8fb5bbf46bad5" kind="dir"><name>gnuradio</name>
+  </compound>
+  <compound refid="dir_fc1c58dbae3640fd5c48163161358e03" kind="dir"><name>gnuradio</name>
+  </compound>
+  <compound refid="dir_902d6fe55786be073ae6681293cdb979" kind="dir"><name>gnuradio</name>
+  </compound>
+  <compound refid="dir_d44c64559bbebec7f509842c48db8b23" kind="dir"><name>include</name>
+  </compound>
+  <compound refid="dir_97aefd0d527b934f1d99a682da8fe6a9" kind="dir"><name>lib</name>
+  </compound>
+  <compound refid="dir_f2cd86917185299abf5a1f0679072f3c" kind="dir"><name>other</name>
+  </compound>
+  <compound refid="dir_eb7570e12286864083ec2c450b189261" kind="dir"><name>python</name>
+  </compound>
+  <compound refid="dir_7650c901f68c1baf5be78758dfd54fcf" kind="dir"><name>python</name>
+  </compound>
+  <compound refid="dir_7837fde3ab9c1fb2fc5be7b717af8d79" kind="dir"><name>python</name>
+  </compound>
+  <compound refid="dir_284a16cc30d6b7cb7cf9093bc998a5e4" kind="dir"><name>test_modules</name>
+  </compound>
+  <compound refid="dir_e7ccdba1962bc268898d44de9853d09b" kind="dir"><name>test_modules</name>
+  </compound>
+  <compound refid="indexpage" kind="page"><name>index</name>
+  </compound>
+</doxygenindex>

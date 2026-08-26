@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1calibrate__lin__array__impl" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::calibrate_lin_array_impl</compoundname>
+    <basecompoundref refid="classgr_1_1doa_1_1calibrate__lin__array" prot="public" virt="non-virtual">gr::doa::calibrate_lin_array</basecompoundref>
+    <includes refid="calibrate__lin__array__impl_8h" local="no">calibrate_lin_array_impl.h</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a683e737f759b474a129c698d80018ab0" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::calibrate_lin_array_impl::d_norm_spacing</definition>
+        <argsstring></argsstring>
+        <name>d_norm_spacing</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_norm_spacing</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="22" column="11" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a015240e33e4aa597a48bee1dd4013570" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::calibrate_lin_array_impl::d_num_ant_ele</definition>
+        <argsstring></argsstring>
+        <name>d_num_ant_ele</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_num_ant_ele</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="23" column="9" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1ab6ba71745abeec5276187f70efcc4ee1" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::calibrate_lin_array_impl::d_pilot_angle</definition>
+        <argsstring></argsstring>
+        <name>d_pilot_angle</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_pilot_angle</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="24" column="11" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1ada046db12f6378a98a5cf759f98dc590" prot="private" static="no" mutable="no">
+        <type>fcolvec</type>
+        <definition>fcolvec gr::doa::calibrate_lin_array_impl::d_array_loc</definition>
+        <argsstring></argsstring>
+        <name>d_array_loc</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_array_loc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="27" column="13" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a55c39f5a32eed250d547a3d2f9497807" prot="private" static="no" mutable="no">
+        <type>cx_fmat</type>
+        <definition>cx_fmat gr::doa::calibrate_lin_array_impl::d_diagmat_v_vec</definition>
+        <argsstring></argsstring>
+        <name>d_diagmat_v_vec</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_diagmat_v_vec</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="28" column="13" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a092cf6e21abc6376ea72ed4f31aef8f4" prot="private" static="no" mutable="no">
+        <type>cx_fmat</type>
+        <definition>cx_fmat gr::doa::calibrate_lin_array_impl::d_diagmat_v_vec_conj</definition>
+        <argsstring></argsstring>
+        <name>d_diagmat_v_vec_conj</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::d_diagmat_v_vec_conj</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="29" column="13" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1aae21bc49606d01ceaa176699b153435e" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gr::doa::calibrate_lin_array_impl::amv</definition>
+        <argsstring>(cx_fcolvec &amp;v_ii, fcolvec &amp;array_loc, float theta)</argsstring>
+        <name>amv</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::amv</qualifiedname>
+        <param>
+          <type>cx_fcolvec &amp;</type>
+          <declname>v_ii</declname>
+        </param>
+        <param>
+          <type>fcolvec &amp;</type>
+          <declname>array_loc</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>theta</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="32" column="10"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1aa2da13ddc65950eac17dafeed5ee34e9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::calibrate_lin_array_impl::calibrate_lin_array_impl</definition>
+        <argsstring>(float norm_spacing, int num_ant_ele, float pilot_angle)</argsstring>
+        <name>calibrate_lin_array_impl</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::calibrate_lin_array_impl</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>norm_spacing</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_ant_ele</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>pilot_angle</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="35" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a1bbd4cdccd2058c57431209d08e136c5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::calibrate_lin_array_impl::~calibrate_lin_array_impl</definition>
+        <argsstring>()</argsstring>
+        <name>~calibrate_lin_array_impl</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::~calibrate_lin_array_impl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="36" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1calibrate__lin__array__impl_1a788aae35e3d065bde70e1c6eb2bb73bf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gr::doa::calibrate_lin_array_impl::work</definition>
+        <argsstring>(int noutput_items, gr_vector_const_void_star &amp;input_items, gr_vector_void_star &amp;output_items)</argsstring>
+        <name>work</name>
+        <qualifiedname>gr::doa::calibrate_lin_array_impl::work</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_const_void_star &amp;</type>
+          <declname>input_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_void_star &amp;</type>
+          <declname>output_items</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="39" column="9"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>gr::doa::calibrate_lin_array</label>
+        <link refid="classgr_1_1doa_1_1calibrate__lin__array"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::calibrate_lin_array_impl</label>
+        <link refid="classgr_1_1doa_1_1calibrate__lin__array__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>gr::doa::calibrate_lin_array</label>
+        <link refid="classgr_1_1doa_1_1calibrate__lin__array"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::calibrate_lin_array_impl</label>
+        <link refid="classgr_1_1doa_1_1calibrate__lin__array__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" line="19" column="1" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/calibrate_lin_array_impl.h" bodystart="20" bodyend="42"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1aae21bc49606d01ceaa176699b153435e" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>amv</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1aa2da13ddc65950eac17dafeed5ee34e9" prot="public" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>calibrate_lin_array_impl</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1ada046db12f6378a98a5cf759f98dc590" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_array_loc</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a55c39f5a32eed250d547a3d2f9497807" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_diagmat_v_vec</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a092cf6e21abc6376ea72ed4f31aef8f4" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_diagmat_v_vec_conj</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a683e737f759b474a129c698d80018ab0" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_norm_spacing</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a015240e33e4aa597a48bee1dd4013570" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_num_ant_ele</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1ab6ba71745abeec5276187f70efcc4ee1" prot="private" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>d_pilot_angle</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array_1a2c9998cfc361c07b40377af2b302a105" prot="public" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array_1a3e61fe1f1084aeb3533673a5b7f09254" prot="public" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>sptr</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a788aae35e3d065bde70e1c6eb2bb73bf" prot="public" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>work</name></member>
+      <member refid="classgr_1_1doa_1_1calibrate__lin__array__impl_1a1bbd4cdccd2058c57431209d08e136c5" prot="public" virt="non-virtual"><scope>gr::doa::calibrate_lin_array_impl</scope><name>~calibrate_lin_array_impl</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

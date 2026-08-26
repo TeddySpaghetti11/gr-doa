@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1autocorrelate__impl" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::autocorrelate_impl</compoundname>
+    <basecompoundref refid="classgr_1_1doa_1_1autocorrelate" prot="public" virt="non-virtual">gr::doa::autocorrelate</basecompoundref>
+    <includes refid="autocorrelate__impl_8h" local="no">autocorrelate_impl.h</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a9d0dbcaa0e0e4953684e80d8595bb916" prot="private" static="no" mutable="no">
+        <type>const int</type>
+        <definition>const int gr::doa::autocorrelate_impl::d_num_inputs</definition>
+        <argsstring></argsstring>
+        <name>d_num_inputs</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_num_inputs</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="20" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1ad35877616970291228611dc37c95e378" prot="private" static="no" mutable="no">
+        <type>const int</type>
+        <definition>const int gr::doa::autocorrelate_impl::d_snapshot_size</definition>
+        <argsstring></argsstring>
+        <name>d_snapshot_size</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_snapshot_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="21" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a1fbaf0408c94fe644b7e9ee933120856" prot="private" static="no" mutable="no">
+        <type>const int</type>
+        <definition>const int gr::doa::autocorrelate_impl::d_overlap_size</definition>
+        <argsstring></argsstring>
+        <name>d_overlap_size</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_overlap_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="22" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a15285e80a2c188386fb9d327fa67c61c" prot="private" static="no" mutable="no">
+        <type>const int</type>
+        <definition>const int gr::doa::autocorrelate_impl::d_avg_method</definition>
+        <argsstring></argsstring>
+        <name>d_avg_method</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_avg_method</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="23" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a040ba27ebb2425bb365acb30a1445ec6" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::autocorrelate_impl::d_nonoverlap_size</definition>
+        <argsstring></argsstring>
+        <name>d_nonoverlap_size</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_nonoverlap_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="24" column="13" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a92905514813c2fd0504ccdb582ac5941" prot="private" static="no" mutable="no">
+        <type>arma::cx_fmat</type>
+        <definition>arma::cx_fmat gr::doa::autocorrelate_impl::d_J</definition>
+        <argsstring></argsstring>
+        <name>d_J</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_J</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="25" column="23" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1autocorrelate__impl_1a111dd569c013772f3759836c0b6c1358" prot="private" static="no" mutable="no">
+        <type>arma::cx_fmat</type>
+        <definition>arma::cx_fmat gr::doa::autocorrelate_impl::d_input_matrix</definition>
+        <argsstring></argsstring>
+        <name>d_input_matrix</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::d_input_matrix</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="26" column="23" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1autocorrelate__impl_1a68b296078430e282477213c82cb06a8e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::autocorrelate_impl::autocorrelate_impl</definition>
+        <argsstring>(int inputs, int snapshot_size, int overlap_size, int avg_method)</argsstring>
+        <name>autocorrelate_impl</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::autocorrelate_impl</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>snapshot_size</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>overlap_size</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>avg_method</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="29" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1autocorrelate__impl_1ae20c74f967ae62fad6bda6d941a1a6f1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::autocorrelate_impl::~autocorrelate_impl</definition>
+        <argsstring>()</argsstring>
+        <name>~autocorrelate_impl</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::~autocorrelate_impl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="30" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1autocorrelate__impl_1a224ecee8e5664ce1e027ca83b86af61d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gr::doa::autocorrelate_impl::forecast</definition>
+        <argsstring>(int noutput_items, gr_vector_int &amp;ninput_items_required)</argsstring>
+        <name>forecast</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::forecast</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_int &amp;</type>
+          <declname>ninput_items_required</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="33" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1autocorrelate__impl_1a031eab8e84ec0e2930eac339d78ec0b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gr::doa::autocorrelate_impl::general_work</definition>
+        <argsstring>(int noutput_items, gr_vector_int &amp;ninput_items, gr_vector_const_void_star &amp;input_items, gr_vector_void_star &amp;output_items)</argsstring>
+        <name>general_work</name>
+        <qualifiedname>gr::doa::autocorrelate_impl::general_work</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_int &amp;</type>
+          <declname>ninput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_const_void_star &amp;</type>
+          <declname>input_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_void_star &amp;</type>
+          <declname>output_items</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="35" column="13"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="3">
+        <label>gr::block</label>
+      </node>
+      <node id="2">
+        <label>gr::doa::autocorrelate</label>
+        <link refid="classgr_1_1doa_1_1autocorrelate"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::autocorrelate_impl</label>
+        <link refid="classgr_1_1doa_1_1autocorrelate__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="3">
+        <label>gr::block</label>
+      </node>
+      <node id="2">
+        <label>gr::doa::autocorrelate</label>
+        <link refid="classgr_1_1doa_1_1autocorrelate"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::autocorrelate_impl</label>
+        <link refid="classgr_1_1doa_1_1autocorrelate__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" line="17" column="5" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/lib/autocorrelate_impl.h" bodystart="18" bodyend="39"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a68b296078430e282477213c82cb06a8e" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>autocorrelate_impl</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a15285e80a2c188386fb9d327fa67c61c" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_avg_method</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a111dd569c013772f3759836c0b6c1358" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_input_matrix</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a92905514813c2fd0504ccdb582ac5941" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_J</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a040ba27ebb2425bb365acb30a1445ec6" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_nonoverlap_size</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a9d0dbcaa0e0e4953684e80d8595bb916" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_num_inputs</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a1fbaf0408c94fe644b7e9ee933120856" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_overlap_size</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1ad35877616970291228611dc37c95e378" prot="private" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>d_snapshot_size</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a224ecee8e5664ce1e027ca83b86af61d" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>forecast</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1a031eab8e84ec0e2930eac339d78ec0b9" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>general_work</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate_1a3d46af28e611261dfa787a6fad155aa7" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate_1ae5dcfe9deb0b6db1932c6bedc2d52941" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>sptr</name></member>
+      <member refid="classgr_1_1doa_1_1autocorrelate__impl_1ae20c74f967ae62fad6bda6d941a1a6f1" prot="public" virt="non-virtual"><scope>gr::doa::autocorrelate_impl</scope><name>~autocorrelate_impl</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

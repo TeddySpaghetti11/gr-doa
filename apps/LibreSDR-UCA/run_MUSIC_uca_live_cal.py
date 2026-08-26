@@ -8,12 +8,14 @@
 # Title: LibreSDR UCA MUSIC - Live OTA Calibration
 # Author: gr-doa LibreSDR research port
 # Description: Keep this flowgraph running after calibration; switching off the B210 does not invalidate frozen corrections.
-# GNU Radio version: 3.10.12.0
+# GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
-from PyQt5 import Qt
 from gnuradio import qtgui
+from PyQt5 import Qt
 from gnuradio import blocks
 from gnuradio import doa
+from gnuradio import filter
+from gnuradio.filter import firdes
 from gnuradio import iio
 import gnuradio.doa as doa
 import sip
@@ -66,19 +68,20 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.snapshot_size = snapshot_size = 2**15
         self.samp_rate = samp_rate = int(2.8e6)
+        self.snapshot_size = snapshot_size = 2**15
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
         self.pspectrum_len = pspectrum_len = 720
-        self.pilot_bearing = pilot_bearing = 0.0
+        self.proc_rate = proc_rate = samp_rate / 8
+        self.pilot_bearing = pilot_bearing = 90
         self.overlap_size = overlap_size = 2**14
         self.num_targets = num_targets = 1
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = 0.346379923
         self.element_bearing_step = element_bearing_step = -90.0
         self.element0_bearing = element0_bearing = 225.0
-        self.center_freq = center_freq = int(903e6)
+        self.center_freq = center_freq = int(920.9e6)
         self.calibration_skip = calibration_skip = 2**14
         self.calibration_samples = calibration_samples = 2**16
         self.calibration_file = calibration_file = "/tmp/gr-doa-uca-903MHz.cfg"
@@ -133,7 +136,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.raw_phase_estimator = doa.phase_offset_est(num_elements, calibration_skip)
         self.raw_phase_display = qtgui.time_sink_f(
             1024, #size
-            samp_rate, #samp_rate
+            proc_rate, #samp_rate
             "Raw relative phase", #name
             3, #number of inputs
             None # parent
@@ -183,6 +186,52 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            1024, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            1,
+            None # parent
+        )
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0.set_y_axis((-140), 10)
+        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(False)
+        self.qtgui_freq_sink_x_0.set_fft_window_normalized(False)
+
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
+        self.qtgui_compass_0 = self._qtgui_compass_0_win = qtgui.GrCompass('', 250, 0.10, False, 1,False,1,"default")
+        self._qtgui_compass_0_win.setColors("default","red", "black", "black")
+        self._qtgui_compass_0 = self._qtgui_compass_0_win
+        self.top_layout.addWidget(self._qtgui_compass_0_win)
         self.peak_magnitude_discard = blocks.null_sink(gr.sizeof_float*num_targets)
         self.peak_finder = doa.find_local_max(num_targets, pspectrum_len, 0.0, 360.0)
         self.ota_calibration = doa.uca_pilot_calibration(
@@ -205,9 +254,9 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         if True:
             self.libresdr_b.set_gain_mode(1, 'manual')
             self.libresdr_b.set_gain(1, rx_gain)
-        self.libresdr_b.set_quadrature(False)
-        self.libresdr_b.set_rfdc(False)
-        self.libresdr_b.set_bbdc(False)
+        self.libresdr_b.set_quadrature(True)
+        self.libresdr_b.set_rfdc(True)
+        self.libresdr_b.set_bbdc(True)
         self.libresdr_b.set_filter_params('Auto', '', 0, 0)
         self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 32768)
         self.libresdr_a.set_len_tag_key('packet_len')
@@ -219,15 +268,19 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         if True:
             self.libresdr_a.set_gain_mode(1, 'manual')
             self.libresdr_a.set_gain(1, rx_gain)
-        self.libresdr_a.set_quadrature(False)
-        self.libresdr_a.set_rfdc(False)
-        self.libresdr_a.set_bbdc(False)
+        self.libresdr_a.set_quadrature(True)
+        self.libresdr_a.set_rfdc(True)
+        self.libresdr_a.set_bbdc(True)
         self.libresdr_a.set_filter_params('Auto', '', 0, 0)
+        self.freq_xlating_fir_filter_xxx_0_0_1 = filter.freq_xlating_fir_filter_ccc(8, firdes.low_pass(1.0, samp_rate, 10e3, 15e3), 5e3, samp_rate)
+        self.freq_xlating_fir_filter_xxx_0_0_0 = filter.freq_xlating_fir_filter_ccc(8, firdes.low_pass(1.0, samp_rate, 10e3, 15e3), 5e3, samp_rate)
+        self.freq_xlating_fir_filter_xxx_0_0 = filter.freq_xlating_fir_filter_ccc(8, firdes.low_pass(1.0, samp_rate, 10e3, 15e3), 5e3, samp_rate)
+        self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(8, firdes.low_pass(1.0, samp_rate, 10e3, 15e3), 5e3, samp_rate)
         self.covariance = doa.autocorrelate(num_elements, snapshot_size, overlap_size, 0)
         self.corrected_phase_estimator = doa.phase_offset_est(num_elements, (calibration_skip + calibration_samples))
         self.corrected_phase_display = qtgui.time_sink_f(
             1024, #size
-            samp_rate, #samp_rate
+            proc_rate, #samp_rate
             "Corrected relative phase", #name
             3, #number of inputs
             None # parent
@@ -279,7 +332,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.corrected_channels = qtgui.time_sink_c(
             1024, #size
-            samp_rate, #samp_rate
+            proc_rate, #samp_rate
             "Calibrated UCA channels", #name
             4, #number of inputs
             None # parent
@@ -376,31 +429,37 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.bearing_streams, 0), (self.bearing_display, 0))
+        self.connect((self.bearing_streams, 0), (self.qtgui_compass_0, 0))
         self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
         self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
         self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
         self.connect((self.covariance, 0), (self.music_uca, 0))
-        self.connect((self.libresdr_a, 1), (self.ota_calibration, 1))
-        self.connect((self.libresdr_a, 0), (self.ota_calibration, 0))
-        self.connect((self.libresdr_a, 1), (self.raw_phase_estimator, 1))
-        self.connect((self.libresdr_a, 0), (self.raw_phase_estimator, 0))
-        self.connect((self.libresdr_b, 1), (self.ota_calibration, 2))
-        self.connect((self.libresdr_b, 0), (self.ota_calibration, 3))
-        self.connect((self.libresdr_b, 1), (self.raw_phase_estimator, 2))
-        self.connect((self.libresdr_b, 0), (self.raw_phase_estimator, 3))
+        self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.ota_calibration, 0))
+        self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.raw_phase_estimator, 0))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0, 0), (self.ota_calibration, 1))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0, 0), (self.raw_phase_estimator, 1))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0_0, 0), (self.ota_calibration, 3))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0_0, 0), (self.raw_phase_estimator, 3))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0_1, 0), (self.ota_calibration, 2))
+        self.connect((self.freq_xlating_fir_filter_xxx_0_0_1, 0), (self.raw_phase_estimator, 2))
+        self.connect((self.libresdr_a, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
+        self.connect((self.libresdr_a, 1), (self.freq_xlating_fir_filter_xxx_0_0, 0))
+        self.connect((self.libresdr_a, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.libresdr_b, 0), (self.freq_xlating_fir_filter_xxx_0_0_0, 0))
+        self.connect((self.libresdr_b, 1), (self.freq_xlating_fir_filter_xxx_0_0_1, 0))
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
+        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
         self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
         self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
-        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
         self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
         self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
-        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
         self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
-        self.connect((self.ota_calibration, 0), (self.covariance, 0))
-        self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 3), (self.covariance, 3))
+        self.connect((self.ota_calibration, 1), (self.covariance, 1))
+        self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
@@ -417,22 +476,25 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
 
         event.accept()
 
-    def get_snapshot_size(self):
-        return self.snapshot_size
-
-    def set_snapshot_size(self, snapshot_size):
-        self.snapshot_size = snapshot_size
-
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
+        self.set_proc_rate(self.samp_rate / 8)
+        self.freq_xlating_fir_filter_xxx_0.set_taps(firdes.low_pass(1.0, self.samp_rate, 10e3, 15e3))
+        self.freq_xlating_fir_filter_xxx_0_0.set_taps(firdes.low_pass(1.0, self.samp_rate, 10e3, 15e3))
+        self.freq_xlating_fir_filter_xxx_0_0_0.set_taps(firdes.low_pass(1.0, self.samp_rate, 10e3, 15e3))
+        self.freq_xlating_fir_filter_xxx_0_0_1.set_taps(firdes.low_pass(1.0, self.samp_rate, 10e3, 15e3))
         self.libresdr_a.set_samplerate(self.samp_rate)
         self.libresdr_b.set_samplerate(self.samp_rate)
-        self.corrected_channels.set_samp_rate(self.samp_rate)
-        self.raw_phase_display.set_samp_rate(self.samp_rate)
-        self.corrected_phase_display.set_samp_rate(self.samp_rate)
+        self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
+
+    def get_snapshot_size(self):
+        return self.snapshot_size
+
+    def set_snapshot_size(self, snapshot_size):
+        self.snapshot_size = snapshot_size
 
     def get_rx_gain(self):
         return self.rx_gain
@@ -456,6 +518,15 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
     def set_pspectrum_len(self, pspectrum_len):
         self.pspectrum_len = pspectrum_len
         self.spectrum_display.set_x_axis(0, (360.0/self.pspectrum_len))
+
+    def get_proc_rate(self):
+        return self.proc_rate
+
+    def set_proc_rate(self, proc_rate):
+        self.proc_rate = proc_rate
+        self.corrected_channels.set_samp_rate(self.proc_rate)
+        self.corrected_phase_display.set_samp_rate(self.proc_rate)
+        self.raw_phase_display.set_samp_rate(self.proc_rate)
 
     def get_pilot_bearing(self):
         return self.pilot_bearing

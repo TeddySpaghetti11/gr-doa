@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h" kind="file" language="C++">
+    <compoundname>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h</compoundname>
+    <includes local="yes">pydoc_macros.h</includes>
+    <incdepgraph>
+      <node id="1">
+        <label>autocorrelate_pydoc_template.h</label>
+        <link refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>pydoc_macros.h</label>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" prot="public" static="no">
+        <name>D</name>
+        <param><defname>...</defname></param>
+        <initializer><ref refid="build-fix_2python_2doa_2bindings_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kindref="member">DOC</ref>(<ref refid="namespacegr" kindref="compound">gr</ref>, doa, __VA_ARGS__)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" line="10" column="10" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1ac27aeb69f7671c676099248abc13d4ca" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_autocorrelate</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_autocorrelate</name>
+        <initializer>= R&quot;doc()doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" line="18" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a16e5f2e8db7f103fd46eca5d742981b2" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_autocorrelate_autocorrelate_0</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_autocorrelate_autocorrelate_0</name>
+        <initializer>= R&quot;doc()doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" line="21" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2autocorrelate__pydoc__template_8h_1a0d3b0daf28f235c2a611d7c03e1bf888" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_autocorrelate_make</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_autocorrelate_make</name>
+        <initializer>= R&quot;doc()doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" line="24" column="19" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/autocorrelate_pydoc_template.h"/>
+  </compounddef>
+</doxygen>

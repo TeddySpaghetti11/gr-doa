@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1power__detection__cpp" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::power_detection_cpp</compoundname>
+    <basecompoundref prot="public" virt="virtual">gr::sync_block</basecompoundref>
+    <derivedcompoundref refid="classgr_1_1doa_1_1power__detection__cpp__impl" prot="public" virt="non-virtual">gr::doa::power_detection_cpp_impl</derivedcompoundref>
+    <includes refid="power__detection__cpp_8h" local="no">power_detection_cpp.h</includes>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classgr_1_1doa_1_1power__detection__cpp_1a9bbb996910dde1a041183236e7301986" prot="public" static="no">
+        <type>std::shared_ptr&lt; <ref refid="classgr_1_1doa_1_1power__detection__cpp" kindref="compound">power_detection_cpp</ref> &gt;</type>
+        <definition>typedef std::shared_ptr&lt;power_detection_cpp&gt; gr::doa::power_detection_cpp::sptr</definition>
+        <argsstring></argsstring>
+        <name>sptr</name>
+        <qualifiedname>gr::doa::power_detection_cpp::sptr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/power_detection_cpp.h" line="27" column="29" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/power_detection_cpp.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1power__detection__cpp_1a9c2d33cecc937e528184fd5fdc0b0a38" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classgr_1_1doa_1_1power__detection__cpp_1a9bbb996910dde1a041183236e7301986" kindref="member">sptr</ref></type>
+        <definition>static sptr gr::doa::power_detection_cpp::make</definition>
+        <argsstring>(int num_inputs, double sample_rate, int buffer_size=1024, float threshold_multiplier=5.0f)</argsstring>
+        <name>make</name>
+        <qualifiedname>gr::doa::power_detection_cpp::make</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>num_inputs</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>sample_rate</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>buffer_size</declname>
+          <defval>1024</defval>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>threshold_multiplier</declname>
+          <defval>5.0f</defval>
+        </param>
+        <briefdescription>
+<para>Create a power detection block. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>num_inputs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of input channels </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sample_rate</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Sample rate in Hz </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>buffer_size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Size of capture/playback buffer in samples </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>threshold_multiplier</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Multiplier for power threshold detection </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/power_detection_cpp.h" line="36" column="17"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Power detection block with buffer capture and replay. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Detects signal power on the first input channel. When power exceeds threshold, captures signal to buffer. During silence, replays captured signal. </para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>gr::doa::power_detection_cpp</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::doa::power_detection_cpp_impl</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp__impl"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>gr::doa::power_detection_cpp</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/power_detection_cpp.h" line="24" column="1" bodyfile="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/power_detection_cpp.h" bodystart="25" bodyend="37"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9c2d33cecc937e528184fd5fdc0b0a38" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9bbb996910dde1a041183236e7301986" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp</scope><name>sptr</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="dir_852deb1ae50008fb37debdde36a3651d" kind="dir">
+    <compoundname>doa</compoundname>
+    <innerfile refid="antenna__correction_8h">antenna_correction.h</innerfile>
+    <innerfile refid="api_8h">api.h</innerfile>
+    <innerfile refid="autocorrelate_8h">autocorrelate.h</innerfile>
+    <innerfile refid="calibrate__lin__array_8h">calibrate_lin_array.h</innerfile>
+    <innerfile refid="find__local__max_8h">find_local_max.h</innerfile>
+    <innerfile refid="MUSIC__lin__array_8h">MUSIC_lin_array.h</innerfile>
+    <innerfile refid="MUSIC__uca_8h">MUSIC_uca.h</innerfile>
+    <innerfile refid="power__detection__cpp_8h">power_detection_cpp.h</innerfile>
+    <innerfile refid="rootMUSIC__linear__array_8h">rootMUSIC_linear_array.h</innerfile>
+    <innerfile refid="signal__replay__cpp_8h">signal_replay_cpp.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/include/gnuradio/doa/"/>
+  </compounddef>
+</doxygen>

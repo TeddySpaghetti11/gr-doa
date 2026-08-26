@@ -1,0 +1,16 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/include/gnuradio/doa/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/lib/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/apps/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/examples/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/docs/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/docs/doxygen/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/python/doa/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/python/doa/bindings/cmake_install.cmake",
+		"/home/dev/Documents/ResearchProj_Fork/gr-doa/build-fix/grc/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

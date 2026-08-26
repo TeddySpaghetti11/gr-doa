@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="dir_7837fde3ab9c1fb2fc5be7b717af8d79" kind="dir">
+    <compoundname>python</compoundname>
+    <innerdir refid="dir_43deb7b758cab9219a2d20da8126fefb">doa</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/dev/Documents/ResearchProj_Fork/gr-doa/python/"/>
+  </compounddef>
+</doxygen>

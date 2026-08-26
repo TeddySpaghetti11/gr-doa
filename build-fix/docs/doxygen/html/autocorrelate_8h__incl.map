@@ -1,0 +1,9 @@
+<map id="autocorrelate.h" name="autocorrelate.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="90,5,210,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,81,135,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,36,97,72,94,68,137,32"/>
+<area shape="rect" id="Node000003" href="$api_8h.html" title=" " alt="" coords="159,81,301,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,31,207,70,202,71,164,36"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="151,157,309,184"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="232,107,232,142,228,140,228,111"/>
+</map>
