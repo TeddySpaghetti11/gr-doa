@@ -25,7 +25,7 @@ parameters:
   dtype: float
   default: 0.34638
 - id: pilot_angle
-  label: Pilot Bearing (deg)
+  label: Pilot Source Bearing (deg)
   dtype: float
   default: 0.0
 - id: element0_angle
@@ -70,6 +70,10 @@ outputs:
 documentation: |-
   Same-session OTA phase calibration for a uniform circular array.
 
+  pilot_angle is the SOURCE bearing from the array centre towards the pilot
+  transmitter. The block uses the same source-bearing UCA manifold as MUSIC:
+  exp(+j*2*pi*(r/lambda)*cos(theta-beta_m)).
+
   Place a strong narrowband pilot at the configured known bearing before the
   flowgraph starts. The block removes the predicted UCA steering phase from the
   measured channel ratios, freezes one unit-magnitude phase correction per
@@ -77,13 +81,17 @@ documentation: |-
   skip/calibration interval. Channel amplitudes are intentionally left unchanged,
   matching Ettus's relative phase-correction stage.
 
-  Keep both IIO sources and this flowgraph running after calibration. Reopening
-  or retuning either LibreSDR can invalidate the corrections. The console prints
-  when calibration is complete and the pilot may be switched off. When a log
-  filename is supplied, the saved radians are directly compatible with Ettus's
-  Phase Correct Chains block (channel 0 is the reference and is omitted).
+  The console also prints normalized complex coherence for every channel relative
+  to channel 0. Values close to 1 are expected for a clean stationary pilot; a
+  low value means the phase correction and MUSIC result should not be trusted.
 
-  A pure tone corrects fixed delay only at that tone frequency; this block is
-  intended for narrowband MUSIC and is not a wideband sample synchronizer.
+  Keep both IIO sources and this flowgraph running after calibration. Reopening
+  or retuning either LibreSDR can invalidate the corrections. When a log filename
+  is supplied, the saved radians are directly compatible with Ettus's Phase
+  Correct Chains block (channel 0 is the reference and is omitted).
+
+  Compute norm_radius at the actual pilot RF frequency. A pure tone corrects fixed
+  delay only at that tone frequency; this block is intended for narrowband MUSIC
+  and is not a wideband sample synchronizer.
 
 file_format: 1
