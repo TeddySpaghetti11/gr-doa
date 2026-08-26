@@ -11,6 +11,7 @@ install(FILES
     doa_autocorrelate.block.yml
     doa_save_antenna_calib.block.yml
     doa_MUSIC_lin_array.block.yml
+    doa_MUSIC_uca.block.yml
     doa_find_local_max.block.yml
     doa_antenna_correction.block.yml
     doa_rootMUSIC_linear_array.block.yml
@@ -22,5 +23,6 @@ install(FILES
     doa_serial_connection.block.yml
     doa_signal_replay.block.yml
     doa_power_detection.block.yml
+    doa_uca_pilot_calibration.block.yml
     doa_signal_replay_cpp.block.yml
     doa_power_detection_cpp.block.yml DESTINATION share/gnuradio/grc/blocks)

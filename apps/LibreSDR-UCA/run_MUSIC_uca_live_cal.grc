@@ -1,0 +1,670 @@
+options:
+  parameters:
+    alias: ''
+    author: gr-doa LibreSDR research port
+    catch_exceptions: 'True'
+    comment: 'Four-channel 903 MHz UCA MUSIC with same-session OTA calibration.'
+    copyright: ''
+    description: Keep this flowgraph running after calibration; switching off the B210 does not invalidate frozen corrections.
+    gen_linking: dynamic
+    generate_options: qt_gui
+    generator_class_name: PythonQtGuiGenerator
+    generator_module: gnuradio.grc.workflows.python_qt_gui
+    hier_block_src_path: '.:'
+    id: run_MUSIC_uca_live_cal
+    max_nouts: '0'
+    output_language: python
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    thread_safe_setters: ''
+    title: LibreSDR UCA MUSIC - Live OTA Calibration
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: center_freq
+  id: variable
+  parameters:
+    comment: Array and B210 RF center frequency
+    value: int(903e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 16]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: LibreSDR complex sample rate
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 16]
+    rotation: 0
+    state: enabled
+- name: rf_bandwidth
+  id: variable
+  parameters:
+    comment: IIO template value; verify the actual AD9361 attribute (see README)
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 16]
+    rotation: 0
+    state: enabled
+- name: rx_gain
+  id: variable
+  parameters:
+    comment: Same manual gain on all four channels
+    value: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 16]
+    rotation: 0
+    state: enabled
+- name: num_elements
+  id: variable
+  parameters:
+    comment: Two RX channels per LibreSDR
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 16]
+    rotation: 0
+    state: enabled
+- name: norm_radius
+  id: variable
+  parameters:
+    comment: 114.997 mm radius divided by wavelength at 903 MHz
+    value: '0.346379923'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 16]
+    rotation: 0
+    state: enabled
+- name: pilot_bearing
+  id: variable
+  parameters:
+    comment: Set to the measured B210 bearing before starting
+    value: '0.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [704, 16]
+    rotation: 0
+    state: enabled
+- name: element0_bearing
+  id: variable
+  parameters:
+    comment: Physical bearing of antenna element 0
+    value: '0.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 16]
+    rotation: 0
+    state: enabled
+- name: element_bearing_step
+  id: variable
+  parameters:
+    comment: Use -90 if channel order runs in the opposite direction
+    value: '90.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [968, 16]
+    rotation: 0
+    state: enabled
+- name: calibration_skip
+  id: variable
+  parameters:
+    comment: Allow both network streams and RF chains to settle
+    value: 2**14
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1128, 16]
+    rotation: 0
+    state: enabled
+- name: calibration_samples
+  id: variable
+  parameters:
+    comment: Pilot samples used for complex circular averaging
+    value: 2**16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1264, 16]
+    rotation: 0
+    state: enabled
+- name: snapshot_size
+  id: variable
+  parameters:
+    comment: Samples per MUSIC covariance estimate
+    value: 2**12
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 104]
+    rotation: 0
+    state: enabled
+- name: overlap_size
+  id: variable
+  parameters:
+    comment: Covariance snapshot overlap
+    value: 2**11
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 104]
+    rotation: 0
+    state: enabled
+- name: num_targets
+  id: variable
+  parameters:
+    comment: Known number of narrowband incident signals
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 104]
+    rotation: 0
+    state: enabled
+- name: pspectrum_len
+  id: variable
+  parameters:
+    comment: 720 bins gives 0.5 degree spacing
+    value: '720'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 104]
+    rotation: 0
+    state: enabled
+- name: calibration_file
+  id: variable
+  parameters:
+    comment: Diagnostic copy of frozen coefficients
+    value: '"/tmp/gr-doa-uca-903MHz.cfg"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 104]
+    rotation: 0
+    state: enabled
+- name: libresdr_a
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '32768'
+    comment: 'Global channels 0 and 1: connect these to UCA elements 0 and 1.'
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.4.1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 248]
+    rotation: 0
+    state: enabled
+- name: libresdr_b
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '32768'
+    comment: 'Global channels 2 and 3: connect these to UCA elements 2 and 3.'
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.5.1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 504]
+    rotation: 0
+    state: enabled
+- name: ota_calibration
+  id: doa_uca_pilot_calibration
+  parameters:
+    affinity: ''
+    alias: ''
+    calibration_samples: calibration_samples
+    comment: 'Pilot must be on before start. Wait for the console completion message.'
+    config_filename: calibration_file
+    element0_angle: element0_bearing
+    element_angle_step: element_bearing_step
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    norm_radius: norm_radius
+    num_inputs: num_elements
+    pilot_angle: pilot_bearing
+    skip_samples: calibration_skip
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 360]
+    rotation: 0
+    state: enabled
+- name: covariance
+  id: doa_autocorrelate
+  parameters:
+    affinity: ''
+    alias: ''
+    avg_method: Forward
+    comment: 'Forward-only covariance: ULA reversal averaging is not used for the UCA.'
+    inputs: num_elements
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    overlap_size: overlap_size
+    snapshot_size: snapshot_size
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 360]
+    rotation: 0
+    state: enabled
+- name: music_uca
+  id: doa_MUSIC_uca
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Full-circle UCA steering model.'
+    element0_angle: element0_bearing
+    element_angle_step: element_bearing_step
+    inputs: num_elements
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    norm_radius: norm_radius
+    num_targets: num_targets
+    pspectrum_len: pspectrum_len
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [816, 360]
+    rotation: 0
+    state: enabled
+- name: peak_finder
+  id: doa_find_local_max
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_max_vals: num_targets
+    vector_len: pspectrum_len
+    x_max: '360.0'
+    x_min: '0.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 360]
+    rotation: 0
+    state: enabled
+- name: peak_magnitude_discard
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: float
+    vlen: num_targets
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1248, 320]
+    rotation: 0
+    state: enabled
+- name: bearing_streams
+  id: blocks_vector_to_streams
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: num_targets
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1248, 400]
+    rotation: 0
+    state: enabled
+- name: bearing_display
+  id: qtgui_number_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    autoscale: 'False'
+    avg: '0.15'
+    color1: ("black", "black")
+    color10: ("black", "black")
+    color2: ("black", "black")
+    color3: ("black", "black")
+    color4: ("black", "black")
+    color5: ("black", "black")
+    color6: ("black", "black")
+    color7: ("black", "black")
+    color8: ("black", "black")
+    color9: ("black", "black")
+    comment: 'Displays the strongest peak; the MUSIC block supports additional targets.'
+    factor1: '1'
+    factor10: '1'
+    factor2: '1'
+    factor3: '1'
+    factor4: '1'
+    factor5: '1'
+    factor6: '1'
+    factor7: '1'
+    factor8: '1'
+    factor9: '1'
+    graph_type: qtgui.NUM_GRAPH_HORIZ
+    gui_hint: '0,0,1,1'
+    label1: Estimated bearing
+    label10: ''
+    label2: Target 2
+    label3: Target 3
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    max: '360'
+    min: '0'
+    name: '"UCA MUSIC bearing"'
+    nconnections: '1'
+    type: float
+    unit1: degrees
+    unit10: ''
+    unit2: degrees
+    unit3: degrees
+    unit4: ''
+    unit5: ''
+    unit6: ''
+    unit7: ''
+    unit8: ''
+    unit9: ''
+    update_time: '0.10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1456, 400]
+    rotation: 0
+    state: enabled
+- name: spectrum_display
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '0.2'
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    grid: 'True'
+    gui_hint: '1,0,1,2'
+    label1: MUSIC pseudo-spectrum
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Full-circle UCA MUSIC"'
+    nconnections: '1'
+    ref_level: '0'
+    showports: 'True'
+    update_time: '0.10'
+    vlen: pspectrum_len
+    width1: '2'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    x_axis_label: '"Bearing (degrees)"'
+    x_start: '0'
+    x_step: 360.0/pspectrum_len
+    x_units: '"degrees"'
+    y_axis_label: '"Normalized pseudo-spectrum (dB)"'
+    y_units: '"dB"'
+    ymax: '0'
+    ymin: '-40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 560]
+    rotation: 0
+    state: enabled
+- name: corrected_channels
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'True'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: 'Outputs remain zero until OTA calibration has frozen.'
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: '0,1,1,1'
+    label1: Element 0
+    label10: ''
+    label2: Element 1
+    label3: Element 2
+    label4: Element 3
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Calibrated UCA channels"'
+    nconnections: '4'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: complex
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 640]
+    rotation: 0
+    state: enabled
+
+connections:
+- [libresdr_a, '0', ota_calibration, '0']
+- [libresdr_a, '1', ota_calibration, '1']
+- [libresdr_b, '0', ota_calibration, '2']
+- [libresdr_b, '1', ota_calibration, '3']
+- [ota_calibration, '0', covariance, '0']
+- [ota_calibration, '1', covariance, '1']
+- [ota_calibration, '2', covariance, '2']
+- [ota_calibration, '3', covariance, '3']
+- [ota_calibration, '0', corrected_channels, '0']
+- [ota_calibration, '1', corrected_channels, '1']
+- [ota_calibration, '2', corrected_channels, '2']
+- [ota_calibration, '3', corrected_channels, '3']
+- [covariance, '0', music_uca, '0']
+- [music_uca, '0', peak_finder, '0']
+- [music_uca, '0', spectrum_display, '0']
+- [peak_finder, '0', peak_magnitude_discard, '0']
+- [peak_finder, '1', bearing_streams, '0']
+- [bearing_streams, '0', bearing_display, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

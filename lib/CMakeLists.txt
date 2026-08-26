@@ -15,6 +15,7 @@ list(APPEND doa_sources
     calibrate_lin_array_impl.cc
     autocorrelate_impl.cc
     MUSIC_lin_array_impl.cc
+    MUSIC_uca_impl.cc
     find_local_max_impl.cc
     antenna_correction_impl.cc
     rootMUSIC_linear_array_impl.cc

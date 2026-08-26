@@ -28,7 +28,8 @@ gr_python_install(FILES __init__.py
     x440_usrp_source.py
     serial_connection.py
     signal_replay.py
-    power_detection.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/doa)
+    power_detection.py
+    uca_pilot_calibration.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/doa)
 
 ########################################################################
 # Handle the unit tests
@@ -36,6 +37,7 @@ gr_python_install(FILES __init__.py
 include(GrTest)
 
 set(GR_TEST_TARGET_DEPS gnuradio-doa)
+set(GR_TEST_LIBRARY_DIRS ${PROJECT_BINARY_DIR}/lib)
 
 # Create a package directory that tests can import. It includes everything
 # from `python/`.
@@ -46,5 +48,7 @@ add_custom_target(
 GR_ADD_TEST(qa_calibrate_lin_array ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_calibrate_lin_array.py)
 GR_ADD_TEST(qa_autocorrelate ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_autocorrelate.py)
 GR_ADD_TEST(qa_MUSIC_lin_array ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_MUSIC_lin_array.py)
+GR_ADD_TEST(qa_MUSIC_uca ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_MUSIC_uca.py)
+GR_ADD_TEST(qa_uca_pilot_calibration ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_uca_pilot_calibration.py)
 GR_ADD_TEST(qa_find_local_max ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_find_local_max.py)
 GR_ADD_TEST(qa_rootMUSIC_linear_array ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_rootMUSIC_linear_array.py)

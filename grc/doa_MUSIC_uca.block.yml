@@ -1,0 +1,62 @@
+id: doa_MUSIC_uca
+label: MUSIC Uniform Circular Array
+category: '[doa]'
+
+templates:
+  imports: from gnuradio import doa
+  make: doa.MUSIC_uca(${norm_radius}, ${num_targets}, ${inputs}, ${pspectrum_len}, ${element0_angle}, ${element_angle_step})
+
+parameters:
+- id: norm_radius
+  label: Normalized Radius (r/lambda)
+  dtype: float
+  default: 0.34638
+- id: num_targets
+  label: Number of Targets
+  dtype: int
+  default: 1
+- id: inputs
+  label: Number of Elements
+  dtype: int
+  default: 4
+- id: pspectrum_len
+  label: P-Spectrum Length
+  dtype: int
+  default: 720
+- id: element0_angle
+  label: Element 0 Bearing (deg)
+  dtype: float
+  default: 0.0
+- id: element_angle_step
+  label: Element Bearing Step (deg)
+  dtype: float
+  default: 90.0
+
+asserts:
+- ${ inputs > 1 }
+- ${ num_targets > 0 }
+- ${ inputs > num_targets }
+- ${ norm_radius > 0.0 }
+- ${ pspectrum_len >= 4 }
+
+inputs:
+- label: covariance
+  dtype: complex
+  vlen: ${ inputs * inputs }
+
+outputs:
+- label: spectrum
+  dtype: float
+  vlen: ${ pspectrum_len }
+
+documentation: |-
+  MUSIC pseudo-spectrum estimator for a uniform circular array (UCA).
+
+  The output covers [0, 360) degrees. Element 0 is placed at
+  element0_angle. Subsequent elements use element_angle_step; use a negative
+  step when the physical channel order runs in the opposite direction.
+
+  For four elements with 162.63 mm adjacent chord spacing at 903 MHz, the
+  radius is approximately 114.997 mm and norm_radius is 0.346380.
+
+file_format: 1

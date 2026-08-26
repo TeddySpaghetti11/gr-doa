@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: run DoA transmitter
-# Author: jreitmei
+# Title: B210 903 MHz OTA Calibration Tone
+# Author: Ettus Research; LibreSDR UCA configuration
 # GNU Radio version: 3.10.12.0
 
 from PyQt5 import Qt
@@ -32,9 +32,9 @@ from gnuradio import eng_notation
 class run_DoA_transmitter(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "run DoA transmitter", catch_exceptions=True)
+        gr.top_block.__init__(self, "B210 903 MHz OTA Calibration Tone", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("run DoA transmitter")
+        self.setWindowTitle("B210 903 MHz OTA Calibration Tone")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -65,7 +65,6 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = int(2.8e6)
         self.input_variables = input_variables = struct({
 
             'ToneFreq': 5e3,
@@ -93,8 +92,6 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
 
 
         })
-        self.freq = freq = int(1.24086e9)
-        self.bandwidth = bandwidth = 2800000
 
         ##################################################
         # Blocks
@@ -185,29 +182,11 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
 
         event.accept()
 
-    def get_samp_rate(self):
-        return self.samp_rate
-
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-
     def get_input_variables(self):
         return self.input_variables
 
     def set_input_variables(self, input_variables):
         self.input_variables = input_variables
-
-    def get_freq(self):
-        return self.freq
-
-    def set_freq(self, freq):
-        self.freq = freq
-
-    def get_bandwidth(self):
-        return self.bandwidth
-
-    def set_bandwidth(self, bandwidth):
-        self.bandwidth = bandwidth
 
 
 

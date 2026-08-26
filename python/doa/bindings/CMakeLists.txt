@@ -28,6 +28,7 @@ list(APPEND doa_python_files
     calibrate_lin_array_python.cc
     autocorrelate_python.cc
     MUSIC_lin_array_python.cc
+    MUSIC_uca_python.cc
     find_local_max_python.cc
     antenna_correction_python.cc
     rootMUSIC_linear_array_python.cc

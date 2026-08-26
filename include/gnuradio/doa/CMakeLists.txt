@@ -13,6 +13,7 @@ install(FILES api.h
     calibrate_lin_array.h
     autocorrelate.h
     MUSIC_lin_array.h
+    MUSIC_uca.h
     find_local_max.h
     antenna_correction.h
     rootMUSIC_linear_array.h

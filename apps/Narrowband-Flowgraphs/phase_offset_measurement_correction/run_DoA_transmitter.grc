@@ -1,9 +1,9 @@
 options:
   parameters:
     alias: ''
-    author: jreitmei
+    author: Ettus Research; LibreSDR UCA configuration
     catch_exceptions: 'True'
-    comment: ''
+    comment: 'B210 OTA calibration pilot for the 903 MHz LibreSDR UCA.'
     copyright: ''
     description: ''
     gen_linking: dynamic
@@ -19,7 +19,7 @@ options:
     run: 'True'
     run_command: '{python} -u {filename}'
     thread_safe_setters: ''
-    title: run DoA transmitter
+    title: B210 903 MHz OTA Calibration Tone
   states:
     bus_sink: false
     bus_source: false
@@ -29,30 +29,6 @@ options:
     state: enabled
 
 blocks:
-- name: bandwidth
-  id: variable
-  parameters:
-    comment: ''
-    value: '2800000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1032, 48.0]
-    rotation: 0
-    state: enabled
-- name: freq
-  id: variable
-  parameters:
-    comment: ''
-    value: int(1.24086e9)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [904, 48.0]
-    rotation: 0
-    state: enabled
 - name: input_variables
   id: variable_struct
   parameters:
@@ -104,18 +80,6 @@ blocks:
     coordinate: [8, 145]
     rotation: 0
     state: enabled
-- name: samp_rate
-  id: variable
-  parameters:
-    comment: ''
-    value: int(2.8e6)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [792, 48.0]
-    rotation: 0
-    state: enabled
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -139,59 +103,6 @@ blocks:
     coordinate: [200, 116.0]
     rotation: 0
     state: enabled
-- name: analog_sig_source_x_0_0
-  id: analog_sig_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: '1'
-    comment: ''
-    freq: 5e3
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: samp_rate
-    showports: 'False'
-    type: complex
-    waveform: analog.GR_SIN_WAVE
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [136, 688.0]
-    rotation: 0
-    state: disabled
-- name: iio_fmcomms2_sink_0
-  id: iio_fmcomms2_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    attenuation1: '0'
-    attenuation2: '0'
-    bandwidth: bandwidth
-    buffer_size: '32768'
-    comment: ''
-    cyclic: 'False'
-    filter: ''
-    filter_source: '''Auto'''
-    fpass: '0'
-    frequency: freq
-    fstop: '0'
-    len_tag_key: ''
-    rf_port_select: '''A'''
-    samplerate: samp_rate
-    tx1_en: 'True'
-    tx2_en: 'False'
-    type: fc32
-    uri: ip:192.168.2.1
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [480, 652.0]
-    rotation: 0
-    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -570,7 +481,6 @@ blocks:
 connections:
 - [analog_sig_source_x_0, '0', qtgui_time_sink_x_0, '0']
 - [analog_sig_source_x_0, '0', uhd_usrp_sink_0, '0']
-- [analog_sig_source_x_0_0, '0', iio_fmcomms2_sink_0, '0']
 
 metadata:
   file_format: 1

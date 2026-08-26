@@ -1,0 +1,85 @@
+id: doa_uca_pilot_calibration
+label: UCA OTA Pilot Calibration
+category: '[doa]'
+
+templates:
+  imports: from gnuradio import doa
+  make: |-
+    doa.uca_pilot_calibration(
+        num_inputs=${num_inputs},
+        norm_radius=${norm_radius},
+        pilot_angle=${pilot_angle},
+        element0_angle=${element0_angle},
+        element_angle_step=${element_angle_step},
+        skip_samples=${skip_samples},
+        calibration_samples=${calibration_samples},
+        config_filename=${config_filename})
+
+parameters:
+- id: num_inputs
+  label: Number of Elements
+  dtype: int
+  default: 4
+- id: norm_radius
+  label: Normalized Radius (r/lambda)
+  dtype: float
+  default: 0.34638
+- id: pilot_angle
+  label: Pilot Bearing (deg)
+  dtype: float
+  default: 0.0
+- id: element0_angle
+  label: Element 0 Bearing (deg)
+  dtype: float
+  default: 0.0
+- id: element_angle_step
+  label: Element Bearing Step (deg)
+  dtype: float
+  default: 90.0
+- id: skip_samples
+  label: Initial Samples to Skip
+  dtype: int
+  default: 8192
+- id: calibration_samples
+  label: Pilot Samples to Average
+  dtype: int
+  default: 32768
+- id: config_filename
+  label: Coefficient Log File (optional)
+  dtype: file_save
+  default: "''"
+
+asserts:
+- ${ num_inputs > 1 }
+- ${ norm_radius > 0.0 }
+- ${ skip_samples >= 0 }
+- ${ calibration_samples > 0 }
+
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+  multiplicity: ${ num_inputs }
+
+outputs:
+- label: corrected
+  domain: stream
+  dtype: complex
+  multiplicity: ${ num_inputs }
+
+documentation: |-
+  Same-session OTA gain and phase calibration for a uniform circular array.
+
+  Place a strong narrowband pilot at the configured known bearing before the
+  flowgraph starts. The block removes the predicted UCA steering phase from the
+  measured channel ratios, freezes one complex correction per channel, and then
+  passes corrected samples. It emits zeros during the skip/calibration interval.
+
+  Keep both IIO sources and this flowgraph running after calibration. Reopening
+  or retuning either LibreSDR can invalidate the corrections. The console prints
+  when calibration is complete and the pilot may be switched off.
+
+  A pure tone corrects fixed delay only at that tone frequency; this block is
+  intended for narrowband MUSIC and is not a wideband sample synchronizer.
+
+file_format: 1

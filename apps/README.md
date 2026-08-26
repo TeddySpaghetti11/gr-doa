@@ -1,6 +1,7 @@
 ## Folder Organization
 
 - **Narrowband-Flowgraphs/**: Main flowgraphs for narrowband DoA experiments and calibration.
+- **LibreSDR-UCA/**: Four-channel 903 MHz UCA MUSIC and same-session OTA calibration for two LibreSDRs.
 - **Narrowband-Flowgraphs/phase_offset_measurement_correction/**: Flowgraphs for phase offset measurement and correction.
 - **WiFi-Flowgraphs/**: Flowgraphs for WiFi-based DoA experiments and calibration.
 - **debugging/**: General-purpose debugging and test flowgraphs.
@@ -27,6 +28,14 @@
  - `Narrowband-Flowgraphs/calibrate_lin_array.grc`: Run this flowgraph to calibrate a uniform linear array.
  - `Narrowband-Flowgraphs/run_MUSIC_calib_lin_array.grc`: Run this flowgraph to track one target transmitter using MUSIC algorithm with a calibrated uniform linear array.
  - `Narrowband-Flowgraphs/run_RootMUSIC_calib_lin_array.grc`: Run this flowgraph to track one target transmitter using Root-MUSIC algorithm with a calibrated uniform linear array.
+
+### LibreSDR Uniform Circular Array
+
+- `LibreSDR-UCA/run_MUSIC_uca_live_cal.grc`: Receive two channels from each of
+  `192.168.4.1` and `192.168.5.1`, calibrate from the OTA B210 pilot without
+  reopening the receivers, and estimate bearing over 0–360 degrees using MUSIC.
+- `LibreSDR-UCA/README.md`: Geometry, channel order, calibration sequence, and
+  current synchronization limitations.
 
 ### Phase Offset Measurement & Correction (Narrowband-Flowgraphs/phase_offset_measurement_correction/)
 - `run_DoA_transmitter.grc`: Run this flowgraph to transmit a tone.

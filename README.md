@@ -2,6 +2,11 @@
 
 gr-doa is a demonstration on the phase synchronization capability of Ettus Research's USRP X440. We provide apps to determine the accuracy of phase synchronization achieved and to estimate DoA which fundamentally requires accurate phase synchronization across the receive streams.
 
+This fork also contains a four-channel, 903 MHz uniform-circular-array path for
+two Ethernet-connected LibreSDRs. It adds full-circle UCA MUSIC and same-session
+OTA calibration using a transmitter at a known bearing. See
+[`apps/LibreSDR-UCA/README.md`](apps/LibreSDR-UCA/README.md).
+
 ## Basic Dependencies
 
     UHD >= 4.8.0.0
@@ -22,6 +27,8 @@ gr-doa is a demonstration on the phase synchronization capability of Ettus Resea
     - Antenna element calibration for linear arrays
     - MUSIC algorithm for linear arrays
     - Root-MUSIC algorithm for linear arrays
+    - MUSIC algorithm for a uniform circular array (0-360 degrees)
+    - Same-session OTA gain/phase calibration for two LibreSDRs
 
 ## OSs Tested
 
