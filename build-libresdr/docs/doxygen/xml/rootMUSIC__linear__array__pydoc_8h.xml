@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="rootMUSIC__linear__array__pydoc_8h" kind="file" language="C++">
+    <compoundname>rootMUSIC_linear_array_pydoc.h</compoundname>
+    <includes refid="build_2python_2doa_2bindings_2pydoc__macros_8h" local="yes">pydoc_macros.h</includes>
+    <incdepgraph>
+      <node id="2">
+        <label>pydoc_macros.h</label>
+        <link refid="build_2python_2doa_2bindings_2pydoc__macros_8h"/>
+      </node>
+      <node id="1">
+        <label>rootMUSIC_linear_array_pydoc.h</label>
+        <link refid="rootMUSIC__linear__array__pydoc_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="rootMUSIC__linear__array__pydoc_8h_1a74021f021dcdfbb22891787b79c5529d" prot="public" static="no">
+        <name>D</name>
+        <param><defname>...</defname></param>
+        <initializer><ref refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kindref="member">DOC</ref>(<ref refid="namespacegr" kindref="compound">gr</ref>, doa, __VA_ARGS__)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" line="10" column="10" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="rootMUSIC__linear__array__pydoc_8h_1a12f952bc08c899a7c4629978fb8c893a" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_rootMUSIC_linear_array</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_rootMUSIC_linear_array</name>
+        <initializer>= R&quot;doc(&lt;+description of block+&gt;
+
+This block takes a correlation matrix of size (number of antenna elements x number of antenna elements) as input and generates a complex vector of size (pseudo-spectrum length x 1) whose arg-max values represent the estimated DoAs.
+
+Constructor Specific Documentation:
+
+Return a shared_ptr to a new instance of doa::rootMUSIC_linear_array.
+
+Args:
+    norm_spacing : Normalized spacing between antenna elements
+    num_targets : Known number of targets
+    num_ant_ele : Number of antenna elements)doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" line="18" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="rootMUSIC__linear__array__pydoc_8h_1a7a580e27032b161f5c1970a1ba9fec23" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_rootMUSIC_linear_array_rootMUSIC_linear_array_0</name>
+        <initializer>=
+    R&quot;doc()doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" line="32" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="rootMUSIC__linear__array__pydoc_8h_1a2f5c0629be50ccfd9228f6b3bfb4315a" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_rootMUSIC_linear_array_make</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_rootMUSIC_linear_array_make</name>
+        <initializer>= R&quot;doc(&lt;+description of block+&gt;
+
+This block takes a correlation matrix of size (number of antenna elements x number of antenna elements) as input and generates a complex vector of size (pseudo-spectrum length x 1) whose arg-max values represent the estimated DoAs.
+
+Constructor Specific Documentation:
+
+Return a shared_ptr to a new instance of doa::rootMUSIC_linear_array.
+
+Args:
+    norm_spacing : Normalized spacing between antenna elements
+    num_targets : Known number of targets
+    num_ant_ele : Number of antenna elements)doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" line="36" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h" bodystart="36" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/python/doa/bindings/rootMUSIC_linear_array_pydoc.h"/>
+  </compounddef>
+</doxygen>

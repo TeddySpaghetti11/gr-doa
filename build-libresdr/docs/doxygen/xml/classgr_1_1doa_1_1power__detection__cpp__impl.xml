@@ -1,0 +1,415 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1power__detection__cpp__impl" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::power_detection_cpp_impl</compoundname>
+    <basecompoundref refid="classgr_1_1doa_1_1power__detection__cpp" prot="public" virt="non-virtual">gr::doa::power_detection_cpp</basecompoundref>
+    <includes refid="power__detection__cpp__impl_8h" local="no">power_detection_cpp_impl.h</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1afaf89f0ad33e8f0271fc2b80da59ae09" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_num_inputs</definition>
+        <argsstring></argsstring>
+        <name>d_num_inputs</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_num_inputs</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="20" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a879232b1f3952ba0158316eadb3820c4" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double gr::doa::power_detection_cpp_impl::d_sample_rate</definition>
+        <argsstring></argsstring>
+        <name>d_sample_rate</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_sample_rate</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="21" column="12" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1ad9511144f3f93d4b9a65e2be7e714bdf" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_buffer_size</definition>
+        <argsstring></argsstring>
+        <name>d_buffer_size</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_buffer_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="22" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1aad7c7172e3c56b697b22ae99d4d0e4e5" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::vector&lt; gr_complex &gt; &gt;</type>
+        <definition>std::vector&lt;std::vector&lt;gr_complex&gt; &gt; gr::doa::power_detection_cpp_impl::d_capture_buffer</definition>
+        <argsstring></argsstring>
+        <name>d_capture_buffer</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_capture_buffer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="25" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1abf3c1672e577a9312fb0089456ae5168" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::vector&lt; gr_complex &gt; &gt;</type>
+        <definition>std::vector&lt;std::vector&lt;gr_complex&gt; &gt; gr::doa::power_detection_cpp_impl::d_playback_buffer</definition>
+        <argsstring></argsstring>
+        <name>d_playback_buffer</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_playback_buffer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="26" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a76a1785b1f09b41786fdde76e0e98830" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; float &gt;</type>
+        <definition>std::vector&lt;float&gt; gr::doa::power_detection_cpp_impl::d_power_buffer</definition>
+        <argsstring></argsstring>
+        <name>d_power_buffer</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_power_buffer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="28" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a43385f2c35604a7b7a648a4c80a97311" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_capture_index</definition>
+        <argsstring></argsstring>
+        <name>d_capture_index</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_capture_index</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="30" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1ab443154b0dc0f1ee8fa52f2e4078b3c5" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_playback_index</definition>
+        <argsstring></argsstring>
+        <name>d_playback_index</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_playback_index</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="31" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a3841a2bdf78807f5b57b356b745d3809" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_playback_size</definition>
+        <argsstring></argsstring>
+        <name>d_playback_size</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_playback_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="32" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a072b7c0fe6d96d88c2c028051a6d7e77" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_power_buffer_index</definition>
+        <argsstring></argsstring>
+        <name>d_power_buffer_index</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_power_buffer_index</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="33" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="33" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a9624f6c935ecdc8a2737d95f940f0184" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool gr::doa::power_detection_cpp_impl::d_capturing</definition>
+        <argsstring></argsstring>
+        <name>d_capturing</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_capturing</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="35" column="10" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a49d09044bafb6361168897c939523fa4" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool gr::doa::power_detection_cpp_impl::d_playback_buffer_valid</definition>
+        <argsstring></argsstring>
+        <name>d_playback_buffer_valid</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_playback_buffer_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="36" column="10" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a07193c547c64eac5bb9a5fd27e0343b6" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool gr::doa::power_detection_cpp_impl::d_buffer_fill_complete</definition>
+        <argsstring></argsstring>
+        <name>d_buffer_fill_complete</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_buffer_fill_complete</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="37" column="10" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1aab7b75efb7c60ea109ce4f497d489925" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::d_averaging_window</definition>
+        <argsstring></argsstring>
+        <name>d_averaging_window</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_averaging_window</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="39" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a37b20e589cbc2b590fc4ff5bb8f8ca19" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::power_detection_cpp_impl::d_power_sum</definition>
+        <argsstring></argsstring>
+        <name>d_power_sum</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_power_sum</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="41" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a01c3154aa1f69f614ed9adad3a2aa1de" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::power_detection_cpp_impl::d_lowest_power_sum</definition>
+        <argsstring></argsstring>
+        <name>d_lowest_power_sum</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_lowest_power_sum</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="42" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a2ed8beaa16077160b6e0dc3150b74e49" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::power_detection_cpp_impl::d_threshold</definition>
+        <argsstring></argsstring>
+        <name>d_threshold</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_threshold</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="43" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a803a40af690bf8cf1a3eff7997ad3e10" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::power_detection_cpp_impl::d_threshold_multiplier</definition>
+        <argsstring></argsstring>
+        <name>d_threshold_multiplier</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::d_threshold_multiplier</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="44" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="44" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1power__detection__cpp__impl_1af5593bbf0a665f38a1d3dccfd775c220" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gr::doa::power_detection_cpp_impl::validate_and_promote_buffer</definition>
+        <argsstring>()</argsstring>
+        <name>validate_and_promote_buffer</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::validate_and_promote_buffer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="46" column="10"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a0527925e31aa5329037b1aad29270b67" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::power_detection_cpp_impl::power_detection_cpp_impl</definition>
+        <argsstring>(int num_inputs, double sample_rate, int buffer_size, float threshold_multiplier)</argsstring>
+        <name>power_detection_cpp_impl</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::power_detection_cpp_impl</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>num_inputs</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>sample_rate</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>buffer_size</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>threshold_multiplier</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="49" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a1629126c1bb8cb21f3232a05cafcd9ec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::power_detection_cpp_impl::~power_detection_cpp_impl</definition>
+        <argsstring>()</argsstring>
+        <name>~power_detection_cpp_impl</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::~power_detection_cpp_impl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="50" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1power__detection__cpp__impl_1a5dbde3e3b2404185ab1fd4f8d23f4369" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gr::doa::power_detection_cpp_impl::work</definition>
+        <argsstring>(int noutput_items, gr_vector_const_void_star &amp;input_items, gr_vector_void_star &amp;output_items)</argsstring>
+        <name>work</name>
+        <qualifiedname>gr::doa::power_detection_cpp_impl::work</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_const_void_star &amp;</type>
+          <declname>input_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_void_star &amp;</type>
+          <declname>output_items</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="52" column="9"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>gr::doa::power_detection_cpp</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::power_detection_cpp_impl</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>gr::doa::power_detection_cpp</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::power_detection_cpp_impl</label>
+        <link refid="classgr_1_1doa_1_1power__detection__cpp__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" line="17" column="1" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/power_detection_cpp_impl.h" bodystart="18" bodyend="55"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1aab7b75efb7c60ea109ce4f497d489925" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_averaging_window</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a07193c547c64eac5bb9a5fd27e0343b6" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_buffer_fill_complete</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1ad9511144f3f93d4b9a65e2be7e714bdf" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_buffer_size</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1aad7c7172e3c56b697b22ae99d4d0e4e5" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_capture_buffer</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a43385f2c35604a7b7a648a4c80a97311" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_capture_index</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a9624f6c935ecdc8a2737d95f940f0184" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_capturing</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a01c3154aa1f69f614ed9adad3a2aa1de" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_lowest_power_sum</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1afaf89f0ad33e8f0271fc2b80da59ae09" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_num_inputs</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1abf3c1672e577a9312fb0089456ae5168" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_playback_buffer</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a49d09044bafb6361168897c939523fa4" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_playback_buffer_valid</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1ab443154b0dc0f1ee8fa52f2e4078b3c5" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_playback_index</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a3841a2bdf78807f5b57b356b745d3809" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_playback_size</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a76a1785b1f09b41786fdde76e0e98830" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_power_buffer</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a072b7c0fe6d96d88c2c028051a6d7e77" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_power_buffer_index</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a37b20e589cbc2b590fc4ff5bb8f8ca19" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_power_sum</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a879232b1f3952ba0158316eadb3820c4" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_sample_rate</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a2ed8beaa16077160b6e0dc3150b74e49" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_threshold</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a803a40af690bf8cf1a3eff7997ad3e10" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>d_threshold_multiplier</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9c2d33cecc937e528184fd5fdc0b0a38" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a0527925e31aa5329037b1aad29270b67" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>power_detection_cpp_impl</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp_1a9bbb996910dde1a041183236e7301986" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>sptr</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1af5593bbf0a665f38a1d3dccfd775c220" prot="private" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>validate_and_promote_buffer</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a5dbde3e3b2404185ab1fd4f8d23f4369" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>work</name></member>
+      <member refid="classgr_1_1doa_1_1power__detection__cpp__impl_1a1629126c1bb8cb21f3232a05cafcd9ec" prot="public" virt="non-virtual"><scope>gr::doa::power_detection_cpp_impl</scope><name>~power_detection_cpp_impl</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

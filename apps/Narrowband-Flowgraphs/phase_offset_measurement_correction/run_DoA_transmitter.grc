@@ -3,7 +3,7 @@ options:
     alias: ''
     author: Ettus Research; LibreSDR UCA configuration
     catch_exceptions: 'True'
-    comment: 'B210 OTA calibration pilot for the 903 MHz LibreSDR UCA.'
+    comment: B210 OTA calibration pilot for the 903 MHz LibreSDR UCA.
     copyright: ''
     description: ''
     gen_linking: dynamic
@@ -67,7 +67,7 @@ blocks:
     value19: '0'
     value2: 903e6
     value3: '"serial=310C4AE"'
-    value4: '40'
+    value4: '89'
     value5: '0'
     value6: '0'
     value7: '0'
@@ -100,7 +100,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 116.0]
+    coordinate: [328, 120.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -197,7 +197,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 296.0]
+    coordinate: [616, 296.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_sink_0
@@ -474,7 +474,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 92.0]
+    coordinate: [616, 92.0]
     rotation: 0
     state: enabled
 

@@ -1,0 +1,149 @@
+Start testing: Aug 26 15:56 AEST
+----------------------------------------------------------
+1/7 Testing: qa_calibrate_lin_array
+1/7 Test: qa_calibrate_lin_array
+Command: "/usr/bin/sh" "qa_calibrate_lin_array_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_calibrate_lin_array" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/python/doa/qa_calibrate_lin_array.py", line 12, in <module>
+    import oct2py
+ModuleNotFoundError: No module named 'oct2py'
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Failed.
+"qa_calibrate_lin_array" end time: Aug 26 15:56 AEST
+"qa_calibrate_lin_array" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/7 Testing: qa_autocorrelate
+2/7 Test: qa_autocorrelate
+Command: "/usr/bin/sh" "qa_autocorrelate_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_autocorrelate" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/python/doa/qa_autocorrelate.py", line 12, in <module>
+    import oct2py
+ModuleNotFoundError: No module named 'oct2py'
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Failed.
+"qa_autocorrelate" end time: Aug 26 15:56 AEST
+"qa_autocorrelate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/7 Testing: qa_MUSIC_lin_array
+3/7 Test: qa_MUSIC_lin_array
+Command: "/usr/bin/sh" "qa_MUSIC_lin_array_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_MUSIC_lin_array" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/python/doa/qa_MUSIC_lin_array.py", line 12, in <module>
+    import oct2py
+ModuleNotFoundError: No module named 'oct2py'
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Failed.
+"qa_MUSIC_lin_array" end time: Aug 26 15:56 AEST
+"qa_MUSIC_lin_array" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/7 Testing: qa_MUSIC_uca
+4/7 Test: qa_MUSIC_uca
+Command: "/usr/bin/sh" "qa_MUSIC_uca_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_MUSIC_uca" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+buffer_double_mapped :warning: allocate_buffer: tried to allocate   22 items of size 2880. Due to alignment requirements   64 were allocated.  If this isn't OK, consider padding   your structure to a power-of-two bytes.   On this platform, our allocation granularity is 4096 bytes.
+.buffer_double_mapped :warning: allocate_buffer: tried to allocate   22 items of size 2880. Due to alignment requirements   64 were allocated.  If this isn't OK, consider padding   your structure to a power-of-two bytes.   On this platform, our allocation granularity is 4096 bytes.
+.
+----------------------------------------------------------------------
+Ran 2 tests in 0.018s
+
+OK
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"qa_MUSIC_uca" end time: Aug 26 15:56 AEST
+"qa_MUSIC_uca" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/7 Testing: qa_uca_pilot_calibration
+5/7 Test: qa_uca_pilot_calibration
+Command: "/usr/bin/sh" "qa_uca_pilot_calibration_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_uca_pilot_calibration" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.008s
+
+OK
+UCA calibration: waiting for 4096 pilot samples after skipping 0 samples
+UCA calibration ch1/ch0: measured=-59.493 deg, geometry=-24.543 deg, hardware correction=-34.950 deg
+UCA calibration ch2/ch0: measured=-137.295 deg, geometry=160.825 deg, hardware correction=61.879 deg
+UCA calibration ch3/ch0: measured=62.755 deg, geometry=-174.632 deg, hardware correction=-122.613 deg
+UCA calibration ch0: magnitude=1.000000, phase=0.000 deg
+UCA calibration ch1: magnitude=1.000000, phase=-34.950 deg
+UCA calibration ch2: magnitude=1.000000, phase=61.879 deg
+UCA calibration ch3: magnitude=1.000000, phase=-122.613 deg
+UCA calibration complete. Coefficients are frozen; the pilot may now be switched off without stopping this flowgraph.
+<end of output>
+Test time =   0.13 sec
+----------------------------------------------------------
+Test Passed.
+"qa_uca_pilot_calibration" end time: Aug 26 15:56 AEST
+"qa_uca_pilot_calibration" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/7 Testing: qa_find_local_max
+6/7 Test: qa_find_local_max
+Command: "/usr/bin/sh" "qa_find_local_max_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_find_local_max" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/python/doa/qa_find_local_max.py", line 11, in <module>
+    import oct2py
+ModuleNotFoundError: No module named 'oct2py'
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Failed.
+"qa_find_local_max" end time: Aug 26 15:56 AEST
+"qa_find_local_max" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/7 Testing: qa_rootMUSIC_linear_array
+7/7 Test: qa_rootMUSIC_linear_array
+Command: "/usr/bin/sh" "qa_rootMUSIC_linear_array_test.sh"
+Directory: /home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa
+"qa_rootMUSIC_linear_array" start time: Aug 26 15:56 AEST
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/python/doa/qa_rootMUSIC_linear_array.py", line 11, in <module>
+    import oct2py
+ModuleNotFoundError: No module named 'oct2py'
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Failed.
+"qa_rootMUSIC_linear_array" end time: Aug 26 15:56 AEST
+"qa_rootMUSIC_linear_array" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 26 15:56 AEST

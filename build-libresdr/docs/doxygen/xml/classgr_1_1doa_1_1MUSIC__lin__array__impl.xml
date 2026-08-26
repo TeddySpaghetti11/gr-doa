@@ -1,0 +1,275 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1MUSIC__lin__array__impl" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::MUSIC_lin_array_impl</compoundname>
+    <basecompoundref refid="classgr_1_1doa_1_1MUSIC__lin__array" prot="public" virt="non-virtual">gr::doa::MUSIC_lin_array</basecompoundref>
+    <includes refid="MUSIC__lin__array__impl_8h" local="no">MUSIC_lin_array_impl.h</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6e2f298389799aaef1138dd99a75b149" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::MUSIC_lin_array_impl::d_norm_spacing</definition>
+        <argsstring></argsstring>
+        <name>d_norm_spacing</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_norm_spacing</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="21" column="15" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a78526a910edd021515a2df834d30a1d5" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_lin_array_impl::d_num_targets</definition>
+        <argsstring></argsstring>
+        <name>d_num_targets</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_num_targets</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="22" column="13" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2512e58473762a7af7c896617a1a6836" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_lin_array_impl::d_num_ant_ele</definition>
+        <argsstring></argsstring>
+        <name>d_num_ant_ele</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_num_ant_ele</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="23" column="13" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a21589f5e5a2e07282a48f1bee3cdac86" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_lin_array_impl::d_pspectrum_len</definition>
+        <argsstring></argsstring>
+        <name>d_pspectrum_len</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_pspectrum_len</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="24" column="13" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1ab6198a23949ec7b34b1bc12a464cb6f7" prot="private" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float* gr::doa::MUSIC_lin_array_impl::d_theta</definition>
+        <argsstring></argsstring>
+        <name>d_theta</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_theta</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="25" column="15" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a93149124d27128fb87b541227ad55304" prot="private" static="no" mutable="no">
+        <type>fcolvec</type>
+        <definition>fcolvec gr::doa::MUSIC_lin_array_impl::d_array_loc</definition>
+        <argsstring></argsstring>
+        <name>d_array_loc</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_array_loc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="26" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a685a1718356bf9b88be3722e64740225" prot="private" static="no" mutable="no">
+        <type>cx_fmat</type>
+        <definition>cx_fmat gr::doa::MUSIC_lin_array_impl::d_vii_matrix</definition>
+        <argsstring></argsstring>
+        <name>d_vii_matrix</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_vii_matrix</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="27" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a0bdc32286c376cb603fcd5063340e9e1" prot="private" static="no" mutable="no">
+        <type>cx_fmat</type>
+        <definition>cx_fmat gr::doa::MUSIC_lin_array_impl::d_vii_matrix_trans</definition>
+        <argsstring></argsstring>
+        <name>d_vii_matrix_trans</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::d_vii_matrix_trans</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="28" column="17" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2320a040619567413654a52641dad72e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::MUSIC_lin_array_impl::MUSIC_lin_array_impl</definition>
+        <argsstring>(float norm_spacing, int num_targets, int inputs, int pspectrum_len)</argsstring>
+        <name>MUSIC_lin_array_impl</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::MUSIC_lin_array_impl</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>norm_spacing</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_targets</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>pspectrum_len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="32" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6a42baec5940ae9578856eebb43f1004" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::MUSIC_lin_array_impl::~MUSIC_lin_array_impl</definition>
+        <argsstring>()</argsstring>
+        <name>~MUSIC_lin_array_impl</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::~MUSIC_lin_array_impl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="33" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a16a2b658601c72620a11cceae129b203" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gr::doa::MUSIC_lin_array_impl::amv</definition>
+        <argsstring>(cx_fcolvec &amp;v_ii, fcolvec &amp;array_loc, float theta)</argsstring>
+        <name>amv</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::amv</qualifiedname>
+        <param>
+          <type>cx_fcolvec &amp;</type>
+          <declname>v_ii</declname>
+        </param>
+        <param>
+          <type>fcolvec &amp;</type>
+          <declname>array_loc</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>theta</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="36" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__lin__array__impl_1af4f4f356f5767138a8b6389d58c1fbb8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_lin_array_impl::work</definition>
+        <argsstring>(int noutput_items, gr_vector_const_void_star &amp;input_items, gr_vector_void_star &amp;output_items)</argsstring>
+        <name>work</name>
+        <qualifiedname>gr::doa::MUSIC_lin_array_impl::work</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_const_void_star &amp;</type>
+          <declname>input_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_void_star &amp;</type>
+          <declname>output_items</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="38" column="13"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>gr::doa::MUSIC_lin_array</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::MUSIC_lin_array_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>gr::doa::MUSIC_lin_array</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::MUSIC_lin_array_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__lin__array__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" line="18" column="1" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_lin_array_impl.h" bodystart="19" bodyend="41"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a16a2b658601c72620a11cceae129b203" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>amv</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a93149124d27128fb87b541227ad55304" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_array_loc</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6e2f298389799aaef1138dd99a75b149" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_norm_spacing</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2512e58473762a7af7c896617a1a6836" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_num_ant_ele</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a78526a910edd021515a2df834d30a1d5" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_num_targets</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a21589f5e5a2e07282a48f1bee3cdac86" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_pspectrum_len</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1ab6198a23949ec7b34b1bc12a464cb6f7" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_theta</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a685a1718356bf9b88be3722e64740225" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_vii_matrix</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a0bdc32286c376cb603fcd5063340e9e1" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>d_vii_matrix_trans</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1af7d18cf4976d11aa35998f4e815d56dd" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a2320a040619567413654a52641dad72e" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>MUSIC_lin_array_impl</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array_1ae3c687f9310f65c756bf175ca29149ef" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>sptr</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1af4f4f356f5767138a8b6389d58c1fbb8" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>work</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__lin__array__impl_1a6a42baec5940ae9578856eebb43f1004" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_lin_array_impl</scope><name>~MUSIC_lin_array_impl</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

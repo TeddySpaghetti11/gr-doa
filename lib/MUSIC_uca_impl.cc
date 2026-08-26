@@ -7,10 +7,10 @@
 
 #include "MUSIC_uca_impl.h"
 #include <gnuradio/io_signature.h>
-#include <algorithm>
 #include <cmath>
-#include <limits>
-#include <stdexcept>
+
+#define COPY_MEM false // Do not copy matrices into separate memory
+#define FIX_SIZE true  // Keep dimensions of matrices constant
 
 namespace gr {
 namespace doa {
@@ -51,17 +51,9 @@ MUSIC_uca_impl::MUSIC_uca_impl(float norm_radius,
       d_element0_angle_deg(element0_angle_deg),
       d_element_angle_step_deg(element_angle_step_deg)
 {
-    if (d_norm_radius <= 0.0F) {
-        throw std::invalid_argument("UCA normalized radius must be positive");
-    }
-    if (d_num_ant_ele < 2 || d_num_targets < 1 || d_num_targets >= d_num_ant_ele) {
-        throw std::invalid_argument(
-            "MUSIC requires 1 <= number of targets < number of elements");
-    }
-    if (d_pspectrum_len < 4) {
-        throw std::invalid_argument("MUSIC pseudo-spectrum length must be at least 4");
-    }
-
+    // UCA geometry is the only intentional algorithmic difference from the
+    // Ettus MUSIC_lin_array constructor.  Positions are expressed in
+    // wavelengths and projected onto each candidate bearing.
     const float pi = static_cast<float>(arma::datum::pi);
     const float degrees_to_radians = pi / 180.0F;
     const gr_complex j(0.0F, 1.0F);
@@ -88,44 +80,38 @@ int MUSIC_uca_impl::work(int noutput_items,
 {
     const auto* in = static_cast<const input_type*>(input_items[0]);
     auto* out = static_cast<output_type*>(output_items[0]);
-    const float denominator_floor = 64.0F * std::numeric_limits<float>::epsilon();
 
     arma::fvec eigenvalues;
     arma::cx_fmat eigenvectors;
+    arma::cx_fmat noise_subspace;
+    arma::cx_fmat noise_projector;
 
     for (int item = 0; item < noutput_items; ++item) {
         arma::cx_fmat covariance(
             const_cast<input_type*>(in + item * d_num_ant_ele * d_num_ant_ele),
             d_num_ant_ele,
-            d_num_ant_ele,
-            false,
-            true);
+            d_num_ant_ele);
         arma::fvec spectrum(out + item * d_pspectrum_len,
                             d_pspectrum_len,
-                            false,
-                            true);
+                            COPY_MEM,
+                            FIX_SIZE);
 
-        if (!arma::eig_sym(eigenvalues, eigenvectors, covariance)) {
-            spectrum.fill(-120.0F);
-            continue;
-        }
+        // Preserve Ettus eigendecomposition and ascending eigenvector order.
+        arma::eig_sym(eigenvalues, eigenvectors, covariance);
 
-        const arma::cx_fmat noise_subspace =
-            eigenvectors.cols(0, d_num_ant_ele - d_num_targets - 1);
-        const arma::cx_fmat noise_projector =
-            noise_subspace * arma::trans(noise_subspace);
+        noise_subspace = eigenvectors.cols(0, d_num_ant_ele - d_num_targets - 1);
+        noise_projector = noise_subspace * arma::trans(noise_subspace);
 
-        float maximum = denominator_floor;
+        gr_complex denominator;
         for (int angle_index = 0; angle_index < d_pspectrum_len; ++angle_index) {
-            const gr_complex denominator = arma::as_scalar(
+            denominator = arma::as_scalar(
                 d_manifold_h.row(angle_index) * noise_projector *
                 d_manifold.col(angle_index));
-            spectrum(angle_index) =
-                1.0F / std::max(denominator.real(), denominator_floor);
-            maximum = std::max(maximum, spectrum(angle_index));
+            spectrum(angle_index) = 1.0F / denominator.real();
         }
 
-        spectrum = 10.0F * arma::log10(spectrum / maximum);
+        // Preserve Ettus pseudo-spectrum normalization.
+        spectrum = 10.0F * arma::log10(spectrum / spectrum.max());
     }
 
     return noutput_items;

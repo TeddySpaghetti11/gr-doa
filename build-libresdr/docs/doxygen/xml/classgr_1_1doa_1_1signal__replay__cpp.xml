@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1signal__replay__cpp" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::signal_replay_cpp</compoundname>
+    <basecompoundref prot="public" virt="virtual">gr::sync_block</basecompoundref>
+    <derivedcompoundref refid="classgr_1_1doa_1_1signal__replay__cpp__impl" prot="public" virt="non-virtual">gr::doa::signal_replay_cpp_impl</derivedcompoundref>
+    <includes refid="signal__replay__cpp_8h" local="no">signal_replay_cpp.h</includes>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classgr_1_1doa_1_1signal__replay__cpp_1ab7bf1a0edffe50d7e4c6842064a1f5f5" prot="public" static="no">
+        <type>std::shared_ptr&lt; <ref refid="classgr_1_1doa_1_1signal__replay__cpp" kindref="compound">signal_replay_cpp</ref> &gt;</type>
+        <definition>typedef std::shared_ptr&lt;signal_replay_cpp&gt; gr::doa::signal_replay_cpp::sptr</definition>
+        <argsstring></argsstring>
+        <name>sptr</name>
+        <qualifiedname>gr::doa::signal_replay_cpp::sptr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/signal_replay_cpp.h" line="21" column="29" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/signal_replay_cpp.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1signal__replay__cpp_1a417ec02fda2b5d15da082735eb774a10" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classgr_1_1doa_1_1signal__replay__cpp_1ab7bf1a0edffe50d7e4c6842064a1f5f5" kindref="member">sptr</ref></type>
+        <definition>static sptr gr::doa::signal_replay_cpp::make</definition>
+        <argsstring>(const std::string &amp;filename, bool repeat=true, int interpolation=1)</argsstring>
+        <name>make</name>
+        <qualifiedname>gr::doa::signal_replay_cpp::make</qualifiedname>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filename</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>repeat</declname>
+          <defval>true</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>interpolation</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/signal_replay_cpp.h" line="23" column="17"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>gr::doa::signal_replay_cpp</label>
+        <link refid="classgr_1_1doa_1_1signal__replay__cpp"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::doa::signal_replay_cpp_impl</label>
+        <link refid="classgr_1_1doa_1_1signal__replay__cpp__impl"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>gr::doa::signal_replay_cpp</label>
+        <link refid="classgr_1_1doa_1_1signal__replay__cpp"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/signal_replay_cpp.h" line="18" column="1" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/signal_replay_cpp.h" bodystart="19" bodyend="24"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1signal__replay__cpp_1a417ec02fda2b5d15da082735eb774a10" prot="public" virt="non-virtual"><scope>gr::doa::signal_replay_cpp</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1signal__replay__cpp_1ab7bf1a0edffe50d7e4c6842064a1f5f5" prot="public" virt="non-virtual"><scope>gr::doa::signal_replay_cpp</scope><name>sptr</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

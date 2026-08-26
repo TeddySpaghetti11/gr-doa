@@ -56,8 +56,9 @@ analogue bandwidth is important to a measurement.
    confirm that `TxAddr` contains your B210's serial number.
 4. Start `run_MUSIC_uca_live_cal.grc` and watch its console. The output remains
    zero while the two sources settle and pilot samples are accumulated.
-5. Wait for `UCA calibration complete`. The block prints and logs the frozen
-   correction coefficient for every channel.
+5. Wait for `UCA calibration complete`. The block prints the measured pairwise
+   phase, predicted geometric phase, and frozen hardware-phase correction for
+   every channel relative to channel 0.
 6. Switch off the B210 transmitter without stopping the receiver flowgraph.
 7. Activate the target transmitter. The GUI shows the calibrated channel traces,
    full 0–360 degree MUSIC spectrum, and estimated bearing.
@@ -68,9 +69,11 @@ therefore requires a new OTA calibration.
 
 ## Limitations
 
-The pilot block performs a complex gain/phase correction at the pilot frequency.
-This is appropriate for narrowband MUSIC near that frequency, but it is not a
-wideband sample synchronizer. A wideband or frequency-separated target requires
+The pilot block performs a unit-magnitude phase correction at the pilot
+frequency, matching Ettus's relative phase-correction stage; it deliberately
+does not equalize channel amplitudes. This is appropriate for narrowband MUSIC
+near that frequency, but it is not a wideband sample synchronizer. A wideband or
+frequency-separated target requires
 coarse/fractional delay estimation using a known broadband calibration waveform.
 For the first validation runs, place the target signal at the same RF/baseband
 frequency as the calibration pilot.
@@ -82,3 +85,23 @@ repair a sample discontinuity or relative drift that occurs after calibration.
 Indoor multipath also affects OTA calibration. Keep the B210 in the far field
 with a clear line of sight where practical, and repeat measurements at several
 known bearings to validate the assumed UCA manifold and bearing convention.
+
+## Equations
+
+For element position angle `beta_m`, normalized radius `rho = r/lambda`, and
+bearing `theta`, calibration and MUSIC both use
+
+```text
+a_m(theta) = exp(-j 2 pi rho cos(theta - beta_m)).
+```
+
+For channel `i` relative to channel 0, the calibration block forms the circular
+mean phase ratio `q_i = unit(sum(x_0 conj(x_i)))`. Its predicted geometric ratio
+is `g_i = a_0(theta_cal) conj(a_i(theta_cal))`. The unit-magnitude correction is
+
+```text
+c_i = unit(q_i / g_i) = exp(j (phi_hardware,0 - phi_hardware,i)).
+```
+
+Applying `c_i x_i` removes only the relative hardware/channel phase. The UCA
+manifold phase `a_i(theta_cal)` remains in the corrected signal.

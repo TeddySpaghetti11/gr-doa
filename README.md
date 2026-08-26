@@ -28,7 +28,7 @@ OTA calibration using a transmitter at a known bearing. See
     - MUSIC algorithm for linear arrays
     - Root-MUSIC algorithm for linear arrays
     - MUSIC algorithm for a uniform circular array (0-360 degrees)
-    - Same-session OTA gain/phase calibration for two LibreSDRs
+    - Same-session, known-bearing OTA phase calibration for two LibreSDRs
 
 ## OSs Tested
 

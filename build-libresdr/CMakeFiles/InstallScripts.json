@@ -1,0 +1,16 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/include/gnuradio/doa/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/lib/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/apps/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/examples/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/docs/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/docs/doxygen/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/python/doa/bindings/cmake_install.cmake",
+		"/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/grc/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

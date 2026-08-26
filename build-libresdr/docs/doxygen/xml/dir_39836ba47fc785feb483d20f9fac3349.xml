@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="dir_39836ba47fc785feb483d20f9fac3349" kind="dir">
+    <compoundname>bindings</compoundname>
+    <innerdir refid="dir_bcd737013a5c5f6bdf4d71e75106f371">docstrings</innerdir>
+    <innerfile refid="build_2test__modules_2gnuradio_2doa_2bindings_2antenna__correction__pydoc_8h">build/test_modules/gnuradio/doa/bindings/antenna_correction_pydoc.h</innerfile>
+    <innerfile refid="build_2test__modules_2gnuradio_2doa_2bindings_2MUSIC__lin__array__pydoc_8h">build/test_modules/gnuradio/doa/bindings/MUSIC_lin_array_pydoc.h</innerfile>
+    <innerfile refid="build_2test__modules_2gnuradio_2doa_2bindings_2signal__replay__cpp__pydoc_8h">build/test_modules/gnuradio/doa/bindings/signal_replay_cpp_pydoc.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build/test_modules/gnuradio/doa/bindings/"/>
+  </compounddef>
+</doxygen>

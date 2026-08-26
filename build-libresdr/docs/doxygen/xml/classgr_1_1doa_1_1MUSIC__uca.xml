@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1MUSIC__uca" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::MUSIC_uca</compoundname>
+    <basecompoundref prot="public" virt="virtual">gr::sync_block</basecompoundref>
+    <derivedcompoundref refid="classgr_1_1doa_1_1MUSIC__uca__impl" prot="public" virt="non-virtual">gr::doa::MUSIC_uca_impl</derivedcompoundref>
+    <includes refid="MUSIC__uca_8h" local="no">MUSIC_uca.h</includes>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classgr_1_1doa_1_1MUSIC__uca_1afe06938a4a4ce16b8b12f555a46827c7" prot="public" static="no">
+        <type>std::shared_ptr&lt; <ref refid="classgr_1_1doa_1_1MUSIC__uca" kindref="compound">MUSIC_uca</ref> &gt;</type>
+        <definition>typedef std::shared_ptr&lt;MUSIC_uca&gt; gr::doa::MUSIC_uca::sptr</definition>
+        <argsstring></argsstring>
+        <name>sptr</name>
+        <qualifiedname>gr::doa::MUSIC_uca::sptr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/MUSIC_uca.h" line="29" column="29" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/MUSIC_uca.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__uca_1a95dc533baa200a8ca0be46c3fc4ef391" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classgr_1_1doa_1_1MUSIC__uca_1afe06938a4a4ce16b8b12f555a46827c7" kindref="member">sptr</ref></type>
+        <definition>static sptr gr::doa::MUSIC_uca::make</definition>
+        <argsstring>(float norm_radius, int num_targets, int inputs, int pspectrum_len, float element0_angle_deg, float element_angle_step_deg)</argsstring>
+        <name>make</name>
+        <qualifiedname>gr::doa::MUSIC_uca::make</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>norm_radius</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_targets</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>pspectrum_len</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>element0_angle_deg</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>element_angle_step_deg</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/MUSIC_uca.h" line="31" column="17"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>MUSIC pseudo-spectrum estimator for a uniform circular array. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Angles are scanned over [0, 360) degrees. Element zero is placed at element0_angle_deg and subsequent element bearings are separated by element_angle_step_deg. Use a negative step when the channel order runs in the opposite direction to the chosen bearing convention. </para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>gr::doa::MUSIC_uca</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::doa::MUSIC_uca_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca__impl"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>gr::doa::MUSIC_uca</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/MUSIC_uca.h" line="26" column="1" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/MUSIC_uca.h" bodystart="27" bodyend="37"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca_1a95dc533baa200a8ca0be46c3fc4ef391" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca_1afe06938a4a4ce16b8b12f555a46827c7" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca</scope><name>sptr</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

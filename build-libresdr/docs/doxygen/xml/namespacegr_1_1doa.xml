@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="namespacegr_1_1doa" kind="namespace" language="C++">
+    <compoundname>gr::doa</compoundname>
+    <innerclass refid="classgr_1_1doa_1_1antenna__correction" prot="public">gr::doa::antenna_correction</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1autocorrelate" prot="public">gr::doa::autocorrelate</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1calibrate__lin__array" prot="public">gr::doa::calibrate_lin_array</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1find__local__max" prot="public">gr::doa::find_local_max</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1MUSIC__lin__array" prot="public">gr::doa::MUSIC_lin_array</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1MUSIC__uca" prot="public">gr::doa::MUSIC_uca</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1power__detection__cpp" prot="public">gr::doa::power_detection_cpp</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1rootMUSIC__linear__array" prot="public">gr::doa::rootMUSIC_linear_array</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1signal__replay__cpp" prot="public">gr::doa::signal_replay_cpp</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1antenna__correction__impl" prot="public">gr::doa::antenna_correction_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1autocorrelate__impl" prot="public">gr::doa::autocorrelate_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1calibrate__lin__array__impl" prot="public">gr::doa::calibrate_lin_array_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1find__local__max__impl" prot="public">gr::doa::find_local_max_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1MUSIC__lin__array__impl" prot="public">gr::doa::MUSIC_lin_array_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1MUSIC__uca__impl" prot="public">gr::doa::MUSIC_uca_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1power__detection__cpp__impl" prot="public">gr::doa::power_detection_cpp_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1rootMUSIC__linear__array__impl" prot="public">gr::doa::rootMUSIC_linear_array_impl</innerclass>
+    <innerclass refid="classgr_1_1doa_1_1signal__replay__cpp__impl" prot="public">gr::doa::signal_replay_cpp_impl</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/include/gnuradio/doa/antenna_correction.h" line="15" column="5"/>
+  </compounddef>
+</doxygen>

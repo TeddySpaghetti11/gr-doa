@@ -29,30 +29,6 @@ options:
     state: enabled
 
 blocks:
-- name: bandwidth
-  id: variable
-  parameters:
-    comment: ''
-    value: '2800000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1424, 48.0]
-    rotation: 0
-    state: enabled
-- name: freq
-  id: variable
-  parameters:
-    comment: ''
-    value: int(903e6)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1320, 48.0]
-    rotation: 0
-    state: enabled
 - name: input_variables
   id: variable_struct
   parameters:
@@ -116,18 +92,6 @@ blocks:
     coordinate: [384, 24.0]
     rotation: 0
     state: enabled
-- name: samp_rate
-  id: variable
-  parameters:
-    comment: ''
-    value: int(2.8e6)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1232, 48.0]
-    rotation: 0
-    state: enabled
 - name: doa_findmax_and_save_0
   id: doa_findmax_and_save
   parameters:
@@ -142,22 +106,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [904, 128.0]
-    rotation: 0
-    state: disabled
-- name: doa_findmax_and_save_0_0_0
-  id: doa_findmax_and_save
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    config_filename: rel_phase_offsets_file_name
-    num_inputs: '3'
-    samples_to_findmax: input_variables.Samples2FindMax
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1736, 256.0]
     rotation: 0
     state: enabled
 - name: doa_phase_offset_est_0
@@ -175,23 +123,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [656, 112.0]
-    rotation: 0
-    state: disabled
-- name: doa_phase_offset_est_0_0_0
-  id: doa_phase_offset_est
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n_skip_ahead: input_variables.SkipAhead
-    num_inputs: '4'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1512, 240.0]
     rotation: 0
     state: enabled
 - name: doa_x440_usrp_source_0
@@ -212,78 +143,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [288, 200.0]
-    rotation: 0
-    state: disabled
-- name: iio_fmcomms2_source_0
-  id: iio_fmcomms2_source
-  parameters:
-    affinity: ''
-    alias: ''
-    bandwidth: bandwidth
-    bbdc: 'True'
-    buffer_size: '32768'
-    comment: ''
-    filter: ''
-    filter_source: '''Auto'''
-    fpass: '0'
-    frequency: freq
-    fstop: '0'
-    gain1: '''manual'''
-    gain2: '''manual'''
-    len_tag_key: packet_len
-    manual_gain1: '64'
-    manual_gain2: '64'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    quadrature: 'True'
-    rf_port_select: '''A_BALANCED'''
-    rfdc: 'True'
-    rx1_en: 'True'
-    rx2_en: 'True'
-    samplerate: samp_rate
-    type: fc32
-    uri: ip:192.168.5.1
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1232, 432.0]
-    rotation: 0
-    state: enabled
-- name: iio_fmcomms2_source_0_0
-  id: iio_fmcomms2_source
-  parameters:
-    affinity: ''
-    alias: ''
-    bandwidth: bandwidth
-    bbdc: 'True'
-    buffer_size: '32768'
-    comment: ''
-    filter: ''
-    filter_source: '''Auto'''
-    fpass: '0'
-    frequency: freq
-    fstop: '0'
-    gain1: '''manual'''
-    gain2: '''manual'''
-    len_tag_key: packet_len
-    manual_gain1: '64'
-    manual_gain2: '64'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    quadrature: 'True'
-    rf_port_select: '''A_BALANCED'''
-    rfdc: 'True'
-    rx1_en: 'True'
-    rx2_en: 'True'
-    samplerate: samp_rate
-    type: fc32
-    uri: ip:192.168.4.1
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1232, 120.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -395,7 +254,7 @@ blocks:
     bus_structure: null
     coordinate: [656, 408.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -492,103 +351,6 @@ blocks:
     bus_structure: null
     coordinate: [656, 544.0]
     rotation: 0
-    state: disabled
-- name: qtgui_time_sink_x_0_1_0
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'True'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: cyan
-    color5: black
-    color6: magenta
-    color7: black
-    color8: dark red
-    color9: dark green
-    comment: ''
-    ctrlpanel: 'False'
-    entags: 'True'
-    grid: 'False'
-    gui_hint: ''
-    label1: Signal 1 - Real
-    label10: Signal 10
-    label2: Signal 2
-    label3: Signal 3 - Real
-    label4: Signal 4
-    label5: Signal 5 - Real
-    label6: Signal 6
-    label7: Signal 7 - Real
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '-1'
-    marker10: '-1'
-    marker2: '1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '"USRP time sink"'
-    nconnections: '2'
-    size: '1024 '
-    srate: samp_rate
-    stemplot: 'False'
-    style1: '1'
-    style10: '1'
-    style2: '0'
-    style3: '1'
-    style4: '0'
-    style5: '1'
-    style6: '0'
-    style7: '1'
-    style8: '0'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: complex
-    update_time: '0.10'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Amplitude
-    ymax: '1'
-    ymin: '-1'
-    yunit: '""'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1512, 376.0]
-    rotation: 0
     state: enabled
 
 connections:
@@ -599,9 +361,6 @@ connections:
 - [doa_phase_offset_est_0, '4', doa_findmax_and_save_0, '4']
 - [doa_phase_offset_est_0, '5', doa_findmax_and_save_0, '5']
 - [doa_phase_offset_est_0, '6', doa_findmax_and_save_0, '6']
-- [doa_phase_offset_est_0_0_0, '0', doa_findmax_and_save_0_0_0, '0']
-- [doa_phase_offset_est_0_0_0, '1', doa_findmax_and_save_0_0_0, '1']
-- [doa_phase_offset_est_0_0_0, '2', doa_findmax_and_save_0_0_0, '2']
 - [doa_x440_usrp_source_0, '0', doa_phase_offset_est_0, '0']
 - [doa_x440_usrp_source_0, '0', qtgui_time_sink_x_0, '0']
 - [doa_x440_usrp_source_0, '1', doa_phase_offset_est_0, '1']
@@ -618,13 +377,7 @@ connections:
 - [doa_x440_usrp_source_0, '6', qtgui_time_sink_x_0_0, '2']
 - [doa_x440_usrp_source_0, '7', doa_phase_offset_est_0, '7']
 - [doa_x440_usrp_source_0, '7', qtgui_time_sink_x_0_0, '3']
-- [iio_fmcomms2_source_0, '0', doa_phase_offset_est_0_0_0, '2']
-- [iio_fmcomms2_source_0, '1', doa_phase_offset_est_0_0_0, '3']
-- [iio_fmcomms2_source_0_0, '0', doa_phase_offset_est_0_0_0, '0']
-- [iio_fmcomms2_source_0_0, '0', qtgui_time_sink_x_0_1_0, '0']
-- [iio_fmcomms2_source_0_0, '1', doa_phase_offset_est_0_0_0, '1']
-- [iio_fmcomms2_source_0_0, '1', qtgui_time_sink_x_0_1_0, '1']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.12.0
+  grc_version: v3.11.0.0git-992-ga7b5ef78

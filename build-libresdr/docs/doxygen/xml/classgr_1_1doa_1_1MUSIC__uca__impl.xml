@@ -1,0 +1,256 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="classgr_1_1doa_1_1MUSIC__uca__impl" kind="class" language="C++" prot="public">
+    <compoundname>gr::doa::MUSIC_uca_impl</compoundname>
+    <basecompoundref refid="classgr_1_1doa_1_1MUSIC__uca" prot="public" virt="non-virtual">gr::doa::MUSIC_uca</basecompoundref>
+    <includes refid="MUSIC__uca__impl_8h" local="no">MUSIC_uca_impl.h</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a0175858e28ac8a948196856fea301ddb" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::MUSIC_uca_impl::d_norm_radius</definition>
+        <argsstring></argsstring>
+        <name>d_norm_radius</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_norm_radius</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="20" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a2fe4030f7e0dcadfbca59ce06e571e60" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_uca_impl::d_num_targets</definition>
+        <argsstring></argsstring>
+        <name>d_num_targets</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_num_targets</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="21" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a5b793367702517fe3070b26ad14e72e1" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_uca_impl::d_num_ant_ele</definition>
+        <argsstring></argsstring>
+        <name>d_num_ant_ele</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_num_ant_ele</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="22" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a16a0f3fc87335006993d676b64bcf816" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_uca_impl::d_pspectrum_len</definition>
+        <argsstring></argsstring>
+        <name>d_pspectrum_len</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_pspectrum_len</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="23" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1aeef8db7807fa87cdcc5d948b5f4b2c7f" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::MUSIC_uca_impl::d_element0_angle_deg</definition>
+        <argsstring></argsstring>
+        <name>d_element0_angle_deg</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_element0_angle_deg</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="24" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a4b88e35c7f1fc10200c5966709385386" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gr::doa::MUSIC_uca_impl::d_element_angle_step_deg</definition>
+        <argsstring></argsstring>
+        <name>d_element_angle_step_deg</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_element_angle_step_deg</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="25" column="11" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a1f2b174e10425fe4a021432e08cf8d68" prot="private" static="no" mutable="no">
+        <type>arma::cx_fmat</type>
+        <definition>arma::cx_fmat gr::doa::MUSIC_uca_impl::d_manifold</definition>
+        <argsstring></argsstring>
+        <name>d_manifold</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_manifold</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="26" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a8b22d376feb07ff4edbcb12663ffc629" prot="private" static="no" mutable="no">
+        <type>arma::cx_fmat</type>
+        <definition>arma::cx_fmat gr::doa::MUSIC_uca_impl::d_manifold_h</definition>
+        <argsstring></argsstring>
+        <name>d_manifold_h</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::d_manifold_h</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="27" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__uca__impl_1aea2514763e7b524d4edb450ca52a05c9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::MUSIC_uca_impl::MUSIC_uca_impl</definition>
+        <argsstring>(float norm_radius, int num_targets, int inputs, int pspectrum_len, float element0_angle_deg, float element_angle_step_deg)</argsstring>
+        <name>MUSIC_uca_impl</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::MUSIC_uca_impl</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>norm_radius</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_targets</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>pspectrum_len</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>element0_angle_deg</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>element_angle_step_deg</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="30" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a9fd2de266f246eb200bf26277b7af35f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>gr::doa::MUSIC_uca_impl::~MUSIC_uca_impl</definition>
+        <argsstring>() override=default</argsstring>
+        <name>~MUSIC_uca_impl</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::~MUSIC_uca_impl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="36" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classgr_1_1doa_1_1MUSIC__uca__impl_1a4605253c9b7be676b3f9e3b4d49271cf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gr::doa::MUSIC_uca_impl::work</definition>
+        <argsstring>(int noutput_items, gr_vector_const_void_star &amp;input_items, gr_vector_void_star &amp;output_items) override</argsstring>
+        <name>work</name>
+        <qualifiedname>gr::doa::MUSIC_uca_impl::work</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>noutput_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_const_void_star &amp;</type>
+          <declname>input_items</declname>
+        </param>
+        <param>
+          <type>gr_vector_void_star &amp;</type>
+          <declname>output_items</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="38" column="9"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>gr::doa::MUSIC_uca</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::MUSIC_uca_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>gr::doa::MUSIC_uca</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::doa::MUSIC_uca_impl</label>
+        <link refid="classgr_1_1doa_1_1MUSIC__uca__impl"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_block</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" line="17" column="1" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/lib/MUSIC_uca_impl.h" bodystart="18" bodyend="41"/>
+    <listofallmembers>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1aeef8db7807fa87cdcc5d948b5f4b2c7f" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_element0_angle_deg</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a4b88e35c7f1fc10200c5966709385386" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_element_angle_step_deg</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a1f2b174e10425fe4a021432e08cf8d68" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_manifold</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a8b22d376feb07ff4edbcb12663ffc629" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_manifold_h</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a0175858e28ac8a948196856fea301ddb" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_norm_radius</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a5b793367702517fe3070b26ad14e72e1" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_num_ant_ele</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a2fe4030f7e0dcadfbca59ce06e571e60" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_num_targets</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a16a0f3fc87335006993d676b64bcf816" prot="private" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>d_pspectrum_len</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca_1a95dc533baa200a8ca0be46c3fc4ef391" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>make</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1aea2514763e7b524d4edb450ca52a05c9" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>MUSIC_uca_impl</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca_1afe06938a4a4ce16b8b12f555a46827c7" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>sptr</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a4605253c9b7be676b3f9e3b4d49271cf" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>work</name></member>
+      <member refid="classgr_1_1doa_1_1MUSIC__uca__impl_1a9fd2de266f246eb200bf26277b7af35f" prot="public" virt="non-virtual"><scope>gr::doa::MUSIC_uca_impl</scope><name>~MUSIC_uca_impl</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

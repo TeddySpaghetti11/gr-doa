@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="en-US">
+  <compounddef id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h" kind="file" language="C++">
+    <compoundname>build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h</compoundname>
+    <includes local="yes">pydoc_macros.h</includes>
+    <incdepgraph>
+      <node id="1">
+        <label>MUSIC_uca_pydoc_template.h</label>
+        <link refid="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>pydoc_macros.h</label>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a74021f021dcdfbb22891787b79c5529d" prot="public" static="no">
+        <name>D</name>
+        <param><defname>...</defname></param>
+        <initializer><ref refid="build-libresdr_2python_2doa_2bindings_2pydoc__macros_8h_1a4e578031ec998eaeb933d5caa6a7d28a" kindref="member">DOC</ref>(<ref refid="namespacegr" kindref="compound">gr</ref>, doa, __VA_ARGS__)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" line="10" column="9" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a4e29dd4f322e961c6f18b3ba99f1dbd6" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_MUSIC_uca</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_MUSIC_uca</name>
+        <initializer>= R&quot;doc(
+MUSIC pseudo-spectrum estimator for a uniform circular array.
+)doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" line="12" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" bodystart="12" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1af4574aac9575d79bbfc8cf39c579a0b6" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_MUSIC_uca_MUSIC_uca_0</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_MUSIC_uca_MUSIC_uca_0</name>
+        <initializer>= R&quot;doc()doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" line="15" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="build-libresdr_2test__modules_2gnuradio_2doa_2bindings_2docstrings_2MUSIC__uca__pydoc__template_8h_1a8f515d2d53ed7e0618e399938347c21d" prot="public" static="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* __doc_gr_doa_MUSIC_uca_make</definition>
+        <argsstring></argsstring>
+        <name>__doc_gr_doa_MUSIC_uca_make</name>
+        <initializer>= R&quot;doc(
+Construct a UCA MUSIC estimator scanning bearings from 0 to 360 degrees.
+)doc&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" line="16" column="19" bodyfile="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h" bodystart="16" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/theo/Documents/ResearchProj/GNU_Radio/Plugins/gr-doa/build-libresdr/test_modules/gnuradio/doa/bindings/docstrings/MUSIC_uca_pydoc_template.h"/>
+  </compounddef>
+</doxygen>

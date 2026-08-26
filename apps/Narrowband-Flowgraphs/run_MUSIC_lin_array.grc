@@ -44,30 +44,6 @@ blocks:
     coordinate: [320, 8.0]
     rotation: 0
     state: enabled
-- name: bandwidth
-  id: variable
-  parameters:
-    comment: ''
-    value: '2800000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [896, 8.0]
-    rotation: 0
-    state: enabled
-- name: freq
-  id: variable
-  parameters:
-    comment: ''
-    value: int(1.24086e9)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [768, 8.0]
-    rotation: 0
-    state: enabled
 - name: input_variables
   id: variable_struct
   parameters:
@@ -107,7 +83,7 @@ blocks:
     value2: 2.495e9
     value3: '"addr=10.94.17.33"'
     value4: '0'
-    value5: '2'
+    value5: '4'
     value6: '0.5'
     value7: 2**15
     value8: 2**14
@@ -131,18 +107,6 @@ blocks:
     coordinate: [152, 8.0]
     rotation: 0
     state: enabled
-- name: samp_rate
-  id: variable
-  parameters:
-    comment: ''
-    value: int(2.8e6)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [656, 8.0]
-    rotation: 0
-    state: enabled
 - name: blocks_null_sink_0
   id: blocks_null_sink
   parameters:
@@ -158,23 +122,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [792, 376.0]
-    rotation: 180
-    state: disabled
-- name: blocks_null_sink_0_0
-  id: blocks_null_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    bus_structure_sink: '[[0,],]'
-    comment: ''
-    num_inputs: '1'
-    type: float
-    vlen: input_variables.NumTargets
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [808, 760.0]
     rotation: 180
     state: enabled
 - name: blocks_vector_to_streams_0
@@ -193,24 +140,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [752, 408.0]
-    rotation: 180
-    state: disabled
-- name: blocks_vector_to_streams_0_0
-  id: blocks_vector_to_streams
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_streams: input_variables.NumTargets
-    type: float
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [768, 792.0]
     rotation: 180
     state: enabled
 - name: doa_MUSIC_lin_array_0
@@ -231,25 +160,6 @@ blocks:
     bus_structure: null
     coordinate: [952, 232.0]
     rotation: 0
-    state: disabled
-- name: doa_MUSIC_lin_array_0_0
-  id: doa_MUSIC_lin_array
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    inputs: input_variables.NumArrayElements
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    norm_spacing: input_variables.NormSpacing
-    num_targets: input_variables.NumTargets
-    pspectrum_len: input_variables.PSpectrumLength
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [968, 616.0]
-    rotation: 0
     state: enabled
 - name: doa_autocorrelate_0
   id: doa_autocorrelate
@@ -268,25 +178,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [680, 216.0]
-    rotation: 0
-    state: disabled
-- name: doa_autocorrelate_0_0
-  id: doa_autocorrelate
-  parameters:
-    affinity: ''
-    alias: ''
-    avg_method: Forward-Backward
-    comment: ''
-    inputs: input_variables.NumArrayElements
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    overlap_size: input_variables.OverlapSize
-    snapshot_size: input_variables.SnapshotSize
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [696, 600.0]
     rotation: 0
     state: enabled
 - name: doa_find_local_max_0
@@ -307,25 +198,6 @@ blocks:
     bus_structure: null
     coordinate: [976, 360.0]
     rotation: 180
-    state: disabled
-- name: doa_find_local_max_0_0
-  id: doa_find_local_max
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_max_vals: input_variables.NumTargets
-    vector_len: input_variables.PSpectrumLength
-    x_max: '180.0'
-    x_min: '0.0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [992, 744.0]
-    rotation: 180
     state: enabled
 - name: doa_phase_correct_hier_0
   id: doa_phase_correct_hier
@@ -342,23 +214,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [456, 216.0]
-    rotation: 0
-    state: disabled
-- name: doa_phase_correct_hier_0_0
-  id: doa_phase_correct_hier
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    config_filename: rel_phase_offsets_file_name
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_ports: input_variables.NumArrayElements
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [472, 616.0]
     rotation: 0
     state: enabled
 - name: doa_x440_usrp_source_0
@@ -379,42 +234,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [208, 216.0]
-    rotation: 0
-    state: disabled
-- name: iio_fmcomms2_source_0
-  id: iio_fmcomms2_source
-  parameters:
-    affinity: ''
-    alias: ''
-    bandwidth: bandwidth
-    bbdc: 'True'
-    buffer_size: '32768'
-    comment: ''
-    filter: ''
-    filter_source: '''Auto'''
-    fpass: '0'
-    frequency: freq
-    fstop: '0'
-    gain1: '''slow_attack'''
-    gain2: '''slow_attack'''
-    len_tag_key: packet_len
-    manual_gain1: '64'
-    manual_gain2: '64'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    quadrature: 'True'
-    rf_port_select: '''A_BALANCED'''
-    rfdc: 'True'
-    rx1_en: 'True'
-    rx2_en: 'True'
-    samplerate: samp_rate
-    type: fc32
-    uri: ip:192.168.1.10
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [208, 512.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -505,69 +324,6 @@ blocks:
     bus_structure: null
     coordinate: [503, 367]
     rotation: 180
-    state: disabled
-- name: qtgui_number_sink_1_0
-  id: qtgui_number_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    autoscale: 'True'
-    avg: '0'
-    color1: ("black", "black")
-    color10: ("black", "black")
-    color2: ("black", "black")
-    color3: ("black", "black")
-    color4: ("black", "black")
-    color5: ("black", "black")
-    color6: ("black", "black")
-    color7: ("black", "black")
-    color8: ("black", "black")
-    color9: ("black", "black")
-    comment: ''
-    factor1: '1'
-    factor10: '1'
-    factor2: '1'
-    factor3: '1'
-    factor4: '1'
-    factor5: '1'
-    factor6: '1'
-    factor7: '1'
-    factor8: '1'
-    factor9: '1'
-    graph_type: qtgui.NUM_GRAPH_HORIZ
-    gui_hint: ''
-    label1: Estimated angle
-    label10: ''
-    label2: ''
-    label3: ''
-    label4: ''
-    label5: ''
-    label6: ''
-    label7: ''
-    label8: ''
-    label9: ''
-    max: '180'
-    min: '0'
-    name: '""'
-    nconnections: input_variables.NumTargets
-    type: float
-    unit1: "\xB0"
-    unit10: ''
-    unit2: ''
-    unit3: ''
-    unit4: ''
-    unit5: ''
-    unit6: ''
-    unit7: ''
-    unit8: ''
-    unit9: ''
-    update_time: '0.10'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [520, 752.0]
-    rotation: 180
     state: enabled
 - name: qtgui_vector_sink_f_0
   id: qtgui_vector_sink_f
@@ -642,104 +398,24 @@ blocks:
     bus_structure: null
     coordinate: [944, 88.0]
     rotation: 180
-    state: disabled
-- name: qtgui_vector_sink_f_0_0
-  id: qtgui_vector_sink_f
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'True'
-    average: '1.0'
-    color1: '"blue"'
-    color10: '"dark blue"'
-    color2: '"red"'
-    color3: '"green"'
-    color4: '"black"'
-    color5: '"cyan"'
-    color6: '"magenta"'
-    color7: '"yellow"'
-    color8: '"dark red"'
-    color9: '"dark green"'
-    comment: ''
-    grid: 'True'
-    gui_hint: ''
-    label1: estimated angle
-    label10: ''
-    label2: ''
-    label3: ''
-    label4: ''
-    label5: ''
-    label6: ''
-    label7: ''
-    label8: ''
-    label9: ''
-    legend: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    name: '""'
-    nconnections: '1'
-    ref_level: '0'
-    showports: 'True'
-    update_time: '0.05'
-    vlen: input_variables.PSpectrumLength
-    width1: '2'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    x_axis_label: '"angle (in degrees)"'
-    x_start: '0'
-    x_step: 180.0/input_variables.PSpectrumLength
-    x_units: '""'
-    y_axis_label: '"Pseudo-Spectrum (dB)"'
-    y_units: '""'
-    ymax: '60'
-    ymin: '-60'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [960, 472.0]
-    rotation: 180
     state: enabled
 
 connections:
 - [blocks_vector_to_streams_0, '0', qtgui_number_sink_1, '0']
-- [blocks_vector_to_streams_0_0, '0', qtgui_number_sink_1_0, '0']
 - [doa_MUSIC_lin_array_0, '0', doa_find_local_max_0, '0']
 - [doa_MUSIC_lin_array_0, '0', qtgui_vector_sink_f_0, '0']
-- [doa_MUSIC_lin_array_0_0, '0', doa_find_local_max_0_0, '0']
-- [doa_MUSIC_lin_array_0_0, '0', qtgui_vector_sink_f_0_0, '0']
 - [doa_autocorrelate_0, '0', doa_MUSIC_lin_array_0, '0']
-- [doa_autocorrelate_0_0, '0', doa_MUSIC_lin_array_0_0, '0']
 - [doa_find_local_max_0, '0', blocks_null_sink_0, '0']
 - [doa_find_local_max_0, '1', blocks_vector_to_streams_0, '0']
-- [doa_find_local_max_0_0, '0', blocks_null_sink_0_0, '0']
-- [doa_find_local_max_0_0, '1', blocks_vector_to_streams_0_0, '0']
 - [doa_phase_correct_hier_0, '0', doa_autocorrelate_0, '0']
 - [doa_phase_correct_hier_0, '1', doa_autocorrelate_0, '1']
-- [doa_phase_correct_hier_0_0, '0', doa_autocorrelate_0_0, '0']
-- [doa_phase_correct_hier_0_0, '1', doa_autocorrelate_0_0, '1']
+- [doa_phase_correct_hier_0, '2', doa_autocorrelate_0, '2']
+- [doa_phase_correct_hier_0, '3', doa_autocorrelate_0, '3']
 - [doa_x440_usrp_source_0, '0', doa_phase_correct_hier_0, '0']
 - [doa_x440_usrp_source_0, '1', doa_phase_correct_hier_0, '1']
-- [iio_fmcomms2_source_0, '0', doa_phase_correct_hier_0_0, '0']
-- [iio_fmcomms2_source_0, '1', doa_phase_correct_hier_0_0, '1']
+- [doa_x440_usrp_source_0, '2', doa_phase_correct_hier_0, '2']
+- [doa_x440_usrp_source_0, '3', doa_phase_correct_hier_0, '3']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.12.0
+  grc_version: v3.11.0.0git-992-ga7b5ef78

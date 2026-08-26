@@ -68,12 +68,14 @@ outputs:
   multiplicity: ${ num_inputs }
 
 documentation: |-
-  Same-session OTA gain and phase calibration for a uniform circular array.
+  Same-session OTA phase calibration for a uniform circular array.
 
   Place a strong narrowband pilot at the configured known bearing before the
   flowgraph starts. The block removes the predicted UCA steering phase from the
-  measured channel ratios, freezes one complex correction per channel, and then
-  passes corrected samples. It emits zeros during the skip/calibration interval.
+  measured channel ratios, freezes one unit-magnitude phase correction per
+  channel, and then passes corrected samples. It emits zeros during the
+  skip/calibration interval. Channel amplitudes are intentionally left unchanged,
+  matching Ettus's relative phase-correction stage.
 
   Keep both IIO sources and this flowgraph running after calibration. Reopening
   or retuning either LibreSDR can invalidate the corrections. The console prints
