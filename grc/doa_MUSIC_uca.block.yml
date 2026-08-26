@@ -52,11 +52,16 @@ outputs:
 documentation: |-
   MUSIC pseudo-spectrum estimator for a uniform circular array (UCA).
 
-  The output covers [0, 360) degrees. Element 0 is placed at
-  element0_angle. Subsequent elements use element_angle_step; use a negative
-  step when the physical channel order runs in the opposite direction.
+  The output covers [0, 360) degrees. Angles are SOURCE bearings: theta points
+  from the array centre towards the transmitter/source. The analytic-signal UCA
+  manifold is exp(+j*2*pi*(r/lambda)*cos(theta-beta_m)).
 
-  For four elements with 162.63 mm adjacent chord spacing at 903 MHz, the
-  radius is approximately 114.997 mm and norm_radius is 0.346380.
+  Element 0 is placed at element0_angle. Subsequent elements use
+  element_angle_step; use a negative step when the physical channel order runs
+  clockwise in the chosen bearing convention.
+
+  Compute norm_radius from the physical radius and the actual RF frequency being
+  processed: norm_radius = radius_m * rf_hz / 299792458.0. Do not leave a value
+  hard-coded for a different centre/pilot frequency.
 
 file_format: 1
