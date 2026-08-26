@@ -1,36 +1,115 @@
 # LibreSDR UCA MUSIC
 
-This directory contains the four-channel LibreSDR flowgraph for the 903 MHz
-uniform circular array. It is separate from the Ettus X440/linear-array examples
-so the upstream demonstrations remain useful as references.
+This directory contains the four-channel LibreSDR uniform circular array (UCA)
+flowgraph and same-session over-the-air phase calibration.
 
 ## Geometry and channel order
 
-The supplied defaults assume:
+The physical array uses four elements with `162.63 mm` adjacent chord spacing,
+which gives a radius of `114.997 mm`.
 
-- four UCA elements;
-- 162.63 mm adjacent chord spacing;
-- 903 MHz center frequency;
-- 114.997 mm circle radius, or `0.346379923` wavelengths;
-- the B210 direction from the array centre defines the relative `0` degree axis;
-- `192.168.4.1` RX1 at bottom-right is element 0 at 225 degrees;
-- `192.168.4.1` RX2 at bottom-left is element 1 at 135 degrees;
-- `192.168.5.1` RX2 at top-left is element 2 at 45 degrees;
-- `192.168.5.1` RX1 at top-right is element 3 at 315 degrees; and
-- element indices advance clockwise with `element_bearing_step = -90.0`.
+Stream order is fixed as:
 
-The graph intentionally swaps the two `192.168.5.1` source outputs before
-calibration so this physical wiring does not need to change. The default
-`element0_bearing = 225.0` assumes the B210 is centred above the array as drawn
-in the setup diagram. If the B210 is displaced sideways, change only
-`element0_bearing` to the measured counterclockwise angle from the actual B210
-direction to the bottom-right element. All MUSIC bearings are reported relative
-to that B210 direction.
+1. `192.168.4.1 RX1` - bottom-right - `225 deg`
+2. `192.168.4.1 RX2` - bottom-left - `135 deg`
+3. `192.168.5.1 RX2` - top-left - `45 deg`
+4. `192.168.5.1 RX1` - top-right - `315 deg`
 
-## Build and install
+The second LibreSDR is intentionally permuted in the flowgraph so the element
+step is `-90 deg`.
 
-After changing the OOT module, rebuild and reinstall it before opening the new
-flowgraph in GNU Radio Companion:
+Angles are **source bearings**, measured from the array centre towards the
+transmitter. Calibration and MUSIC use the same manifold:
+
+```text
+a_m(theta) = exp(+j 2 pi rho cos(theta - beta_m))
+```
+
+where `rho = r/lambda`.
+
+## Frequency-derived normalized radius
+
+`norm_radius` is no longer hard-coded. The flowgraph calculates it from the
+actual pilot RF frequency:
+
+```text
+array_radius = 0.16263 / sqrt(2)
+pilot_rf = center_freq + pilot_offset
+norm_radius = array_radius * pilot_rf / 299792458.0
+```
+
+With the current defaults (`center_freq = 920.9 MHz`, `pilot_offset = +50 kHz`),
+the processed RF is `920.95 MHz` and `norm_radius` is about `0.3532653`.
+
+Note that `162.63 mm` equals exactly half a wavelength at about `921.70 MHz`.
+The present test frequency is therefore extremely close to half-wavelength
+adjacent spacing. A strong 180-degree ambiguity can still occur on array
+symmetry axes even when the processing is correct. Validate at several off-axis
+bearings rather than using only `0/90/180/270 deg`.
+
+## Pilot filtering
+
+The B210 pilot is now `+50 kHz` from the receiver centre instead of `+5 kHz`.
+Each of the four receiver channels passes through an identical Frequency Xlating
+FIR Filter before calibration and covariance formation:
+
+```text
+pilot_offset     = 50 kHz
+pilot_decim      = 8
+pilot_passband   = 10 kHz
+pilot_transition = 10 kHz
+proc_rate        = 350 kS/s
+```
+
+After translation the desired pilot is at DC, receiver DC is at `-50 kHz`, and
+the pilot image is around `-100 kHz`, so the narrow low-pass rejects both.
+
+The B210 transmitter flowgraph uses the same `920.9 MHz` centre and `+50 kHz`
+tone by default. Keep those values matched to the receiver variables if you
+retune.
+
+## AD9361 settings
+
+Both LibreSDRs use:
+
+```text
+Gain mode:              Manual
+Quadrature tracking:    False
+RF DC correction:       True
+Baseband DC correction: True
+```
+
+The same manual gain is used on all channels. Quadrature tracking stays disabled
+after calibration so an adaptive update cannot change relative RF phase.
+
+## Calibration coherence
+
+The calibration block averages the complex cross product
+
+```text
+C_i = sum(x_0 * conj(x_i))
+```
+
+and now also reports normalized coherence
+
+```text
+gamma_i = |sum(x_0 conj(x_i))|
+          / sqrt(sum(|x_0|^2) sum(|x_i|^2))
+```
+
+for each channel relative to channel 0. `gamma` is between 0 and 1. A clean
+stationary pilot should be close to 1; the block prints a warning below `0.90`.
+For validation, values around `0.98-1.00` are preferable.
+
+If the same-radio channel is highly coherent but channels from the other
+LibreSDR are not, investigate inter-device timing/coherence before interpreting
+the MUSIC result.
+
+The existing Phase Offset Est plots remain Ettus's instantaneous
+`arg(x0*conj(xi))` diagnostics. The averaged calibration phase and coherence
+printed in the console are more reliable indicators for a stationary CW pilot.
+
+## Build and test
 
 ```sh
 cmake -S . -B build
@@ -40,94 +119,21 @@ sudo cmake --install build
 sudo ldconfig
 ```
 
-The original Ettus QA tests additionally need `oct2py` and Octave. The new
-`qa_MUSIC_uca` and `qa_uca_pilot_calibration` tests do not.
+The UCA tests now exercise the real `225, 135, 45, 315 deg` stream order and the
+source-bearing steering convention.
 
-The GNU Radio 3.10 FMComms2/3/4 source template installed on the development
-machine accepts an RF-bandwidth field in GRC but does not emit a corresponding
-runtime setter in the generated Python. The flowgraph therefore requests
-`2.8 MHz`, but do not assume that value was applied: inspect the live AD9361
-`rf_bandwidth` IIO attribute (or set it outside this source block) when exact
-analogue bandwidth is important to a measurement.
+## Test procedure
 
-The live graph now keeps the important Ettus defaults: `32768`-sample
-covariance snapshots, `16384`-sample overlap, an unsmoothed MUSIC spectrum, and
-an unsmoothed peak readout. AD9361 quadrature, RF-DC, and baseband-DC tracking
-are disabled on both radios so those adaptive loops cannot change relative
-phase after calibration. Gain remains manual and identical on all channels.
+1. Confirm the physical channel order above.
+2. Set `pilot_bearing` to the actual B210 bearing for the current setup.
+3. Start the B210 calibration transmitter.
+4. Start `run_MUSIC_uca_live_cal.grc`.
+5. Wait for `UCA calibration complete` and inspect all three coherence values.
+6. Keep the source stationary and verify the MUSIC spectrum has clear structure.
+7. Rotate through several known off-axis bearings and compare the peak movement.
+8. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
 
-## Measurement procedure
-
-1. Leave `pilot_bearing = 0.0` to use the B210 direction as the relative zero
-   axis. Confirm `element0_bearing` describes the angle from that axis to the
-   bottom-right `192.168.4.1` RX1 element.
-2. Confirm the element-to-channel order above and use the same manual gain on
-   all four receiver channels.
-3. Start the B210 calibration tone with
-   `../Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.grc`.
-   Its active UHD path is configured for a 903 MHz center and +5 kHz tone;
-   confirm that `TxAddr` contains your B210's serial number.
-4. Start `run_MUSIC_uca_live_cal.grc` and watch its console. The output remains
-   zero while the two sources settle and pilot samples are accumulated.
-5. Wait for `UCA calibration complete`. The block prints the measured pairwise
-   phase, predicted geometric phase, and frozen hardware-phase correction for
-   every channel relative to channel 0. It also writes three correction phases,
-   in radians, to `/tmp/gr-doa-uca-903MHz.cfg`; this file can be read directly by
-   Ettus's `Phase Correct Chains` block.
-6. With the pilot still on, inspect the two relative-phase panels. Each uses
-   Ettus's unchanged `Phase Offset Est` block and shows `x0*conj(xi)` in radians.
-   The raw and corrected traces should be approximately horizontal. Corrected
-   phases retain the predicted UCA geometry; they are not expected to all be
-   zero.
-7. Switch off the B210 transmitter without stopping the receiver flowgraph.
-8. Activate the target transmitter. The GUI shows the calibrated channel traces,
-   full 0–360 degree MUSIC spectrum, estimated bearing, and continuing raw versus
-   corrected relative-phase diagnostics.
-
-Do not restart or retune either LibreSDR between steps 5 and 7. With the current
-firmware, a new start or retune can change inter-device timing or RF phase and
-therefore requires a new OTA calibration.
-
-## Limitations
-
-The pilot block performs a unit-magnitude phase correction at the pilot
-frequency, matching Ettus's relative phase-correction stage; it deliberately
-does not equalize channel amplitudes. This is appropriate for narrowband MUSIC
-near that frequency, but it is not a wideband sample synchronizer. A wideband or
-frequency-separated target requires
-coarse/fractional delay estimation using a known broadband calibration waveform.
-For the first validation runs, place the target signal at the same RF/baseband
-frequency as the calibration pilot.
-
-The receiver flowgraph intentionally does not depend on 1 PPS. Same-session OTA
-calibration absorbs a fixed start offset at the pilot frequency, but it cannot
-repair a sample discontinuity or relative drift that occurs after calibration.
-
-Indoor multipath also affects OTA calibration. Keep the B210 in the far field
-with a clear line of sight where practical, and repeat measurements at several
-known bearings to validate the assumed UCA manifold and bearing convention.
-
-If same-radio pairs remain stable while `ch2/ch0` and `ch3/ch0` wander or jump,
-the failure is across the two LibreSDRs rather than inside MUSIC. A flat MUSIC
-spectrum is not a trustworthy bearing; use the phase panels to localize that
-condition before interpreting the numerical maximum.
-
-## Equations
-
-For element position angle `beta_m`, normalized radius `rho = r/lambda`, and
-bearing `theta`, calibration and MUSIC both use
-
-```text
-a_m(theta) = exp(-j 2 pi rho cos(theta - beta_m)).
-```
-
-For channel `i` relative to channel 0, the calibration block forms the circular
-mean phase ratio `q_i = unit(sum(x_0 conj(x_i)))`. Its predicted geometric ratio
-is `g_i = a_0(theta_cal) conj(a_i(theta_cal))`. The unit-magnitude correction is
-
-```text
-c_i = unit(q_i / g_i) = exp(j (phi_hardware,0 - phi_hardware,i)).
-```
-
-Applying `c_i x_i` removes only the relative hardware/channel phase. The UCA
-manifold phase `a_i(theta_cal)` remains in the corrected signal.
+The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
+architecture. The intentional changes are the UCA geometry, full-circle scan,
+physical channel order, frequency-derived manifold, narrow pilot selection, and
+same-session phase correction.
