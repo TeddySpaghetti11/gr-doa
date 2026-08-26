@@ -16,10 +16,14 @@ class uca_pilot_calibration(gr.sync_block):
     """Estimate and freeze per-channel phase corrections from a known pilot.
 
     The block deliberately emits zeros while skipping and calibrating. Once the
-        requested pilot samples have been accumulated, it applies fixed phase
-        coefficients and passes all channels through. Keeping this block and the two
+    requested pilot samples have been accumulated, it applies fixed phase
+    coefficients and passes all channels through. Keeping this block and the two
     IIO sources alive avoids invalidating the calibration by reopening or
     retuning either AD9361.
+
+    ``pilot_angle`` is the bearing from the array centre *towards the source*.
+    With the usual analytic-signal convention the corresponding UCA manifold is
+    exp(+j 2*pi*r/lambda*cos(theta-beta)).
 
     This corrects a fixed inter-radio delay at the pilot frequency. It does not
     provide wideband sample-time alignment.
@@ -59,7 +63,9 @@ class uca_pilot_calibration(gr.sync_block):
 
         self._samples_accumulated = 0
         self._cross_sum = numpy.zeros(self.num_inputs, dtype=numpy.complex128)
+        self._power_sum = numpy.zeros(self.num_inputs, dtype=numpy.float64)
         self._coefficients = numpy.ones(self.num_inputs, dtype=numpy.complex64)
+        self._coherences = numpy.ones(self.num_inputs, dtype=numpy.float64)
         self._calibrated = False
         self._lock = threading.Lock()
 
@@ -69,7 +75,7 @@ class uca_pilot_calibration(gr.sync_block):
             + numpy.arange(self.num_inputs) * self.element_angle_step
         )
         self._steering = numpy.exp(
-            -1j * 2.0 * numpy.pi * self.norm_radius
+            1j * 2.0 * numpy.pi * self.norm_radius
             * numpy.cos(theta - element_angles)
         )
 
@@ -89,24 +95,41 @@ class uca_pilot_calibration(gr.sync_block):
         with self._lock:
             return self._coefficients.copy()
 
+    def coherences(self):
+        """Return normalized pilot coherence relative to channel 0."""
+        with self._lock:
+            return self._coherences.copy()
+
     def _finish_calibration(self):
-        reference_cross = self._cross_sum[0]
-        if abs(reference_cross) <= numpy.finfo(numpy.float64).eps:
+        eps = numpy.finfo(numpy.float64).eps
+        reference_power = self._power_sum[0]
+        if reference_power <= eps:
             raise RuntimeError("Pilot calibration failed: reference channel has no power")
 
         coefficients = numpy.ones(self.num_inputs, dtype=numpy.complex128)
+        coherences = numpy.ones(self.num_inputs, dtype=numpy.float64)
         steering_reference = self._steering[0]
+
         for channel in range(1, self.num_inputs):
             cross = self._cross_sum[channel]
-            if abs(cross) <= numpy.finfo(numpy.float64).eps:
+            channel_power = self._power_sum[channel]
+            denom = numpy.sqrt(reference_power * channel_power)
+            if denom <= eps:
+                raise RuntimeError(
+                    f"Pilot calibration failed: channel {channel} has no power"
+                )
+
+            coherence = float(numpy.clip(abs(cross) / denom, 0.0, 1.0))
+            coherences[channel] = coherence
+            if abs(cross) <= eps:
                 raise RuntimeError(
                     f"Pilot calibration failed: channel {channel} is not coherent "
                     "with the reference"
                 )
 
-            # This is the same phase convention as Ettus phase_offset_est:
-            # angle(x0 * conj(xi)).  Remove the known array-manifold part so
-            # only the fixed channel/hardware phase is corrected.
+            # Same cross-product convention as Ettus phase_offset_est:
+            # angle(x0 * conj(xi)).  Divide out the known array-manifold ratio
+            # so the frozen coefficient removes only fixed channel/hardware phase.
             measured_ratio = cross / abs(cross)
             geometric_ratio = steering_reference * numpy.conj(
                 self._steering[channel]
@@ -118,17 +141,26 @@ class uca_pilot_calibration(gr.sync_block):
                 f"UCA calibration ch{channel}/ch0: "
                 f"measured={numpy.angle(measured_ratio, deg=True):.3f} deg, "
                 f"geometry={numpy.angle(geometric_ratio, deg=True):.3f} deg, "
-                f"hardware correction={numpy.angle(coefficients[channel], deg=True):.3f} deg"
+                f"hardware correction={numpy.angle(coefficients[channel], deg=True):.3f} deg, "
+                f"coherence={coherence:.4f}"
             )
+            if coherence < 0.90:
+                print(
+                    f"WARNING: UCA calibration ch{channel}/ch0 coherence is only "
+                    f"{coherence:.4f}; do not trust MUSIC until the filtered pilot "
+                    "is strongly coherent on all channels."
+                )
 
         with self._lock:
             self._coefficients = coefficients.astype(numpy.complex64)
+            self._coherences = coherences
             self._calibrated = True
 
         for channel, coefficient in enumerate(coefficients):
             print(
                 f"UCA calibration ch{channel}: magnitude={abs(coefficient):.6f}, "
-                f"phase={numpy.angle(coefficient, deg=True):.3f} deg"
+                f"phase={numpy.angle(coefficient, deg=True):.3f} deg, "
+                f"coherence={coherences[channel]:.4f}"
             )
         print(
             "UCA calibration complete. Coefficients are frozen; the pilot may now "
@@ -170,12 +202,20 @@ class uca_pilot_calibration(gr.sync_block):
             reference = input_items[0][cursor:cursor + used].astype(
                 numpy.complex128, copy=False
             )
-            self._cross_sum[0] += numpy.vdot(reference, reference)
+            reference_power = float(numpy.vdot(reference, reference).real)
+            self._cross_sum[0] += reference_power
+            self._power_sum[0] += reference_power
+
             for channel in range(1, self.num_inputs):
                 samples = input_items[channel][cursor:cursor + used].astype(
                     numpy.complex128, copy=False
                 )
-                self._cross_sum[channel] += numpy.sum(reference * numpy.conj(samples))
+                self._cross_sum[channel] += numpy.sum(
+                    reference * numpy.conj(samples)
+                )
+                self._power_sum[channel] += float(
+                    numpy.vdot(samples, samples).real
+                )
 
             self._samples_accumulated += used
             cursor += used
