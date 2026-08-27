@@ -1,0 +1,260 @@
+options:
+  parameters:
+    alias: ''
+    author: gr-doa LibreSDR research port
+    catch_exceptions: 'True'
+    comment: Minimal four-channel LibreSDR receive-path overflow diagnostic.
+    copyright: null
+    description: Streams both RX channels from both LibreSDRs directly into a null
+      sink for a fixed interval. Any printed O is an IIO receive overflow independent
+      of CFO correction, calibration, MUSIC, and GUI processing.
+    gen_linking: dynamic
+    generate_options: no_gui
+    generator_class_name: PythonNoGuiGenerator
+    generator_module: gnuradio.grc.workflows.python_nogui
+    hier_block_src_path: '.:'
+    id: diagnose_libresdr_iio_overflow
+    max_nouts: '0'
+    output_language: python
+    realtime_scheduling: ''
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    thread_safe_setters: ''
+    title: LibreSDR Four-Channel IIO Overflow Diagnostic
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: center_freq
+  id: variable
+  parameters:
+    comment: Match the live UCA receiver centre frequency
+    value: int(920.9e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 16]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: Same reduced sample rate used for the live diagnostic run
+    value: int(2.1e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [152, 16]
+    rotation: 0
+    state: enabled
+- name: rf_bandwidth
+  id: variable
+  parameters:
+    comment: Requested AD9361 RF bandwidth
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 16]
+    rotation: 0
+    state: enabled
+- name: rx_gain
+  id: variable
+  parameters:
+    comment: Same manual gain on all four channels
+    value: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 16]
+    rotation: 0
+    state: enabled
+- name: test_seconds
+  id: variable
+  parameters:
+    comment: Diagnostic duration; every channel must deliver this many samples
+    value: '20'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 16]
+    rotation: 0
+    state: enabled
+- name: libresdr_a
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '262144'
+    comment: Alpha; RX1 is ch0 and RX2 is ch1.
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'False'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.4.1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 176]
+    rotation: 0
+    state: enabled
+- name: libresdr_b
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '262144'
+    comment: Bravo; RX1 and RX2 are both consumed without permutation because this
+      test only checks transport.
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'False'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.5.1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 448]
+    rotation: 0
+    state: enabled
+- name: alpha_rx1_head
+  id: blocks_head
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Stops Alpha RX1 after the fixed test interval
+    num_items: int(test_seconds * samp_rate)
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 192]
+    rotation: 0
+    state: enabled
+- name: alpha_rx2_head
+  id: blocks_head
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Stops Alpha RX2 after the fixed test interval
+    num_items: int(test_seconds * samp_rate)
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 280]
+    rotation: 0
+    state: enabled
+- name: bravo_rx1_head
+  id: blocks_head
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Stops Bravo RX1 after the fixed test interval
+    num_items: int(test_seconds * samp_rate)
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 464]
+    rotation: 0
+    state: enabled
+- name: bravo_rx2_head
+  id: blocks_head
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Stops Bravo RX2 after the fixed test interval
+    num_items: int(test_seconds * samp_rate)
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 552]
+    rotation: 0
+    state: enabled
+- name: all_channels_sink
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: Consumes all four streams without DSP or GUI work
+    num_inputs: '4'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 352]
+    rotation: 0
+    state: enabled
+
+connections:
+- [alpha_rx1_head, '0', all_channels_sink, '0']
+- [alpha_rx2_head, '0', all_channels_sink, '1']
+- [bravo_rx1_head, '0', all_channels_sink, '2']
+- [bravo_rx2_head, '0', all_channels_sink, '3']
+- [libresdr_a, '0', alpha_rx1_head, '0']
+- [libresdr_a, '1', alpha_rx2_head, '0']
+- [libresdr_b, '0', bravo_rx1_head, '0']
+- [libresdr_b, '1', bravo_rx2_head, '0']
+
+metadata:
+  file_format: 1
+  grc_version: v3.11.0.0git-1103-g14d6a758

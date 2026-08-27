@@ -225,6 +225,26 @@ Alpha-vs-Bravo coherence. CFO and phase calibration results from a run containin
 overruns must not be trusted; reduce display/host load or the configured sample
 rate and restart until the run is overrun-free.
 
+### Source-only overflow test
+
+Use `diagnose_libresdr_iio_overflow.grc` before changing CFO or calibration
+thresholds when the live graph prints `O`. It uses the same two IIO addresses,
+two channels per radio, `2.1 MS/s` sample rate, and `262144`-sample IIO buffers,
+but contains no CFO, calibration, MUSIC, or GUI blocks. Four Head blocks feed a
+four-input Null Sink, so the test stops automatically after 20 seconds.
+
+1. Stop every other receiver flowgraph using either LibreSDR.
+2. Open `diagnose_libresdr_iio_overflow.grc` in GNU Radio Companion.
+3. Generate and run it without changing the wiring.
+4. Check the console for the 20-second run:
+   - no `O`: raw four-channel acquisition is sustainable; the added processing
+     in the live graph is causing the overruns;
+   - any `O`: the failure already exists in the IIO/device/transport path and
+     must be fixed before CFO or phase calibration can be trusted.
+
+The buffer-allocation alignment warning is unrelated and can be ignored for
+this test.
+
 The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
 architecture. The intentional changes are the UCA geometry, full-circle scan,
 physical channel order, frequency-derived manifold, narrow pilot selection, and
