@@ -259,7 +259,8 @@ If the source-only test completes without any `O`, run the next-stage
 `diagnose_libresdr_cfo_calibration_load.py` directly from a terminal. This
 20-second graph retains the live CFO corrector, four pilot filters, and gated
 phase calibration, but replaces MUSIC and every GUI branch with a four-input
-Null Sink:
+Null Sink. It waits five seconds after the IIO sources start before taking its
+first CFO window so RF/PLL startup drift is not mistaken for a stable offset:
 
 ```sh
 python3 -u apps/LibreSDR-UCA/diagnose_libresdr_cfo_calibration_load.py \

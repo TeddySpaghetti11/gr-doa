@@ -147,8 +147,8 @@ blocks:
 - name: cfo_settling_samples
   id: variable
   parameters:
-    comment: Initial raw-sample settling window
-    value: 2**16
+    comment: Five-second RF/PLL settling window before the first CFO estimate
+    value: int(5 * samp_rate)
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [16, 176], rotation: 0, state: enabled}
 - name: cfo_estimation_samples
   id: variable

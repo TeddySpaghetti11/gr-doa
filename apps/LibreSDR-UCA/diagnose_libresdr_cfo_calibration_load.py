@@ -39,10 +39,10 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         ##################################################
         self.pilot_offset = pilot_offset = 50e3
         self.center_freq = center_freq = int(920.9e6)
+        self.samp_rate = samp_rate = int(2.1e6)
         self.pilot_rf = pilot_rf = center_freq + pilot_offset
         self.array_radius = array_radius = 0.16263 / (2**0.5)
         self.test_seconds = test_seconds = 20
-        self.samp_rate = samp_rate = int(2.1e6)
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
         self.pilot_transition = pilot_transition = 10e3
@@ -54,7 +54,7 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.element_bearing_step = element_bearing_step = -90.0
         self.element0_bearing = element0_bearing = 225.0
         self.cfo_validation_settling_samples = cfo_validation_settling_samples = 2**16
-        self.cfo_settling_samples = cfo_settling_samples = 2**16
+        self.cfo_settling_samples = cfo_settling_samples = int(5 * samp_rate)
         self.cfo_retry_delay_samples = cfo_retry_delay_samples = 2**20
         self.cfo_residual_tolerance_hz = cfo_residual_tolerance_hz = 1.0
         self.cfo_min_coherence = cfo_min_coherence = 0.90
@@ -148,10 +148,10 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.connect((self.libresdr_a, 1), (self.alpha_rx2_head, 0))
         self.connect((self.libresdr_b, 0), (self.bravo_rx1_head, 0))
         self.connect((self.libresdr_b, 1), (self.bravo_rx2_head, 0))
-        self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
         self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
-        self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
+        self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
         self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
+        self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))
@@ -178,6 +178,23 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.libresdr_a.set_frequency(self.center_freq)
         self.libresdr_b.set_frequency(self.center_freq)
 
+    def get_samp_rate(self):
+        return self.samp_rate
+
+    def set_samp_rate(self, samp_rate):
+        self.samp_rate = samp_rate
+        self.set_cfo_settling_samples(int(5 * self.samp_rate))
+        self.libresdr_a.set_samplerate(self.samp_rate)
+        self.libresdr_b.set_samplerate(self.samp_rate)
+        self.alpha_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
+        self.alpha_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
+        self.bravo_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
+        self.bravo_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
+        self.pilot_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+
     def get_pilot_rf(self):
         return self.pilot_rf
 
@@ -201,22 +218,6 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.alpha_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
         self.bravo_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
         self.bravo_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
-
-    def get_samp_rate(self):
-        return self.samp_rate
-
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.libresdr_a.set_samplerate(self.samp_rate)
-        self.libresdr_b.set_samplerate(self.samp_rate)
-        self.alpha_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.alpha_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.pilot_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
-        self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
-        self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
-        self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
 
     def get_rx_gain(self):
         return self.rx_gain
