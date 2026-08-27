@@ -92,6 +92,9 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._accepted_cfo_hz = None
         self._correction_phase = 0.0
         self._correction_step = 0.0
+        self._rotator_cache = numpy.empty(0, dtype=numpy.complex64)
+        self._rotator_work = numpy.empty(0, dtype=numpy.complex64)
+        self._rotator_cache_step = None
         self._correction_active = False
         self._estimating_residual = False
         self._refinement_round = 0
@@ -170,6 +173,18 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             return self._last_failure_reason
 
     def _fit_cfo(self, relative_samples):
+        # Fitting every raw point causes a long scheduler pause at multi-MS/s
+        # rates. Retain the full time span while fitting a safely decimated set
+        # of points. The stride is capped so even max_abs_cfo_hz advances by
+        # less than pi between fitted samples and phase unwrapping is unique.
+        raw_sample_count = int(relative_samples.size)
+        max_unambiguous_stride = max(
+            1,
+            int(self.samp_rate / (2.0 * self.max_abs_cfo_hz)) - 1,
+        )
+        fit_stride = min(8, max_unambiguous_stride)
+        relative_samples = relative_samples[::fit_stride]
+        fit_sample_rate = self.samp_rate / fit_stride
         magnitudes = numpy.abs(relative_samples)
         finite = numpy.isfinite(relative_samples)
         positive = finite & (magnitudes > numpy.finfo(numpy.float32).tiny)
@@ -199,7 +214,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         # one common slope with a separate phase intercept for every segment.
         max_unambiguous_gap = max(
             1,
-            int(self.samp_rate / (2.0 * self.max_abs_cfo_hz)) - 1,
+            int(fit_sample_rate / (2.0 * self.max_abs_cfo_hz)) - 1,
         )
         split_points = numpy.flatnonzero(
             numpy.diff(valid_indices) > max_unambiguous_gap
@@ -237,8 +252,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             )
             residual_sum += numpy.sum(numpy.exp(1j * (phase - fitted)))
         coherence = float(abs(residual_sum) / used_count)
-        estimate_hz = float(slope * self.samp_rate / (2.0 * numpy.pi))
-        return estimate_hz, coherence, valid_count, used_count
+        estimate_hz = float(slope * fit_sample_rate / (2.0 * numpy.pi))
+        return (
+            estimate_hz,
+            coherence,
+            valid_count,
+            used_count,
+            int(relative_samples.size),
+            raw_sample_count,
+            fit_stride,
+        )
 
     def _reset_pilot_filters(self):
         state_shape = (self._pilot_sos.shape[0], 2)
@@ -287,16 +310,28 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         coherences = []
         valid_counts = []
         used_counts = []
+        fit_counts = []
+        raw_counts = []
+        fit_strides = []
         try:
             for chunks in self._relative_samples:
                 relative = numpy.concatenate(chunks)
-                estimate, coherence, valid_count, used_count = self._fit_cfo(
-                    relative
-                )
+                (
+                    estimate,
+                    coherence,
+                    valid_count,
+                    used_count,
+                    fit_count,
+                    raw_count,
+                    fit_stride,
+                ) = self._fit_cfo(relative)
                 estimates.append(estimate)
                 coherences.append(coherence)
                 valid_counts.append(valid_count)
                 used_counts.append(used_count)
+                fit_counts.append(fit_count)
+                raw_counts.append(raw_count)
+                fit_strides.append(fit_stride)
         except ValueError as error:
             self._reject(str(error))
             return
@@ -311,12 +346,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         print(
             f"Cross-SDR CFO {label} ch2/ch0 estimate: {estimates[0]:+.6f} Hz "
             f"(coherence {coherences[0]:.6f}, valid "
-            f"{valid_counts[0]}/{self.estimation_samples}, used {used_counts[0]})"
+            f"{valid_counts[0]}/{fit_counts[0]} fit points, used "
+            f"{used_counts[0]}, stride {fit_strides[0]} over "
+            f"{raw_counts[0]} raw samples)"
         )
         print(
             f"Cross-SDR CFO {label} ch3/ch0 estimate: {estimates[1]:+.6f} Hz "
             f"(coherence {coherences[1]:.6f}, valid "
-            f"{valid_counts[1]}/{self.estimation_samples}, used {used_counts[1]})"
+            f"{valid_counts[1]}/{fit_counts[1]} fit points, used "
+            f"{used_counts[1]}, stride {fit_strides[1]} over "
+            f"{raw_counts[1]} raw samples)"
         )
         print(
             f"Cross-SDR CFO {label} estimate disagreement: {disagreement:.6f} Hz "
@@ -358,6 +397,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
     def _set_correction_frequency(self, cfo_hz, reset_phase=False):
         self._correction_step = -2.0 * numpy.pi * cfo_hz / self.samp_rate
+        self._rotator_cache_step = None
         if reset_phase:
             self._correction_phase = 0.0
 
@@ -481,10 +521,30 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         count = stop - start
         if count <= 0:
             return
-        phases = self._correction_phase + self._correction_step * numpy.arange(count)
-        rotator = numpy.exp(1j * phases).astype(numpy.complex64)
-        output_items[2][start:stop] = input_items[2][start:stop] * rotator
-        output_items[3][start:stop] = input_items[3][start:stop] * rotator
+        if (
+                self._rotator_cache_step != self._correction_step
+                or self._rotator_cache.size < count):
+            capacity = max(65536, count)
+            sample_index = numpy.arange(capacity, dtype=numpy.float64)
+            self._rotator_cache = numpy.exp(
+                1j * self._correction_step * sample_index
+            ).astype(numpy.complex64)
+            self._rotator_work = numpy.empty(capacity, dtype=numpy.complex64)
+            self._rotator_cache_step = self._correction_step
+
+        phase_factor = numpy.complex64(numpy.exp(1j * self._correction_phase))
+        rotator = self._rotator_work[:count]
+        numpy.multiply(
+            self._rotator_cache[:count], phase_factor, out=rotator
+        )
+        numpy.multiply(
+            input_items[2][start:stop], rotator,
+            out=output_items[2][start:stop],
+        )
+        numpy.multiply(
+            input_items[3][start:stop], rotator,
+            out=output_items[3][start:stop],
+        )
         self._correction_phase = float(
             numpy.remainder(
                 self._correction_phase + self._correction_step * count + numpy.pi,
@@ -494,14 +554,19 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
     def work(self, input_items, output_items):
         item_count = min(len(items) for items in input_items)
-        for channel in range(4):
-            output_items[channel][:item_count] = input_items[channel][:item_count]
 
         if self._locked:
+            # Alpha is copied once. Bravo is written directly by the cached
+            # common rotator instead of first being copied and then overwritten.
+            output_items[0][:item_count] = input_items[0][:item_count]
+            output_items[1][:item_count] = input_items[1][:item_count]
             if self._lock_tag_pending:
                 self._emit_lock_tags(0)
             self._apply_correction(input_items, output_items, 0, item_count)
             return item_count
+
+        for channel in range(4):
+            output_items[channel][:item_count] = input_items[channel][:item_count]
 
         cursor = 0
         while cursor < item_count and not self._locked:

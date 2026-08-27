@@ -95,6 +95,14 @@ residual is at most `1 Hz`. The final measured residual is included in the
 frozen correction even when already inside that bound. Phase remains continuous
 when the correction frequency is refined.
 
+To avoid blocking the GNU Radio scheduler at multi-MS/s input rates, each CFO
+fit retains the complete configured time window but uses a phase-unambiguous
+stride of at most eight samples. Console diagnostics report the fit stride and
+raw-window length. Once a correction is active, a cached complex rotator is
+reused across scheduler calls; only its starting phase changes per call. This
+preserves phase continuity and the one-common-rotator invariant while avoiding
+a full complex exponential and a redundant Bravo copy for every output chunk.
+
 A rejected coarse or residual window prints finite/non-zero sample counts,
 waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
 until the post-correction residual passes every check. The downstream phase
