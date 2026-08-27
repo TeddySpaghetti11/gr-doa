@@ -58,7 +58,7 @@ pilot_offset     = 50 kHz
 pilot_decim      = 8
 pilot_passband   = 10 kHz
 pilot_transition = 10 kHz
-proc_rate        = 350 kS/s
+proc_rate        = 262.5 kS/s
 ```
 
 After translation the desired pilot is at DC, receiver DC is at `-50 kHz`, and
@@ -85,7 +85,7 @@ Bravo's internal channel coherence is preserved. The rotator begins with zero
 phase and therefore leaves all constant phase offsets for the existing OTA phase
 calibration.
 
-Defaults at `2.8 MS/s` are `2**16` startup-settling samples, a `2**18`-sample
+Defaults at `2.1 MS/s` are five seconds of startup settling, a `2**18`-sample
 estimation window, maximum `20 kHz` absolute CFO, and minimum `0.90` pilot-fit
 coherence. The accepted coarse estimate is applied provisionally to both Bravo
 channels. After another `2**16` settling samples, the block measures both
@@ -134,10 +134,10 @@ can be localized without changing the receiver architecture:
 
 1. **TRUE pre-filter relative phase** is connected directly to the IIO source
    outputs in physical order `A RX1, A RX2, B RX2, B RX1` and runs at
-   `samp_rate` (`2.8 MS/s`).
+   `samp_rate` (`2.1 MS/s`).
 2. **POST-CFO relative phase** is after the common CFO rotator and four identical
    translating/decimating FIR filters, but before constant phase calibration. It
-   runs at `proc_rate` (`350 kS/s`) and should be flat after CFO lock.
+   runs at `proc_rate` (`262.5 kS/s`) and should be flat after CFO lock.
 3. **Alpha internal** and **Bravo internal** plots compare RX1 with RX2 inside
    each LibreSDR before filtering. A flat same-radio trace with moving
    inter-radio traces isolates the problem to coherence between the devices.
@@ -145,11 +145,18 @@ can be localized without changing the receiver architecture:
 All phase displays use the Ettus convention `arg(x0 * conj(xi))`; their labels
 name both physical inputs to avoid an ambiguous channel number.
 
+The full-rate and multi-trace diagnostic sinks remain in the GRC source but are
+disabled by default to protect continuous four-channel IIO delivery on the test
+laptop. The bearing display and compass remain enabled. After an overrun-free
+calibration, enable only the specific phase or spectrum diagnostic needed for a
+short inspection; the POST-CFO relative-phase display is the preferred check
+that the corrected cross-SDR phase is flat.
+
 The raw four-channel FFT remains connected before the CFO block and all filters in physical UCA
-order. It uses the QT sink's maximum valid size of 32,768 bins (about
-`85.4 Hz/bin` at `2.8 MS/s`) and explicit channel labels so a small frequency
-difference between the two radios can be seen directly. This raw display is
-expected to retain the original Alpha/Bravo separation. A second 8,192-bin
+order. It uses 8,192 bins (about `256.3 Hz/bin` at `2.1 MS/s`) and explicit
+channel labels so a small frequency difference between the two radios can be
+seen directly. This raw display is expected to retain the original Alpha/Bravo
+separation. A second 8,192-bin
 **POST-CFO filtered pilot spectrum** runs at `proc_rate`; all four peaks should
 coincide there after lock. GNU Radio 3.11 rejects
 65,536 for this sink even though that would otherwise be preferred.

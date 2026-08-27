@@ -286,7 +286,7 @@ blocks:
   id: variable
   parameters:
     comment: LibreSDR complex sample rate
-    value: int(2.8e6)
+    value: int(2.1e6)
   states:
     bus_sink: false
     bus_source: false
@@ -297,8 +297,8 @@ blocks:
 - name: cfo_settling_samples
   id: variable
   parameters:
-    comment: Initial IIO/network/RF settling before cross-SDR CFO estimation
-    value: 2**16
+    comment: Five-second IIO/RF/PLL settling before cross-SDR CFO estimation
+    value: int(5 * samp_rate)
   states:
     bus_sink: false
     bus_source: false
@@ -592,7 +592,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 640]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: corrected_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -689,7 +689,7 @@ blocks:
     bus_structure: null
     coordinate: [1392, 680]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: corrected_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -706,7 +706,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 568]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: covariance
   id: doa_autocorrelate
   parameters:
@@ -733,7 +733,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '32768'
+    buffer_size: '262144'
     comment: Element 0 = RX1 bottom-right; element 1 = RX2 bottom-left.
     filter: ''
     filter_source: '''Auto'''
@@ -769,7 +769,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '32768'
+    buffer_size: '262144'
     comment: 'Outputs are permuted below: RX2 top-left = element 2; RX1 top-right
       = element 3.'
     filter: ''
@@ -1043,11 +1043,12 @@ blocks:
     color7: '"yellow"'
     color8: '"dark red"'
     color9: '"dark green"'
-    comment: TRUE pre-filter spectra in physical UCA order. This GNU Radio QT sink
-      caps FFT size at 32768, giving about 85.4 Hz/bin at 2.8 MS/s.
+    comment: TRUE pre-filter spectra in physical UCA order. Kept disabled by default
+      because full-rate GUI diagnostics can cause IIO overruns; enable only for a
+      short inspection after calibration is proven stable.
     ctrlpanel: 'False'
     fc: '0'
-    fftsize: '32768'
+    fftsize: '8192'
     freqhalf: 'True'
     grid: 'False'
     gui_hint: ''
@@ -1065,7 +1066,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"TRUE pre-filter raw spectra (32768-bin FFT)"'
+    name: '"TRUE pre-filter raw spectra (8192-bin FFT)"'
     nconnections: '4'
     norm_window: 'False'
     showports: 'False'
@@ -1075,7 +1076,7 @@ blocks:
     tr_tag: '""'
     type: complex
     units: dB
-    update_time: '0.10'
+    update_time: '0.50'
     width1: '1'
     width10: '1'
     width2: '1'
@@ -1095,7 +1096,7 @@ blocks:
     bus_structure: null
     coordinate: [568, 240]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: post_cfo_fft_display
   id: qtgui_freq_sink_x
   parameters:
@@ -1176,7 +1177,7 @@ blocks:
     bus_structure: null
     coordinate: [824, 240]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: postfilter_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -1274,7 +1275,7 @@ blocks:
     bus_structure: null
     coordinate: [1168, 680]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: postfilter_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -1291,7 +1292,7 @@ blocks:
     bus_structure: null
     coordinate: [584, 568]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: prefilter_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -1389,7 +1390,7 @@ blocks:
     bus_structure: null
     coordinate: [848, 792]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: prefilter_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -1406,7 +1407,7 @@ blocks:
     bus_structure: null
     coordinate: [584, 792]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: alpha_internal_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -1503,7 +1504,7 @@ blocks:
     bus_structure: null
     coordinate: [848, 920]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: alpha_internal_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -1520,7 +1521,7 @@ blocks:
     bus_structure: null
     coordinate: [584, 920]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: bravo_internal_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -1618,7 +1619,7 @@ blocks:
     bus_structure: null
     coordinate: [1168, 920]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: bravo_internal_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -1635,7 +1636,7 @@ blocks:
     bus_structure: null
     coordinate: [960, 920]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: spectrum_display
   id: qtgui_vector_sink_f
   parameters:
@@ -1709,7 +1710,7 @@ blocks:
     bus_structure: null
     coordinate: [1392, 544]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [alpha_internal_phase_estimator, '0', alpha_internal_phase_display, '0']
