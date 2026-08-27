@@ -35,9 +35,18 @@ def _pilot_channels(sample_rate, sample_count, bravo_cfo_hz, phases=None):
     pilot = numpy.exp(1j * (2.0 * numpy.pi * 4100.0 / sample_rate * sample_index))
     alpha0 = numpy.exp(1j * phases[0]) * pilot
     alpha1 = 0.83 * numpy.exp(1j * phases[1]) * pilot
-    bravo_rotator = numpy.exp(
-        1j * 2.0 * numpy.pi * numpy.asarray(bravo_cfo_hz) / sample_rate * sample_index
-    )
+    bravo_cfo = numpy.asarray(bravo_cfo_hz, dtype=numpy.float64)
+    if bravo_cfo.ndim == 0:
+        bravo_phase = 2.0 * numpy.pi * bravo_cfo / sample_rate * sample_index
+    else:
+        if bravo_cfo.size != sample_count:
+            raise ValueError("Per-sample CFO array must match sample_count")
+        bravo_phase = numpy.empty(sample_count, dtype=numpy.float64)
+        bravo_phase[0] = 0.0
+        bravo_phase[1:] = numpy.cumsum(
+            2.0 * numpy.pi * bravo_cfo[:-1] / sample_rate
+        )
+    bravo_rotator = numpy.exp(1j * bravo_phase)
     bravo2 = 1.12 * numpy.exp(1j * phases[2]) * pilot * bravo_rotator
     bravo3 = 0.91 * numpy.exp(1j * phases[3]) * pilot * bravo_rotator
     return [
@@ -62,12 +71,15 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         sample_rate = 100000.0
         settling_samples = 37
         estimation_samples = 4096
-        lock_offset = settling_samples + estimation_samples
+        correction_start = settling_samples + estimation_samples
+        lock_offset = correction_start + estimation_samples
         inputs = _pilot_channels(sample_rate, lock_offset + 5000, 123.75)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
             settling_samples=settling_samples,
             estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -79,11 +91,15 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         self.assertAlmostEqual(corrector.accepted_cfo_hz(), 123.75, places=3)
         numpy.testing.assert_array_equal(outputs[0], inputs[0])
         numpy.testing.assert_array_equal(outputs[1], inputs[1])
-        numpy.testing.assert_array_equal(outputs[2][:lock_offset], inputs[2][:lock_offset])
-        numpy.testing.assert_array_equal(outputs[3][:lock_offset], inputs[3][:lock_offset])
+        numpy.testing.assert_array_equal(
+            outputs[2][:correction_start], inputs[2][:correction_start]
+        )
+        numpy.testing.assert_array_equal(
+            outputs[3][:correction_start], inputs[3][:correction_start]
+        )
 
-        correction2 = outputs[2][lock_offset:] / inputs[2][lock_offset:]
-        correction3 = outputs[3][lock_offset:] / inputs[3][lock_offset:]
+        correction2 = outputs[2][correction_start:] / inputs[2][correction_start:]
+        correction3 = outputs[3][correction_start:] / inputs[3][correction_start:]
         numpy.testing.assert_allclose(correction2, correction3, rtol=2e-6, atol=2e-6)
         expected = numpy.exp(
             -1j * 2.0 * numpy.pi * 123.75 / sample_rate
@@ -92,7 +108,10 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         numpy.testing.assert_allclose(correction2, expected, rtol=3e-5, atol=3e-5)
 
         relative_phase = numpy.unwrap(
-            numpy.angle(outputs[2][lock_offset:] * numpy.conj(outputs[0][lock_offset:]))
+            numpy.angle(
+                outputs[2][correction_start:]
+                * numpy.conj(outputs[0][correction_start:])
+            )
         )
         fitted_slope = numpy.polyfit(numpy.arange(relative_phase.size), relative_phase, 1)[0]
         self.assertAlmostEqual(fitted_slope, 0.0, places=6)
@@ -116,6 +135,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             samp_rate=sample_rate,
             settling_samples=0,
             estimation_samples=4096,
+            validation_settling_samples=0,
             agreement_tolerance_hz=5.0,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -135,7 +155,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
     def test_sparse_zero_samples_do_not_poison_an_otherwise_valid_window(self):
         sample_rate = 100000.0
         estimation_samples = 4096
-        inputs = _pilot_channels(sample_rate, estimation_samples + 1000, 64.25)
+        inputs = _pilot_channels(sample_rate, 2 * estimation_samples + 1000, 64.25)
         # Model intermittent source zeros while retaining 80% of the defined
         # time window. The old maximum-based validity test rejected this case.
         for channel in (0, 2, 3):
@@ -144,6 +164,8 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             samp_rate=sample_rate,
             settling_samples=0,
             estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -159,7 +181,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         estimation_samples = 1024
         retry_delay = 128
         second_window_start = estimation_samples + retry_delay
-        sample_count = second_window_start + estimation_samples + 1000
+        sample_count = second_window_start + 2 * estimation_samples + 1000
         inputs = _pilot_channels(sample_rate, sample_count, 51.5)
         for channel in range(4):
             inputs[channel][:estimation_samples] = 0.0
@@ -167,6 +189,8 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             samp_rate=sample_rate,
             settling_samples=0,
             estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
             retry_delay_samples=retry_delay,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
@@ -185,7 +209,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         self.assertEqual(len(lock_tags), 1)
         self.assertEqual(
             lock_tags[0].offset,
-            second_window_start + estimation_samples,
+            second_window_start + 2 * estimation_samples,
         )
         numpy.testing.assert_array_equal(outputs[0], inputs[0])
         numpy.testing.assert_array_equal(outputs[1], inputs[1])
@@ -196,12 +220,17 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         cfo_samples = 2048
         phase_settling = 73
         phase_samples = 2048
-        sample_count = cfo_settling + cfo_samples + phase_settling + phase_samples + 500
+        sample_count = (
+            cfo_settling + 2 * cfo_samples
+            + phase_settling + phase_samples + 500
+        )
         inputs = _pilot_channels(sample_rate, sample_count, 87.5)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
             settling_samples=cfo_settling,
             estimation_samples=cfo_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -229,7 +258,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
 
         self.assertTrue(corrector.locked())
         self.assertTrue(calibration.calibrated())
-        calibration_start = cfo_settling + cfo_samples
+        calibration_start = cfo_settling + 2 * cfo_samples
         calibration_end = calibration_start + phase_settling + phase_samples
         for sink in sinks:
             output = numpy.asarray(sink.data(), dtype=numpy.complex64)
@@ -244,12 +273,14 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         decimation = 4
         cfo_samples = 1024
         phase_samples = 256
-        sample_count = cfo_samples + decimation * (phase_samples + 128)
+        sample_count = 2 * cfo_samples + decimation * (phase_samples + 128)
         inputs = _pilot_channels(sample_rate, sample_count, 42.0)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
             settling_samples=0,
             estimation_samples=cfo_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -285,6 +316,97 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
 
         self.assertTrue(corrector.locked())
         self.assertTrue(calibration.calibrated())
+
+    def test_residual_validation_refines_a_changed_cfo_before_lock(self):
+        sample_rate = 100000.0
+        estimation_samples = 2048
+        coarse_cfo_hz = 100.0
+        final_cfo_hz = 112.5
+        lock_offset = 3 * estimation_samples
+        cfo = numpy.full(lock_offset + 1000, final_cfo_hz, dtype=numpy.float64)
+        cfo[:estimation_samples] = coarse_cfo_hz
+        inputs = _pilot_channels(sample_rate, cfo.size, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
+            max_refinement_rounds=2,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+        )
+
+        outputs, sinks = _run_block(corrector, inputs, max_noutput_items=131)
+        self.assertTrue(corrector.locked())
+        self.assertFalse(corrector.failed())
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), final_cfo_hz, places=3)
+        lock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ]
+        self.assertEqual(len(lock_tags), 1)
+        self.assertEqual(lock_tags[0].offset, lock_offset)
+
+        # The rotator frequency changes after round one without a phase jump,
+        # then the final corrected relative phase is flat before lock is emitted.
+        correction = outputs[2][estimation_samples:] / inputs[2][estimation_samples:]
+        phase_step = numpy.angle(correction[1:] * numpy.conj(correction[:-1]))
+        boundary = estimation_samples
+        self.assertLess(
+            abs(numpy.angle(correction[boundary] * numpy.conj(correction[boundary - 1]))),
+            0.02,
+        )
+        numpy.testing.assert_allclose(
+            phase_step[boundary + 1:],
+            -2.0 * numpy.pi * final_cfo_hz / sample_rate,
+            rtol=0.0,
+            atol=2e-6,
+        )
+        relative_phase = numpy.unwrap(
+            numpy.angle(outputs[2][2 * estimation_samples:] * numpy.conj(
+                outputs[0][2 * estimation_samples:]
+            ))
+        )
+        fitted_slope = numpy.polyfit(
+            numpy.arange(relative_phase.size), relative_phase, 1
+        )[0]
+        self.assertAlmostEqual(fitted_slope, 0.0, places=6)
+
+    def test_nonconvergent_residual_is_rejected_without_lock_tag(self):
+        sample_rate = 100000.0
+        estimation_samples = 2048
+        sample_count = 3 * estimation_samples + 500
+        cfo = numpy.full(sample_count, 137.5, dtype=numpy.float64)
+        cfo[:estimation_samples] = 100.0
+        cfo[estimation_samples:2 * estimation_samples] = 112.5
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.01,
+            max_refinement_rounds=2,
+            retry_delay_samples=10000,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+        )
+
+        outputs, sinks = _run_block(corrector, inputs, max_noutput_items=127)
+        self.assertFalse(corrector.locked())
+        self.assertTrue(corrector.failed())
+        self.assertEqual(corrector.rejection_count(), 1)
+        self.assertIn("post-correction residual", corrector.last_failure_reason())
+        numpy.testing.assert_array_equal(outputs[0], inputs[0])
+        numpy.testing.assert_array_equal(outputs[1], inputs[1])
+        for sink in sinks:
+            self.assertFalse(any(
+                pmt.symbol_to_string(tag.key) == "cfo_locked"
+                for tag in sink.tags()
+            ))
 
 
 if __name__ == "__main__":

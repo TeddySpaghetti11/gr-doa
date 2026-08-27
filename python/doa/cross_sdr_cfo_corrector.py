@@ -17,9 +17,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
     Inputs and outputs use the LibreSDR array order: ch0 Alpha RX1 reference,
     ch1 Alpha RX2, ch2 Bravo RX2, and ch3 Bravo RX1. Both Alpha channels pass
-    through bit-for-bit. Before lock, both Bravo channels also pass through
-    without correction. After the independent Bravo/reference estimates pass
-    the configured checks, exactly one rotator is applied to both Bravo streams.
+    through bit-for-bit. Both Bravo channels pass through unchanged during the
+    coarse estimate. A common provisional correction is then applied while its
+    post-correction residual is measured and refined. No lock tag is emitted
+    until the residual passes. Exactly one rotator is always shared by Bravo.
     """
 
     _LOCK_TAG = "cfo_locked"
@@ -28,6 +29,9 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  samp_rate=2.8e6,
                  settling_samples=65536,
                  estimation_samples=262144,
+                 validation_settling_samples=65536,
+                 residual_tolerance_hz=1.0,
+                 max_refinement_rounds=3,
                  retry_delay_samples=1048576,
                  agreement_tolerance_hz=10.0,
                  max_abs_cfo_hz=20000.0,
@@ -38,6 +42,12 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             raise ValueError("CFO settling length must be non-negative")
         if estimation_samples < 2:
             raise ValueError("CFO estimation window must contain at least two samples")
+        if validation_settling_samples < 0:
+            raise ValueError("CFO validation settling length must be non-negative")
+        if residual_tolerance_hz < 0.0:
+            raise ValueError("Residual CFO tolerance must be non-negative")
+        if max_refinement_rounds < 1:
+            raise ValueError("At least one residual validation round is required")
         if retry_delay_samples < 0:
             raise ValueError("CFO retry delay must be non-negative")
         if agreement_tolerance_hz < 0.0:
@@ -57,6 +67,9 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self.samp_rate = float(samp_rate)
         self.settling_remaining = int(settling_samples)
         self.estimation_samples = int(estimation_samples)
+        self.validation_settling_samples = int(validation_settling_samples)
+        self.residual_tolerance_hz = float(residual_tolerance_hz)
+        self.max_refinement_rounds = int(max_refinement_rounds)
         self.retry_delay_samples = int(retry_delay_samples)
         self.retry_remaining = 0
         self.agreement_tolerance_hz = float(agreement_tolerance_hz)
@@ -70,6 +83,9 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._accepted_cfo_hz = None
         self._correction_phase = 0.0
         self._correction_step = 0.0
+        self._correction_active = False
+        self._estimating_residual = False
+        self._refinement_round = 0
         self._locked = False
         self._failed = False
         self._rejection_count = 0
@@ -86,6 +102,12 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             "Cross-SDR CFO acceptance limits: disagreement <= "
             f"{self.agreement_tolerance_hz:.6f} Hz, |CFO| <= "
             f"{self.max_abs_cfo_hz:.6f} Hz, coherence >= {self.min_coherence:.6f}"
+        )
+        print(
+            "Cross-SDR CFO post-correction validation: residual <= "
+            f"{self.residual_tolerance_hz:.6f} Hz after "
+            f"{self.validation_settling_samples} settling samples, up to "
+            f"{self.max_refinement_rounds} refinement rounds"
         )
 
     def locked(self):
@@ -104,7 +126,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             return None if self._estimates_hz is None else tuple(self._estimates_hz)
 
     def accepted_cfo_hz(self):
-        """Return the frozen Bravo-minus-Alpha CFO, or None before lock."""
+        """Return the current accepted total CFO, or None before a coarse fit."""
         with self._lock:
             return self._accepted_cfo_hz
 
@@ -190,6 +212,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         return estimate_hz, coherence, valid_count, used_count
 
     def _finish_estimation(self):
+        estimating_residual = self._estimating_residual
+        refinement_round = self._refinement_round
         estimates = []
         coherences = []
         valid_counts = []
@@ -211,18 +235,22 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._relative_samples = [[], []]
 
         disagreement = abs(estimates[0] - estimates[1])
+        label = (
+            f"residual round {refinement_round}"
+            if estimating_residual else "coarse"
+        )
         print(
-            f"Cross-SDR CFO ch2/ch0 estimate: {estimates[0]:+.6f} Hz "
+            f"Cross-SDR CFO {label} ch2/ch0 estimate: {estimates[0]:+.6f} Hz "
             f"(coherence {coherences[0]:.6f}, valid "
             f"{valid_counts[0]}/{self.estimation_samples}, used {used_counts[0]})"
         )
         print(
-            f"Cross-SDR CFO ch3/ch0 estimate: {estimates[1]:+.6f} Hz "
+            f"Cross-SDR CFO {label} ch3/ch0 estimate: {estimates[1]:+.6f} Hz "
             f"(coherence {coherences[1]:.6f}, valid "
             f"{valid_counts[1]}/{self.estimation_samples}, used {used_counts[1]})"
         )
         print(
-            f"Cross-SDR CFO estimate disagreement: {disagreement:.6f} Hz "
+            f"Cross-SDR CFO {label} estimate disagreement: {disagreement:.6f} Hz "
             f"(limit {self.agreement_tolerance_hz:.6f} Hz)"
         )
 
@@ -250,29 +278,94 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 f"the two estimates disagree by {disagreement:.6f} Hz"
             )
         if rejection_reasons:
-            self._reject("; ".join(rejection_reasons))
+            self._reject(f"{label}: " + "; ".join(rejection_reasons))
             return
 
         accepted = 0.5 * (estimates[0] + estimates[1])
-        correction_step = -2.0 * numpy.pi * accepted / self.samp_rate
+        if estimating_residual:
+            self._finish_residual_validation(accepted)
+        else:
+            self._start_provisional_correction(accepted)
+
+    def _set_correction_frequency(self, cfo_hz, reset_phase=False):
+        self._correction_step = -2.0 * numpy.pi * cfo_hz / self.samp_rate
+        if reset_phase:
+            self._correction_phase = 0.0
+
+    def _start_provisional_correction(self, accepted):
         with self._lock:
             self._accepted_cfo_hz = accepted
-            self._correction_step = correction_step
-            # Zero phase at lock preserves the instantaneous constant phase for
-            # the downstream phase-only calibration rather than absorbing it here.
-            self._correction_phase = 0.0
-            self._locked = True
+            self._set_correction_frequency(accepted, reset_phase=True)
+            self._correction_active = True
+            self._estimating_residual = True
+            self._refinement_round = 1
             self._failed = False
-            self._lock_tag_pending = True
+        self._samples_accumulated = 0
+        self.settling_remaining = self.validation_settling_samples
 
-        print(f"Cross-SDR CFO accepted average: {accepted:+.6f} Hz")
+        print(f"Cross-SDR CFO coarse accepted average: {accepted:+.6f} Hz")
         print(
-            f"Cross-SDR CFO frozen correction: {-accepted:+.6f} Hz, "
-            f"phase step {correction_step:+.12g} rad/sample, identically on ch2 and ch3"
+            f"Cross-SDR CFO provisional correction: {-accepted:+.6f} Hz, "
+            f"phase step {self._correction_step:+.12g} rad/sample, identically "
+            "on ch2 and ch3"
         )
         print(
-            "Cross-SDR CFO lock established. Downstream constant phase "
-            "calibration may now begin."
+            "Cross-SDR CFO: correction is active but NOT locked; post-correction "
+            f"residual validation round 1 begins after "
+            f"{self.validation_settling_samples} samples"
+        )
+
+    def _finish_residual_validation(self, residual_hz):
+        print(
+            f"Cross-SDR CFO residual round {self._refinement_round} accepted "
+            f"average: {residual_hz:+.6f} Hz"
+        )
+        if abs(residual_hz) <= self.residual_tolerance_hz:
+            with self._lock:
+                self._locked = True
+                self._failed = False
+                self._lock_tag_pending = True
+                accepted = self._accepted_cfo_hz
+                correction_step = self._correction_step
+            print(f"Cross-SDR CFO final accepted CFO: {accepted:+.6f} Hz")
+            print(
+                f"Cross-SDR CFO frozen correction: {-accepted:+.6f} Hz, "
+                f"phase step {correction_step:+.12g} rad/sample, identically "
+                "on ch2 and ch3"
+            )
+            print(
+                "Cross-SDR CFO lock established after post-correction residual "
+                "validation. Downstream constant phase calibration may now begin."
+            )
+            return
+
+        if self._refinement_round >= self.max_refinement_rounds:
+            self._reject(
+                f"post-correction residual {residual_hz:+.6f} Hz exceeds "
+                f"{self.residual_tolerance_hz:.6f} Hz after "
+                f"{self.max_refinement_rounds} refinement rounds"
+            )
+            return
+
+        with self._lock:
+            self._accepted_cfo_hz += residual_hz
+            accepted = self._accepted_cfo_hz
+            # Retain the current rotator phase when changing its frequency so
+            # both Bravo streams remain phase-continuous across refinements.
+            self._set_correction_frequency(accepted, reset_phase=False)
+            self._refinement_round += 1
+            refinement_round = self._refinement_round
+            correction_step = self._correction_step
+        self._samples_accumulated = 0
+        self.settling_remaining = self.validation_settling_samples
+        print(
+            f"Cross-SDR CFO refinement: total estimate {accepted:+.6f} Hz; "
+            f"common correction {-accepted:+.6f} Hz, phase step "
+            f"{correction_step:+.12g} rad/sample"
+        )
+        print(
+            f"Cross-SDR CFO: residual validation round {refinement_round} begins "
+            f"after {self.validation_settling_samples} samples"
         )
 
     def _reject(self, reason):
@@ -281,6 +374,12 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._rejection_count += 1
             rejection_count = self._rejection_count
             self._last_failure_reason = reason
+            self._accepted_cfo_hz = None
+            self._correction_active = False
+            self._estimating_residual = False
+            self._refinement_round = 0
+            self._correction_phase = 0.0
+            self._correction_step = 0.0
         self._samples_accumulated = 0
         self._relative_samples = [[], []]
         self.retry_remaining = self.retry_delay_samples
@@ -329,6 +428,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         while cursor < item_count and not self._locked:
             if self.settling_remaining:
                 skipped = min(self.settling_remaining, item_count - cursor)
+                if self._correction_active:
+                    self._apply_correction(
+                        input_items, output_items, cursor, cursor + skipped
+                    )
                 self.settling_remaining -= skipped
                 cursor += skipped
                 continue
@@ -346,11 +449,19 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
             needed = self.estimation_samples - self._samples_accumulated
             used = min(needed, item_count - cursor)
+            if self._correction_active:
+                self._apply_correction(
+                    input_items, output_items, cursor, cursor + used
+                )
             reference = input_items[0][cursor:cursor + used]
             for relative_index, bravo_channel in enumerate((2, 3)):
+                bravo_samples = (
+                    output_items[bravo_channel][cursor:cursor + used]
+                    if self._correction_active
+                    else input_items[bravo_channel][cursor:cursor + used]
+                )
                 relative = (
-                    input_items[bravo_channel][cursor:cursor + used]
-                    * numpy.conj(reference)
+                    bravo_samples * numpy.conj(reference)
                 ).astype(numpy.complex64, copy=False)
                 self._relative_samples[relative_index].append(relative.copy())
             self._samples_accumulated += used

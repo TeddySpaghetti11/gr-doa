@@ -318,6 +318,42 @@ blocks:
     coordinate: [176, 176]
     rotation: 0
     state: enabled
+- name: cfo_validation_settling_samples
+  id: variable
+  parameters:
+    comment: Corrected raw samples to settle before each residual validation window
+    value: 2**16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 232]
+    rotation: 0
+    state: enabled
+- name: cfo_residual_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum averaged post-correction residual CFO allowed before cfo_locked
+    value: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 232]
+    rotation: 0
+    state: enabled
+- name: cfo_max_refinement_rounds
+  id: variable
+  parameters:
+    comment: Maximum closed-loop residual correction attempts before rejecting and retrying
+    value: '3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 232]
+    rotation: 0
+    state: enabled
 - name: cfo_retry_delay_samples
   id: variable
   parameters:
@@ -771,6 +807,9 @@ blocks:
     alias: ''
     comment: 'Fixed order: ch0 Alpha RX1, ch1 Alpha RX2, ch2 Bravo RX2, ch3 Bravo RX1. Alpha is untouched; one common rotator corrects both Bravo channels.'
     estimation_samples: cfo_estimation_samples
+    validation_settling_samples: cfo_validation_settling_samples
+    residual_tolerance_hz: cfo_residual_tolerance_hz
+    max_refinement_rounds: cfo_max_refinement_rounds
     max_abs_cfo_hz: cfo_max_abs_hz
     maxoutbuf: '0'
     min_coherence: cfo_min_coherence

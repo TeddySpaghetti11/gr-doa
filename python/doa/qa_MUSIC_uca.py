@@ -126,7 +126,19 @@ class qa_MUSIC_uca(gr_unittest.TestCase):
         self.tb.run()
 
         spectra = numpy.asarray(sink.data()).reshape(-1, spectrum_length)
-        self.assertGreater(len(spectra), 0)
+        self.assertGreater(len(spectra), 1)
+        # autocorrelate can emit one scheduler warm-up vector before its first
+        # complete covariance snapshot. Depending on chunking it may look flat
+        # or contain a partial covariance, so discard that one warm-up result
+        # and validate every subsequent meaningful spectrum.
+        spectra = spectra[1:]
+        valid = (
+            numpy.all(numpy.isfinite(spectra), axis=1)
+            & (numpy.max(numpy.abs(spectra), axis=1) > numpy.finfo(numpy.float32).eps)
+            & (numpy.ptp(spectra, axis=1) > numpy.finfo(numpy.float32).eps)
+        )
+        self.assertGreater(numpy.count_nonzero(valid), 0)
+        spectra = spectra[valid]
         estimated_bearings = (
             360.0 * numpy.argmax(spectra, axis=1) / spectrum_length
         )

@@ -84,10 +84,18 @@ calibration.
 
 Defaults at `2.8 MS/s` are `2**16` startup-settling samples, a `2**18`-sample
 estimation window, maximum `20 kHz` absolute CFO, and minimum `0.5` CFO-fit
-coherence. A rejected window prints finite/non-zero sample counts, waits
-`2**20` samples, and retries automatically. No `cfo_locked` tag is emitted until
-a complete window passes every check. The downstream phase calibration waits
-for that tag before counting its own skip or calibration samples.
+coherence. The accepted coarse estimate is applied provisionally to both Bravo
+channels. After another `2**16` settling samples, the block measures both
+post-correction residual slopes over another `2**18` samples. It refines the
+one common correction up to three times and freezes only when the averaged
+residual is at most `1 Hz`. Phase remains continuous when the correction
+frequency is refined.
+
+A rejected coarse or residual window prints finite/non-zero sample counts,
+waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
+until the post-correction residual passes every check. The downstream phase
+calibration waits for that tag before counting its own skip or calibration
+samples.
 
 ## AD9361 settings
 
@@ -204,6 +212,14 @@ order, diagnostics, and calibration threshold.
 9. Keep the source stationary and verify the MUSIC spectrum has clear structure.
 10. Rotate through several known off-axis bearings and compare the peak movement.
 11. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
+
+A stream of `O` characters is an IIO receive overrun, not a 10 MHz lock report.
+It means samples were lost because the host/network/GUI did not drain one or
+both radios fast enough. Since the two IIO sources can lose different buffers,
+an overrun can preserve each radio's internal RX1/RX2 phase while destroying
+Alpha-vs-Bravo coherence. CFO and phase calibration results from a run containing
+overruns must not be trusted; reduce display/host load or the configured sample
+rate and restart until the run is overrun-free.
 
 The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
 architecture. The intentional changes are the UCA geometry, full-circle scan,
