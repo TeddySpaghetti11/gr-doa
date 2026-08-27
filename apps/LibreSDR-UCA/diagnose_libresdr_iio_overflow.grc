@@ -18,7 +18,7 @@ options:
     output_language: python
     realtime_scheduling: ''
     run_command: '{python} -u {filename}'
-    run_options: prompt
+    run_options: run
     thread_safe_setters: ''
     title: LibreSDR Four-Channel IIO Overflow Diagnostic
   states:
@@ -234,7 +234,7 @@ blocks:
     alias: ''
     bus_structure_sink: '[[0,],]'
     comment: Consumes all four streams without DSP or GUI work
-    num_inputs: '4'
+    num_inputs: '3'
     type: complex
     vlen: '1'
   states:
@@ -244,12 +244,44 @@ blocks:
     coordinate: [720, 352]
     rotation: 0
     state: enabled
+- name: alpha_rx1_rate
+  id: blocks_probe_rate
+  parameters:
+    alpha: '0.25'
+    affinity: ''
+    alias: ''
+    mintime: '2000.0'
+    name: '"Alpha RX1 source-only rate"'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 192]
+    rotation: 0
+    state: enabled
+- name: rate_messages
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    en_uvec: 'False'
+    log_level: info
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 192]
+    rotation: 0
+    state: enabled
 
 connections:
-- [alpha_rx1_head, '0', all_channels_sink, '0']
-- [alpha_rx2_head, '0', all_channels_sink, '1']
-- [bravo_rx1_head, '0', all_channels_sink, '2']
-- [bravo_rx2_head, '0', all_channels_sink, '3']
+- [alpha_rx1_head, '0', alpha_rx1_rate, '0']
+- [alpha_rx1_rate, rate, rate_messages, print]
+- [alpha_rx2_head, '0', all_channels_sink, '0']
+- [bravo_rx1_head, '0', all_channels_sink, '1']
+- [bravo_rx2_head, '0', all_channels_sink, '2']
 - [libresdr_a, '0', alpha_rx1_head, '0']
 - [libresdr_a, '1', alpha_rx2_head, '0']
 - [libresdr_b, '0', bravo_rx1_head, '0']
