@@ -1,0 +1,362 @@
+options:
+  parameters:
+    alias: ''
+    author: gr-doa LibreSDR research port
+    catch_exceptions: 'True'
+    comment: Headless CFO and phase-calibration processing-load diagnostic.
+    copyright: null
+    description: Runs the two LibreSDR sources through only cross-SDR CFO correction,
+      pilot filtering, and UCA phase calibration. MUSIC and every GUI diagnostic are
+      excluded, and all four calibrated outputs terminate in a Null Sink.
+    gen_linking: dynamic
+    generate_options: no_gui
+    generator_class_name: PythonNoGuiGenerator
+    generator_module: gnuradio.grc.workflows.python_nogui
+    hier_block_src_path: '.:'
+    id: diagnose_libresdr_cfo_calibration_load
+    max_nouts: '0'
+    output_language: python
+    realtime_scheduling: ''
+    run_command: '{python} -u {filename}'
+    run_options: run
+    thread_safe_setters: ''
+    title: LibreSDR CFO and Calibration Load Diagnostic
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: center_freq
+  id: variable
+  parameters:
+    comment: Match the live UCA receiver centre frequency
+    value: int(920.9e6)
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [16, 16], rotation: 0, state: enabled}
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: Reduced rate proven sustainable by the source-only test
+    value: int(2.1e6)
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 16], rotation: 0, state: enabled}
+- name: rf_bandwidth
+  id: variable
+  parameters:
+    comment: Requested AD9361 RF bandwidth
+    value: int(2.8e6)
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 16], rotation: 0, state: enabled}
+- name: rx_gain
+  id: variable
+  parameters:
+    comment: Same manual gain on all four channels
+    value: '40'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [424, 16], rotation: 0, state: enabled}
+- name: test_seconds
+  id: variable
+  parameters:
+    comment: Fixed diagnostic duration
+    value: '20'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [560, 16], rotation: 0, state: enabled}
+- name: pilot_offset
+  id: variable
+  parameters:
+    comment: B210 complex tone offset from centre frequency
+    value: 50e3
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [696, 16], rotation: 0, state: enabled}
+- name: pilot_decim
+  id: variable
+  parameters:
+    comment: Identical decimation in all four pilot filters
+    value: '8'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [832, 16], rotation: 0, state: enabled}
+- name: pilot_passband
+  id: variable
+  parameters:
+    comment: Low-pass cutoff after translating the pilot to DC
+    value: 10e3
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [968, 16], rotation: 0, state: enabled}
+- name: pilot_transition
+  id: variable
+  parameters:
+    comment: Pilot LPF transition width
+    value: 10e3
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1104, 16], rotation: 0, state: enabled}
+- name: array_radius
+  id: variable
+  parameters:
+    comment: Physical UCA radius in metres
+    value: 0.16263 / (2**0.5)
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1240, 16], rotation: 0, state: enabled}
+- name: pilot_rf
+  id: variable
+  parameters:
+    comment: Actual pilot RF frequency
+    value: center_freq + pilot_offset
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1376, 16], rotation: 0, state: enabled}
+- name: norm_radius
+  id: variable
+  parameters:
+    comment: Frequency-derived UCA radius in wavelengths
+    value: array_radius * pilot_rf / 299792458.0
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1512, 16], rotation: 0, state: enabled}
+- name: num_elements
+  id: variable
+  parameters:
+    comment: Two RX channels per LibreSDR
+    value: '4'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [16, 96], rotation: 0, state: enabled}
+- name: pilot_bearing
+  id: variable
+  parameters:
+    comment: Source bearing from array centre towards the B210 pilot
+    value: '0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 96], rotation: 0, state: enabled}
+- name: element0_bearing
+  id: variable
+  parameters:
+    comment: Alpha RX1 physical element bearing
+    value: '225.0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 96], rotation: 0, state: enabled}
+- name: element_bearing_step
+  id: variable
+  parameters:
+    comment: Physical stream order proceeds clockwise around the UCA
+    value: '-90.0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [424, 96], rotation: 0, state: enabled}
+- name: calibration_skip
+  id: variable
+  parameters:
+    comment: Filtered samples skipped after CFO lock
+    value: 2**14
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [560, 96], rotation: 0, state: enabled}
+- name: calibration_samples
+  id: variable
+  parameters:
+    comment: Filtered pilot samples used for phase/coherence averaging
+    value: 2**16
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [696, 96], rotation: 0, state: enabled}
+- name: calibration_file
+  id: variable
+  parameters:
+    comment: Separate diagnostic output; never overwrites the live calibration file
+    value: '"/tmp/gr-doa-uca-phase-offsets-load-diagnostic.cfg"'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [832, 96], rotation: 0, state: enabled}
+- name: cfo_settling_samples
+  id: variable
+  parameters:
+    comment: Initial raw-sample settling window
+    value: 2**16
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [16, 176], rotation: 0, state: enabled}
+- name: cfo_estimation_samples
+  id: variable
+  parameters:
+    comment: Raw OTA pilot samples per CFO window
+    value: 2**18
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 176], rotation: 0, state: enabled}
+- name: cfo_retry_delay_samples
+  id: variable
+  parameters:
+    comment: Raw samples passed before retrying a rejected estimate
+    value: 2**20
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 176], rotation: 0, state: enabled}
+- name: cfo_agreement_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum disagreement between the two Bravo estimates
+    value: '10.0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [424, 176], rotation: 0, state: enabled}
+- name: cfo_max_abs_hz
+  id: variable
+  parameters:
+    comment: Maximum plausible Bravo-minus-Alpha CFO magnitude
+    value: '20000.0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [560, 176], rotation: 0, state: enabled}
+- name: cfo_min_coherence
+  id: variable
+  parameters:
+    comment: Minimum pilot-fit coherence
+    value: '0.90'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [696, 176], rotation: 0, state: enabled}
+- name: cfo_validation_settling_samples
+  id: variable
+  parameters:
+    comment: Corrected samples settled before residual validation
+    value: 2**16
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [832, 176], rotation: 0, state: enabled}
+- name: cfo_residual_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum residual before CFO lock
+    value: '1.0'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [968, 176], rotation: 0, state: enabled}
+- name: cfo_max_refinement_rounds
+  id: variable
+  parameters:
+    comment: Maximum residual correction rounds
+    value: '3'
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1104, 176], rotation: 0, state: enabled}
+- name: libresdr_a
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '262144'
+    comment: Alpha RX1 and RX2
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'False'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.4.1
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [48, 280], rotation: 0, state: enabled}
+- name: libresdr_b
+  id: iio_fmcomms2_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: rf_bandwidth
+    bbdc: 'True'
+    buffer_size: '262144'
+    comment: Bravo; outputs are permuted into physical order below
+    filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
+    frequency: center_freq
+    fstop: '0'
+    gain1: '''manual'''
+    gain2: '''manual'''
+    len_tag_key: packet_len
+    manual_gain1: rx_gain
+    manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'False'
+    rf_port_select: '''A_BALANCED'''
+    rfdc: 'True'
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    type: fc32
+    uri: ip:192.168.5.1
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [48, 536], rotation: 0, state: enabled}
+- name: alpha_rx1_head
+  id: blocks_head
+  parameters: {affinity: '', alias: '', comment: '', num_items: 'int(test_seconds * samp_rate)', type: complex, vlen: '1'}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 288], rotation: 0, state: enabled}
+- name: alpha_rx2_head
+  id: blocks_head
+  parameters: {affinity: '', alias: '', comment: '', num_items: 'int(test_seconds * samp_rate)', type: complex, vlen: '1'}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 360], rotation: 0, state: enabled}
+- name: bravo_rx1_head
+  id: blocks_head
+  parameters: {affinity: '', alias: '', comment: '', num_items: 'int(test_seconds * samp_rate)', type: complex, vlen: '1'}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 544], rotation: 0, state: enabled}
+- name: bravo_rx2_head
+  id: blocks_head
+  parameters: {affinity: '', alias: '', comment: '', num_items: 'int(test_seconds * samp_rate)', type: complex, vlen: '1'}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 616], rotation: 0, state: enabled}
+- name: cfo_correction
+  id: doa_cross_sdr_cfo_corrector
+  parameters:
+    affinity: ''
+    agreement_tolerance_hz: cfo_agreement_tolerance_hz
+    alias: ''
+    comment: Alpha remains untouched; one common rotator corrects both Bravo channels
+    estimation_samples: cfo_estimation_samples
+    max_abs_cfo_hz: cfo_max_abs_hz
+    max_refinement_rounds: cfo_max_refinement_rounds
+    maxoutbuf: '0'
+    min_coherence: cfo_min_coherence
+    minoutbuf: '0'
+    pilot_bandwidth_hz: pilot_passband
+    pilot_offset_hz: pilot_offset
+    residual_tolerance_hz: cfo_residual_tolerance_hz
+    retry_delay_samples: cfo_retry_delay_samples
+    samp_rate: samp_rate
+    settling_samples: cfo_settling_samples
+    validation_settling_samples: cfo_validation_settling_samples
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [520, 448], rotation: 0, state: enabled}
+- name: pilot_filter_0
+  id: freq_xlating_fir_filter_xxx
+  parameters: {affinity: '', alias: '', center_freq: pilot_offset, comment: Element 0 pilot selector, decim: pilot_decim, maxoutbuf: '0', minoutbuf: '0', samp_rate: samp_rate, taps: 'firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)', type: ccc}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [760, 288], rotation: 0, state: enabled}
+- name: pilot_filter_1
+  id: freq_xlating_fir_filter_xxx
+  parameters: {affinity: '', alias: '', center_freq: pilot_offset, comment: Element 1 pilot selector, decim: pilot_decim, maxoutbuf: '0', minoutbuf: '0', samp_rate: samp_rate, taps: 'firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)', type: ccc}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [760, 376], rotation: 0, state: enabled}
+- name: pilot_filter_2
+  id: freq_xlating_fir_filter_xxx
+  parameters: {affinity: '', alias: '', center_freq: pilot_offset, comment: Element 2 pilot selector, decim: pilot_decim, maxoutbuf: '0', minoutbuf: '0', samp_rate: samp_rate, taps: 'firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)', type: ccc}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [760, 536], rotation: 0, state: enabled}
+- name: pilot_filter_3
+  id: freq_xlating_fir_filter_xxx
+  parameters: {affinity: '', alias: '', center_freq: pilot_offset, comment: Element 3 pilot selector, decim: pilot_decim, maxoutbuf: '0', minoutbuf: '0', samp_rate: samp_rate, taps: 'firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)', type: ccc}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [760, 624], rotation: 0, state: enabled}
+- name: ota_calibration
+  id: doa_uca_pilot_calibration
+  parameters:
+    affinity: ''
+    alias: ''
+    calibration_samples: calibration_samples
+    comment: Same gated calibration used by the live graph
+    config_filename: calibration_file
+    element0_angle: element0_bearing
+    element_angle_step: element_bearing_step
+    maxoutbuf: '0'
+    min_coherence: '0.90'
+    minoutbuf: '0'
+    norm_radius: norm_radius
+    num_inputs: num_elements
+    pilot_angle: pilot_bearing
+    skip_samples: calibration_skip
+    start_tag_key: '''cfo_locked'''
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1000, 448], rotation: 0, state: enabled}
+- name: calibrated_sink
+  id: blocks_null_sink
+  parameters: {affinity: '', alias: '', bus_structure_sink: '[[0,],]', comment: Consumes all calibrated outputs without MUSIC or GUI work, num_inputs: '4', type: complex, vlen: '1'}
+  states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1280, 448], rotation: 0, state: enabled}
+
+connections:
+- [alpha_rx1_head, '0', cfo_correction, '0']
+- [alpha_rx2_head, '0', cfo_correction, '1']
+- [bravo_rx2_head, '0', cfo_correction, '2']
+- [bravo_rx1_head, '0', cfo_correction, '3']
+- [cfo_correction, '0', pilot_filter_0, '0']
+- [cfo_correction, '1', pilot_filter_1, '0']
+- [cfo_correction, '2', pilot_filter_2, '0']
+- [cfo_correction, '3', pilot_filter_3, '0']
+- [pilot_filter_0, '0', ota_calibration, '0']
+- [pilot_filter_1, '0', ota_calibration, '1']
+- [pilot_filter_2, '0', ota_calibration, '2']
+- [pilot_filter_3, '0', ota_calibration, '3']
+- [ota_calibration, '0', calibrated_sink, '0']
+- [ota_calibration, '1', calibrated_sink, '1']
+- [ota_calibration, '2', calibrated_sink, '2']
+- [ota_calibration, '3', calibrated_sink, '3']
+- [libresdr_a, '0', alpha_rx1_head, '0']
+- [libresdr_a, '1', alpha_rx2_head, '0']
+- [libresdr_b, '0', bravo_rx1_head, '0']
+- [libresdr_b, '1', bravo_rx2_head, '0']
+
+metadata:
+  file_format: 1
+  grc_version: v3.11.0.0git-1103-g14d6a758

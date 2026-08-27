@@ -247,6 +247,30 @@ every two seconds and stops automatically after 20 seconds.
 The buffer-allocation alignment warning is unrelated and can be ignored for
 this test.
 
+If the source-only test completes without any `O`, run the next-stage
+`diagnose_libresdr_cfo_calibration_load.py` directly from a terminal. This
+20-second graph retains the live CFO corrector, four pilot filters, and gated
+phase calibration, but replaces MUSIC and every GUI branch with a four-input
+Null Sink:
+
+```sh
+python3 -u apps/LibreSDR-UCA/diagnose_libresdr_cfo_calibration_load.py \
+  2>&1 | tee /tmp/libresdr_cfo_calibration_load.txt
+```
+
+- no `O` and `UCA calibration complete`: CFO/calibration processing is
+  sustainable, so the downstream MUSIC/diagnostic workload causes the live
+  graph overruns;
+- any `O`, or calibration failure after a valid CFO lock: the load or blocking
+  operation is already present in the CFO/filter/calibration path and must be
+  optimized before restoring MUSIC;
+- repeated CFO rejection without `O`: investigate pilot stability/content
+  rather than host throughput.
+
+This diagnostic writes any accepted coefficients only to
+`/tmp/gr-doa-uca-phase-offsets-load-diagnostic.cfg`, never the live calibration
+file.
+
 The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
 architecture. The intentional changes are the UCA geometry, full-circle scan,
 physical channel order, frequency-derived manifold, narrow pilot selection, and
