@@ -117,6 +117,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         )
         self._pilot_mix_step = -2.0 * numpy.pi * self.pilot_offset_hz / self.samp_rate
         self._pilot_mix_phase = 0.0
+        # Long RF/PLL settling and retry delays must not run three full-rate
+        # scipy filters over samples that will never enter an estimate. The
+        # fourth-order pilot filter reaches steady state comfortably inside
+        # this short tail immediately preceding each measurement window.
+        self._pilot_filter_warmup_samples = 4096
         self._pilot_filter_states = None
         self._reset_pilot_filters()
 
@@ -302,6 +307,26 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             ) - numpy.pi
         )
         return filtered
+
+    def _warm_pilot_filter_tail(
+            self, input_items, output_items, start, count, remaining_before):
+        """Filter only the final warm-up tail of a discard interval."""
+        remaining_after = remaining_before - count
+        warm_count = max(
+            0,
+            min(
+                count,
+                self._pilot_filter_warmup_samples - remaining_after,
+            ),
+        )
+        if warm_count:
+            warm_start = start + count - warm_count
+            self._filter_pilot_segment(
+                input_items,
+                output_items,
+                warm_start,
+                start + count,
+            )
 
     def _finish_estimation(self):
         estimating_residual = self._estimating_residual
@@ -571,22 +596,32 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         cursor = 0
         while cursor < item_count and not self._locked:
             if self.settling_remaining:
+                remaining_before = self.settling_remaining
                 skipped = min(self.settling_remaining, item_count - cursor)
                 if self._correction_active:
                     self._apply_correction(
                         input_items, output_items, cursor, cursor + skipped
                     )
-                self._filter_pilot_segment(
-                    input_items, output_items, cursor, cursor + skipped
+                self._warm_pilot_filter_tail(
+                    input_items,
+                    output_items,
+                    cursor,
+                    skipped,
+                    remaining_before,
                 )
                 self.settling_remaining -= skipped
                 cursor += skipped
                 continue
 
             if self.retry_remaining:
+                remaining_before = self.retry_remaining
                 skipped = min(self.retry_remaining, item_count - cursor)
-                self._filter_pilot_segment(
-                    input_items, output_items, cursor, cursor + skipped
+                self._warm_pilot_filter_tail(
+                    input_items,
+                    output_items,
+                    cursor,
+                    skipped,
+                    remaining_before,
                 )
                 self.retry_remaining -= skipped
                 cursor += skipped

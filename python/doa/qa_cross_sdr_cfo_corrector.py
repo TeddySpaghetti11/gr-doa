@@ -67,6 +67,33 @@ def _run_block(block, inputs, max_noutput_items=257):
 
 
 class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
+    def test_long_settling_filters_only_the_final_warmup_tail(self):
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=100000.0,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=10000,
+            estimation_samples=4096,
+            max_abs_cfo_hz=1000.0,
+        )
+        input_items = [numpy.ones(1024, dtype=numpy.complex64) for _ in range(4)]
+        output_items = [numpy.empty(1024, dtype=numpy.complex64) for _ in range(4)]
+        filtered_counts = []
+        original_filter = corrector._filter_pilot_segment
+
+        def recording_filter(inputs, outputs, start, stop):
+            filtered_counts.append(stop - start)
+            return original_filter(inputs, outputs, start, stop)
+
+        corrector._filter_pilot_segment = recording_filter
+        self.assertEqual(corrector.work(input_items, output_items), 1024)
+        self.assertEqual(filtered_counts, [])
+        self.assertEqual(corrector.settling_remaining, 8976)
+
+        corrector.settling_remaining = corrector._pilot_filter_warmup_samples
+        self.assertEqual(corrector.work(input_items, output_items), 1024)
+        self.assertEqual(filtered_counts, [1024])
+
     def test_common_rotator_preserves_alpha_phase_and_chunk_continuity(self):
         sample_rate = 100000.0
         settling_samples = 37

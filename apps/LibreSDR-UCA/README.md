@@ -102,6 +102,10 @@ raw-window length. Once a correction is active, a cached complex rotator is
 reused across scheduler calls; only its starting phase changes per call. This
 preserves phase continuity and the one-common-rotator invariant while avoiding
 a full complex exponential and a redundant Bravo copy for every output chunk.
+Long RF/PLL settling and retry intervals bypass the internal estimator filters;
+only their final 4,096 samples warm the fourth-order pilot filter before a CFO
+window. Samples passed to the graph outputs are unaffected by this estimator-only
+optimization.
 
 A rejected coarse or residual window prints finite/non-zero sample counts,
 waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
