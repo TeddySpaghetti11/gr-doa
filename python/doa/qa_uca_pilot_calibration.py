@@ -105,9 +105,49 @@ class qa_uca_pilot_calibration(gr_unittest.TestCase):
         outputs = [numpy.empty(sample_count, dtype=numpy.complex64) for _ in range(4)]
         calibration.work(inputs, outputs)
         coherences = calibration.coherences()
+        self.assertFalse(calibration.calibrated())
+        self.assertTrue(calibration.calibration_failed())
+        self.assertEqual(calibration.status(), "failed")
+        self.assertIn("ch3/ch0 coherence", calibration.failure_reason())
         self.assertGreater(coherences[1], 0.999)
         self.assertGreater(coherences[2], 0.999)
         self.assertLess(coherences[3], 0.1)
+        numpy.testing.assert_array_equal(
+            calibration.coefficients(), numpy.ones(4, dtype=numpy.complex64)
+        )
+
+        bypassed = [
+            numpy.empty(sample_count, dtype=numpy.complex64) for _ in range(4)
+        ]
+        calibration.work(inputs, bypassed)
+        for channel in range(4):
+            numpy.testing.assert_array_equal(bypassed[channel], inputs[channel])
+
+    def test_failed_calibration_does_not_write_coefficients(self):
+        sample_count = 512
+        tone = numpy.ones(sample_count, dtype=numpy.complex64)
+        inputs = [tone, tone, tone, numpy.zeros_like(tone)]
+
+        with tempfile.TemporaryDirectory() as directory:
+            config_filename = os.path.join(directory, "invalid.cfg")
+            calibration = doa.uca_pilot_calibration(
+                num_inputs=4,
+                norm_radius=0.25,
+                pilot_angle=0.0,
+                element0_angle=0.0,
+                element_angle_step=90.0,
+                skip_samples=0,
+                calibration_samples=sample_count,
+                config_filename=config_filename,
+            )
+            outputs = [
+                numpy.empty(sample_count, dtype=numpy.complex64)
+                for _ in range(4)
+            ]
+            calibration.work(inputs, outputs)
+
+            self.assertTrue(calibration.calibration_failed())
+            self.assertFalse(os.path.exists(config_filename))
 
     def test_saved_phases_match_ettus_phase_correct_format(self):
         num_elements = 4

@@ -13,7 +13,8 @@ templates:
         element_angle_step=${element_angle_step},
         skip_samples=${skip_samples},
         calibration_samples=${calibration_samples},
-        config_filename=${config_filename})
+        config_filename=${config_filename},
+        min_coherence=${min_coherence})
 
 parameters:
 - id: num_inputs
@@ -48,12 +49,17 @@ parameters:
   label: Coefficient Log File (optional)
   dtype: file_save
   default: "''"
+- id: min_coherence
+  label: Minimum Valid Coherence
+  dtype: float
+  default: 0.90
 
 asserts:
 - ${ num_inputs > 1 }
 - ${ norm_radius > 0.0 }
 - ${ skip_samples >= 0 }
 - ${ calibration_samples > 0 }
+- ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
 
 inputs:
 - label: in
@@ -84,6 +90,9 @@ documentation: |-
   The console also prints normalized complex coherence for every channel relative
   to channel 0. Values close to 1 are expected for a clean stationary pilot; a
   low value means the phase correction and MUSIC result should not be trusted.
+  If any non-reference channel is below min_coherence (0.90 by default), the
+  block prints an explicit CALIBRATION FAILED state, does not save coefficients,
+  and switches to unity/bypass output so invalid phase estimates are never frozen.
 
   Keep both IIO sources and this flowgraph running after calibration. Reopening
   or retuning either LibreSDR can invalidate the corrections. When a log filename

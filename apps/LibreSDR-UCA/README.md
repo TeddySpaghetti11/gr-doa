@@ -82,6 +82,30 @@ Baseband DC correction: True
 The same manual gain is used on all channels. Quadrature tracking stays disabled
 after calibration so an adaptive update cannot change relative RF phase.
 
+## Coherence diagnostics
+
+The flowgraph deliberately exposes the phase at three boundaries so a failure
+can be localized without changing the receiver architecture:
+
+1. **TRUE pre-filter relative phase** is connected directly to the IIO source
+   outputs in physical order `A RX1, A RX2, B RX2, B RX1` and runs at
+   `samp_rate` (`2.8 MS/s`).
+2. **POST-FILTER relative phase** is the original diagnostic after the four
+   independent translating/decimating FIR filters and before calibration. It
+   runs at `proc_rate` (`350 kS/s`).
+3. **Alpha internal** and **Bravo internal** plots compare RX1 with RX2 inside
+   each LibreSDR before filtering. A flat same-radio trace with moving
+   inter-radio traces isolates the problem to coherence between the devices.
+
+All phase displays use the Ettus convention `arg(x0 * conj(xi))`; their labels
+name both physical inputs to avoid an ambiguous channel number.
+
+The raw four-channel FFT is also connected before all filters in physical UCA
+order. It uses the QT sink's maximum valid size of 32,768 bins (about
+`85.4 Hz/bin` at `2.8 MS/s`) and explicit channel labels so a small frequency
+difference between the two radios can be seen directly. GNU Radio 3.11 rejects
+65,536 for this sink even though that would otherwise be preferred.
+
 ## Calibration coherence
 
 The calibration block averages the complex cross product
@@ -98,16 +122,22 @@ gamma_i = |sum(x_0 conj(x_i))|
 ```
 
 for each channel relative to channel 0. `gamma` is between 0 and 1. A clean
-stationary pilot should be close to 1; the block prints a warning below `0.90`.
-For validation, values around `0.98-1.00` are preferable.
+stationary pilot should be close to 1. Calibration now **fails** if any
+non-reference channel is below `0.90`; values around `0.98-1.00` are preferable.
+
+On failure the console prints `UCA CALIBRATION FAILED`, no coefficient file is
+written, and the block switches to unity/bypass output. This keeps downstream
+plots alive with explicitly uncalibrated samples and prevents an invalid phase
+estimate from being frozen or described as successful. Do not trust the MUSIC
+bearing until the flowgraph is restarted and all channels pass calibration.
 
 If the same-radio channel is highly coherent but channels from the other
 LibreSDR are not, investigate inter-device timing/coherence before interpreting
 the MUSIC result.
 
-The existing Phase Offset Est plots remain Ettus's instantaneous
-`arg(x0*conj(xi))` diagnostics. The averaged calibration phase and coherence
-printed in the console are more reliable indicators for a stationary CW pilot.
+The averaged calibration phase and coherence printed in the console are more
+reliable calibration indicators for a stationary CW pilot; the instantaneous
+plots are intended to reveal ramps, discontinuities, and where they first occur.
 
 ## Build and test
 
@@ -122,16 +152,30 @@ sudo ldconfig
 The UCA tests now exercise the real `225, 135, 45, 315 deg` stream order and the
 source-bearing steering convention.
 
+After installation, start the B210 `+50 kHz` pilot using its existing gain
+setting, then run the checked-in Python equivalent:
+
+```sh
+python3 apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.py
+```
+
+Alternatively, open `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc` in GNU Radio
+Companion and run it there. The Python and GRC versions use the same channel
+order, diagnostics, and calibration threshold.
+
 ## Test procedure
 
 1. Confirm the physical channel order above.
 2. Set `pilot_bearing` to the actual B210 bearing for the current setup.
 3. Start the B210 calibration transmitter.
-4. Start `run_MUSIC_uca_live_cal.grc`.
-5. Wait for `UCA calibration complete` and inspect all three coherence values.
-6. Keep the source stationary and verify the MUSIC spectrum has clear structure.
-7. Rotate through several known off-axis bearings and compare the peak movement.
-8. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
+4. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
+5. Compare TRUE pre-filter, POST-FILTER, Alpha-internal, and Bravo-internal phase.
+6. Inspect the 32,768-bin raw FFT for a channel- or radio-specific frequency shift.
+7. Wait for `UCA calibration complete` and inspect all three coherence values. If
+   `UCA CALIBRATION FAILED` appears, treat the output as uncalibrated bypass data.
+8. Keep the source stationary and verify the MUSIC spectrum has clear structure.
+9. Rotate through several known off-axis bearings and compare the peak movement.
+10. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
 
 The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
 architecture. The intentional changes are the UCA geometry, full-circle scan,

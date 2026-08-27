@@ -17,9 +17,11 @@ class uca_pilot_calibration(gr.sync_block):
 
     The block deliberately emits zeros while skipping and calibrating. Once the
     requested pilot samples have been accumulated, it applies fixed phase
-    coefficients and passes all channels through. Keeping this block and the two
-    IIO sources alive avoids invalidating the calibration by reopening or
-    retuning either AD9361.
+    coefficients and passes all channels through. If any channel fails the
+    coherence threshold, it enters an explicit failed state and bypasses all
+    inputs with unity coefficients instead of freezing an untrustworthy phase.
+    Keeping this block and the two IIO sources alive avoids invalidating a valid
+    calibration by reopening or retuning either AD9361.
 
     ``pilot_angle`` is the bearing from the array centre *towards the source*.
     With the usual analytic-signal convention the corresponding UCA manifold is
@@ -37,13 +39,16 @@ class uca_pilot_calibration(gr.sync_block):
                  element_angle_step=90.0,
                  skip_samples=8192,
                  calibration_samples=32768,
-                 config_filename=""):
+                 config_filename="",
+                 min_coherence=0.90):
         if num_inputs < 2:
             raise ValueError("UCA pilot calibration requires at least two inputs")
         if norm_radius <= 0.0:
             raise ValueError("Normalized UCA radius must be positive")
         if skip_samples < 0 or calibration_samples <= 0:
             raise ValueError("Skip must be non-negative and calibration length positive")
+        if not 0.0 <= min_coherence <= 1.0:
+            raise ValueError("Minimum coherence must be between 0 and 1")
 
         gr.sync_block.__init__(
             self,
@@ -60,13 +65,15 @@ class uca_pilot_calibration(gr.sync_block):
         self.skip_remaining = int(skip_samples)
         self.calibration_samples = int(calibration_samples)
         self.config_filename = str(config_filename)
+        self.min_coherence = float(min_coherence)
 
         self._samples_accumulated = 0
         self._cross_sum = numpy.zeros(self.num_inputs, dtype=numpy.complex128)
         self._power_sum = numpy.zeros(self.num_inputs, dtype=numpy.float64)
         self._coefficients = numpy.ones(self.num_inputs, dtype=numpy.complex64)
-        self._coherences = numpy.ones(self.num_inputs, dtype=numpy.float64)
-        self._calibrated = False
+        self._coherences = numpy.zeros(self.num_inputs, dtype=numpy.float64)
+        self._state = "collecting"
+        self._failure_reason = ""
         self._lock = threading.Lock()
 
         theta = numpy.deg2rad(self.pilot_angle)
@@ -82,13 +89,29 @@ class uca_pilot_calibration(gr.sync_block):
         print(
             "UCA calibration: waiting for "
             f"{self.calibration_samples} pilot samples after skipping "
-            f"{self.skip_remaining} samples"
+            f"{self.skip_remaining} samples; minimum coherence is "
+            f"{self.min_coherence:.2f}"
         )
 
     def calibrated(self):
         """Return True after coefficients have been frozen."""
         with self._lock:
-            return self._calibrated
+            return self._state == "calibrated"
+
+    def calibration_failed(self):
+        """Return True when validation rejected the collected coefficients."""
+        with self._lock:
+            return self._state == "failed"
+
+    def status(self):
+        """Return ``collecting``, ``calibrated``, or ``failed``."""
+        with self._lock:
+            return self._state
+
+    def failure_reason(self):
+        """Return the validation failure message, or an empty string."""
+        with self._lock:
+            return self._failure_reason
 
     def coefficients(self):
         """Return a copy of the current complex correction coefficients."""
@@ -100,32 +123,64 @@ class uca_pilot_calibration(gr.sync_block):
         with self._lock:
             return self._coherences.copy()
 
+    def _fail_calibration(self, reason, coherences):
+        with self._lock:
+            self._coefficients = numpy.ones(
+                self.num_inputs, dtype=numpy.complex64
+            )
+            self._coherences = coherences.copy()
+            self._state = "failed"
+            self._failure_reason = reason
+
+        print("=" * 72)
+        print(f"UCA CALIBRATION FAILED: {reason}")
+        print(
+            "No phase coefficients were frozen or written. The calibration "
+            "block is now in UNITY/BYPASS mode so downstream diagnostics keep "
+            "receiving uncalibrated samples. Do not trust the MUSIC bearing."
+        )
+        print("=" * 72)
+
     def _finish_calibration(self):
         eps = numpy.finfo(numpy.float64).eps
         reference_power = self._power_sum[0]
+        coherences = numpy.zeros(self.num_inputs, dtype=numpy.float64)
         if reference_power <= eps:
-            raise RuntimeError("Pilot calibration failed: reference channel has no power")
+            self._fail_calibration(
+                "reference channel 0 has no measurable pilot power", coherences
+            )
+            return
 
         coefficients = numpy.ones(self.num_inputs, dtype=numpy.complex128)
-        coherences = numpy.ones(self.num_inputs, dtype=numpy.float64)
+        coherences[0] = 1.0
         steering_reference = self._steering[0]
+        failures = []
 
         for channel in range(1, self.num_inputs):
             cross = self._cross_sum[channel]
             channel_power = self._power_sum[channel]
             denom = numpy.sqrt(reference_power * channel_power)
             if denom <= eps:
-                raise RuntimeError(
-                    f"Pilot calibration failed: channel {channel} has no power"
+                failures.append(
+                    f"channel {channel} has no measurable pilot power"
                 )
+                print(
+                    f"UCA calibration ch{channel}/ch0: coherence=0.0000 "
+                    "(no measurable channel power)"
+                )
+                continue
 
             coherence = float(numpy.clip(abs(cross) / denom, 0.0, 1.0))
             coherences[channel] = coherence
             if abs(cross) <= eps:
-                raise RuntimeError(
-                    f"Pilot calibration failed: channel {channel} is not coherent "
-                    "with the reference"
+                failures.append(
+                    f"channel {channel} has no coherent cross-correlation with ch0"
                 )
+                print(
+                    f"UCA calibration ch{channel}/ch0: coherence={coherence:.4f} "
+                    "(no usable phase estimate)"
+                )
+                continue
 
             # Same cross-product convention as Ettus phase_offset_est:
             # angle(x0 * conj(xi)).  Divide out the known array-manifold ratio
@@ -144,17 +199,20 @@ class uca_pilot_calibration(gr.sync_block):
                 f"hardware correction={numpy.angle(coefficients[channel], deg=True):.3f} deg, "
                 f"coherence={coherence:.4f}"
             )
-            if coherence < 0.90:
-                print(
-                    f"WARNING: UCA calibration ch{channel}/ch0 coherence is only "
-                    f"{coherence:.4f}; do not trust MUSIC until the filtered pilot "
-                    "is strongly coherent on all channels."
+            if coherence < self.min_coherence:
+                failures.append(
+                    f"ch{channel}/ch0 coherence {coherence:.4f} is below "
+                    f"{self.min_coherence:.2f}"
                 )
+
+        if failures:
+            self._fail_calibration("; ".join(failures), coherences)
+            return
 
         with self._lock:
             self._coefficients = coefficients.astype(numpy.complex64)
             self._coherences = coherences
-            self._calibrated = True
+            self._state = "calibrated"
 
         for channel, coefficient in enumerate(coefficients):
             print(
@@ -196,7 +254,7 @@ class uca_pilot_calibration(gr.sync_block):
             self.skip_remaining -= skipped
             cursor += skipped
 
-        if not self._calibrated and cursor < item_count:
+        if self.status() == "collecting" and cursor < item_count:
             needed = self.calibration_samples - self._samples_accumulated
             used = min(needed, item_count - cursor)
             reference = input_items[0][cursor:cursor + used].astype(
@@ -222,11 +280,17 @@ class uca_pilot_calibration(gr.sync_block):
             if self._samples_accumulated == self.calibration_samples:
                 self._finish_calibration()
 
-        if self._calibrated and cursor < item_count:
+        state = self.status()
+        if state == "calibrated" and cursor < item_count:
             for channel in range(self.num_inputs):
                 output_items[channel][cursor:item_count] = (
                     input_items[channel][cursor:item_count]
                     * self._coefficients[channel]
                 )
+        elif state == "failed" and cursor < item_count:
+            for channel in range(self.num_inputs):
+                output_items[channel][cursor:item_count] = input_items[channel][
+                    cursor:item_count
+                ]
 
         return item_count

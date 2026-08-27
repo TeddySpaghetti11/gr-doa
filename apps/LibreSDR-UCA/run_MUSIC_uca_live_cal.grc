@@ -1,237 +1,632 @@
 options:
   parameters:
+    alias: ''
     author: gr-doa LibreSDR research port
     catch_exceptions: 'True'
     comment: Four-channel LibreSDR UCA MUSIC with same-session OTA calibration.
-    description: Narrow translated pilot, source-bearing UCA steering, and calibration coherence diagnostics.
+    copyright: null
+    description: Narrow translated pilot, source-bearing UCA steering, and calibration
+      coherence diagnostics.
+    gen_linking: dynamic
     generate_options: qt_gui
     generator_class_name: PythonQtGuiGenerator
     generator_module: gnuradio.grc.workflows.python_qt_gui
+    hier_block_src_path: null
     id: run_MUSIC_uca_live_cal
+    max_nouts: '0'
     output_language: python
+    qt_qss_theme: ''
+    realtime_scheduling: ''
     run: 'True'
     run_command: '{python} -u {filename}'
+    thread_safe_setters: ''
     title: LibreSDR UCA MUSIC - Live OTA Calibration
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [8, 8]
     rotation: 0
     state: enabled
 
 blocks:
-- name: center_freq
-  id: variable
-  parameters:
-    comment: LibreSDR and B210 RF centre frequency
-    value: int(920.9e6)
-  states:
-    coordinate: [16, 16]
-    state: enabled
-
-- name: samp_rate
-  id: variable
-  parameters:
-    comment: LibreSDR complex sample rate
-    value: int(2.8e6)
-  states:
-    coordinate: [144, 16]
-    state: enabled
-
-- name: rf_bandwidth
-  id: variable
-  parameters:
-    comment: Requested AD9361 RF bandwidth
-    value: int(2.8e6)
-  states:
-    coordinate: [272, 16]
-    state: enabled
-
-- name: rx_gain
-  id: variable
-  parameters:
-    comment: Same manual gain on all four channels
-    value: '40'
-  states:
-    coordinate: [400, 16]
-    state: enabled
-
-- name: pilot_offset
-  id: variable
-  parameters:
-    comment: B210 complex tone offset from centre frequency
-    value: 50e3
-  states:
-    coordinate: [528, 16]
-    state: enabled
-
-- name: pilot_decim
-  id: variable
-  parameters:
-    comment: Identical decimation in all four pilot filters
-    value: '8'
-  states:
-    coordinate: [656, 16]
-    state: enabled
-
-- name: pilot_passband
-  id: variable
-  parameters:
-    comment: Low-pass cutoff after translating the pilot to DC
-    value: 10e3
-  states:
-    coordinate: [784, 16]
-    state: enabled
-
-- name: pilot_transition
-  id: variable
-  parameters:
-    comment: Pilot LPF transition width
-    value: 10e3
-  states:
-    coordinate: [912, 16]
-    state: enabled
-
-- name: proc_rate
-  id: variable
-  parameters:
-    comment: Sample rate after pilot filtering/decimation
-    value: samp_rate / pilot_decim
-  states:
-    coordinate: [1040, 16]
-    state: enabled
-
 - name: array_radius
   id: variable
   parameters:
     comment: Physical UCA radius in metres from 162.63 mm adjacent chord spacing
     value: 0.16263 / (2**0.5)
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1168, 16]
+    rotation: 0
     state: enabled
-
-- name: pilot_rf
-  id: variable
-  parameters:
-    comment: Actual RF of the calibration/DF pilot
-    value: center_freq + pilot_offset
-  states:
-    coordinate: [1296, 16]
-    state: enabled
-
-- name: norm_radius
-  id: variable
-  parameters:
-    comment: Frequency-derived UCA radius in wavelengths
-    value: array_radius * pilot_rf / 299792458.0
-  states:
-    coordinate: [1424, 16]
-    state: enabled
-
-- name: num_elements
-  id: variable
-  parameters:
-    comment: Two RX channels per LibreSDR
-    value: '4'
-  states:
-    coordinate: [16, 96]
-    state: enabled
-
-- name: pilot_bearing
-  id: variable
-  parameters:
-    comment: Source bearing from array centre towards the B210 pilot
-    value: '90'
-  states:
-    coordinate: [144, 96]
-    state: enabled
-
-- name: element0_bearing
-  id: variable
-  parameters:
-    comment: 192.168.4.1 RX1 bottom-right element
-    value: '225.0'
-  states:
-    coordinate: [272, 96]
-    state: enabled
-
-- name: element_bearing_step
-  id: variable
-  parameters:
-    comment: Physical stream order proceeds clockwise around the UCA
-    value: '-90.0'
-  states:
-    coordinate: [400, 96]
-    state: enabled
-
-- name: calibration_skip
-  id: variable
-  parameters:
-    comment: Filtered samples skipped before calibration
-    value: 2**14
-  states:
-    coordinate: [528, 96]
-    state: enabled
-
-- name: calibration_samples
-  id: variable
-  parameters:
-    comment: Filtered pilot samples used for complex averaging/coherence
-    value: 2**16
-  states:
-    coordinate: [656, 96]
-    state: enabled
-
-- name: snapshot_size
-  id: variable
-  parameters:
-    comment: Samples per MUSIC covariance estimate
-    value: 2**15
-  states:
-    coordinate: [784, 96]
-    state: enabled
-
-- name: overlap_size
-  id: variable
-  parameters:
-    comment: Covariance snapshot overlap
-    value: 2**14
-  states:
-    coordinate: [912, 96]
-    state: enabled
-
-- name: num_targets
-  id: variable
-  parameters:
-    comment: Known number of narrowband sources
-    value: '1'
-  states:
-    coordinate: [1040, 96]
-    state: enabled
-
-- name: pspectrum_len
-  id: variable
-  parameters:
-    comment: 720 bins gives 0.5 degree scan spacing
-    value: '720'
-  states:
-    coordinate: [1168, 96]
-    state: enabled
-
 - name: calibration_file
   id: variable
   parameters:
     comment: Diagnostic copy of frozen phase coefficients
     value: '"/tmp/gr-doa-uca-phase-offsets.cfg"'
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1296, 96]
+    rotation: 0
     state: enabled
-
+- name: calibration_samples
+  id: variable
+  parameters:
+    comment: Filtered pilot samples used for complex averaging/coherence
+    value: 2**16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [656, 96]
+    rotation: 0
+    state: enabled
+- name: calibration_skip
+  id: variable
+  parameters:
+    comment: Filtered samples skipped before calibration
+    value: 2**14
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [544, 96.0]
+    rotation: 0
+    state: enabled
+- name: center_freq
+  id: variable
+  parameters:
+    comment: LibreSDR and B210 RF centre frequency
+    value: int(920.9e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 16]
+    rotation: 0
+    state: enabled
+- name: element0_bearing
+  id: variable
+  parameters:
+    comment: 192.168.4.1 RX1 bottom-right element
+    value: '225.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 96]
+    rotation: 0
+    state: enabled
+- name: element_bearing_step
+  id: variable
+  parameters:
+    comment: Physical stream order proceeds clockwise around the UCA
+    value: '-90.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 96]
+    rotation: 0
+    state: enabled
+- name: norm_radius
+  id: variable
+  parameters:
+    comment: Frequency-derived UCA radius in wavelengths
+    value: array_radius * pilot_rf / 299792458.0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1424, 16]
+    rotation: 0
+    state: enabled
+- name: num_elements
+  id: variable
+  parameters:
+    comment: Two RX channels per LibreSDR
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 96]
+    rotation: 0
+    state: enabled
+- name: num_targets
+  id: variable
+  parameters:
+    comment: Known number of narrowband sources
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 96]
+    rotation: 0
+    state: enabled
+- name: overlap_size
+  id: variable
+  parameters:
+    comment: Covariance snapshot overlap
+    value: 2**14
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 96]
+    rotation: 0
+    state: enabled
+- name: pilot_bearing
+  id: variable
+  parameters:
+    comment: Source bearing from array centre towards the B210 pilot
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 96]
+    rotation: 0
+    state: enabled
+- name: pilot_decim
+  id: variable
+  parameters:
+    comment: Identical decimation in all four pilot filters
+    value: '8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [656, 16]
+    rotation: 0
+    state: enabled
+- name: pilot_offset
+  id: variable
+  parameters:
+    comment: B210 complex tone offset from centre frequency
+    value: 50e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 16]
+    rotation: 0
+    state: enabled
+- name: pilot_passband
+  id: variable
+  parameters:
+    comment: Low-pass cutoff after translating the pilot to DC
+    value: 10e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [784, 16]
+    rotation: 0
+    state: enabled
+- name: pilot_rf
+  id: variable
+  parameters:
+    comment: Actual RF of the calibration/DF pilot
+    value: center_freq + pilot_offset
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 16]
+    rotation: 0
+    state: enabled
+- name: pilot_transition
+  id: variable
+  parameters:
+    comment: Pilot LPF transition width
+    value: 10e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 16]
+    rotation: 0
+    state: enabled
+- name: proc_rate
+  id: variable
+  parameters:
+    comment: Sample rate after pilot filtering/decimation
+    value: samp_rate / pilot_decim
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 16]
+    rotation: 0
+    state: enabled
+- name: pspectrum_len
+  id: variable
+  parameters:
+    comment: 720 bins gives 0.5 degree scan spacing
+    value: '720'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 96]
+    rotation: 0
+    state: enabled
+- name: rf_bandwidth
+  id: variable
+  parameters:
+    comment: Requested AD9361 RF bandwidth
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 16]
+    rotation: 0
+    state: enabled
+- name: rx_gain
+  id: variable
+  parameters:
+    comment: Same manual gain on all four channels
+    value: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 16]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: LibreSDR complex sample rate
+    value: int(2.8e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 16]
+    rotation: 0
+    state: enabled
+- name: snapshot_size
+  id: variable
+  parameters:
+    comment: Samples per MUSIC covariance estimate
+    value: 2**15
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [784, 96]
+    rotation: 0
+    state: enabled
+- name: bearing_display
+  id: qtgui_number_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    autoscale: 'False'
+    avg: '0'
+    color1: ("black", "black")
+    color10: ("black", "black")
+    color2: ("black", "black")
+    color3: ("black", "black")
+    color4: ("black", "black")
+    color5: ("black", "black")
+    color6: ("black", "black")
+    color7: ("black", "black")
+    color8: ("black", "black")
+    color9: ("black", "black")
+    comment: Strongest MUSIC local maximum; inspect the spectrum before trusting a
+      tied/flat result.
+    factor1: '1'
+    factor10: '1'
+    factor2: '1'
+    factor3: '1'
+    factor4: '1'
+    factor5: '1'
+    factor6: '1'
+    factor7: '1'
+    factor8: '1'
+    factor9: '1'
+    graph_type: qtgui.NUM_GRAPH_HORIZ
+    gui_hint: 0,0,1,1
+    label1: Estimated bearing
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    max: '360'
+    min: '0'
+    name: '"UCA MUSIC bearing"'
+    nconnections: '1'
+    type: float
+    unit1: degrees
+    unit10: ''
+    unit2: ''
+    unit3: ''
+    unit4: ''
+    unit5: ''
+    unit6: ''
+    unit7: ''
+    unit8: ''
+    unit9: ''
+    update_time: '0.10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1808, 400]
+    rotation: 0
+    state: enabled
+- name: bearing_streams
+  id: blocks_vector_to_streams
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: num_targets
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 400]
+    rotation: 0
+    state: enabled
+- name: corrected_channels
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'True'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 0,1,1,1
+    label1: Element 0
+    label10: Signal 10
+    label2: Element 1
+    label3: Element 2
+    label4: Element 3
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Calibrated UCA channels"'
+    nconnections: '4'
+    size: '1024'
+    srate: proc_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: complex
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 640]
+    rotation: 0
+    state: enabled
+- name: corrected_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 2,1,1,1
+    label1: Corrected ch1/ch0
+    label10: Signal 10
+    label2: Corrected ch2/ch0
+    label3: Corrected ch3/ch0
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Corrected relative phase (instantaneous)"'
+    nconnections: '3'
+    size: '1024'
+    srate: proc_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1392, 680]
+    rotation: 0
+    state: enabled
+- name: corrected_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Ettus instantaneous x0*conj(xi) phase diagnostic after calibration.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip + calibration_samples
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 568]
+    rotation: 0
+    state: enabled
+- name: covariance
+  id: doa_autocorrelate
+  parameters:
+    affinity: ''
+    alias: ''
+    avg_method: Forward
+    comment: Forward-only covariance; no ULA reversal averaging.
+    inputs: num_elements
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    overlap_size: overlap_size
+    snapshot_size: snapshot_size
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 352]
+    rotation: 0
+    state: enabled
 - name: libresdr_a
   id: iio_fmcomms2_source
   parameters:
+    affinity: ''
+    alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '32768'
-    comment: 'Element 0 = RX1 bottom-right; element 1 = RX2 bottom-left.'
+    comment: Element 0 = RX1 bottom-right; element 1 = RX2 bottom-left.
     filter: ''
     filter_source: '''Auto'''
     fpass: '0'
@@ -242,6 +637,8 @@ blocks:
     len_tag_key: packet_len
     manual_gain1: rx_gain
     manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
     quadrature: 'False'
     rf_port_select: '''A_BALANCED'''
     rfdc: 'True'
@@ -251,16 +648,22 @@ blocks:
     type: fc32
     uri: ip:192.168.4.1
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [48, 248]
+    rotation: 0
     state: enabled
-
 - name: libresdr_b
   id: iio_fmcomms2_source
   parameters:
+    affinity: ''
+    alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '32768'
-    comment: 'Outputs are permuted below: RX2 top-left = element 2; RX1 top-right = element 3.'
+    comment: 'Outputs are permuted below: RX2 top-left = element 2; RX1 top-right
+      = element 3.'
     filter: ''
     filter_source: '''Auto'''
     fpass: '0'
@@ -271,6 +674,8 @@ blocks:
     len_tag_key: packet_len
     manual_gain1: rx_gain
     manual_gain2: rx_gain
+    maxoutbuf: '0'
+    minoutbuf: '0'
     quadrature: 'False'
     rf_port_select: '''A_BALANCED'''
     rfdc: 'True'
@@ -280,180 +685,185 @@ blocks:
     type: fc32
     uri: ip:192.168.5.1
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [48, 520]
+    rotation: 0
     state: enabled
-
-- name: pilot_filter_0
-  id: freq_xlating_fir_filter_xxx
+- name: music_uca
+  id: doa_MUSIC_uca
   parameters:
-    center_freq: pilot_offset
-    comment: Element 0 pilot selector
-    decim: pilot_decim
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
+    affinity: ''
+    alias: ''
+    comment: Full-circle source-bearing UCA steering model.
+    element0_angle: element0_bearing
+    element_angle_step: element_bearing_step
+    inputs: num_elements
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    norm_radius: norm_radius
+    num_targets: num_targets
+    pspectrum_len: pspectrum_len
   states:
-    coordinate: [312, 248]
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 352]
+    rotation: 0
     state: enabled
-
-- name: pilot_filter_1
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    center_freq: pilot_offset
-    comment: Element 1 pilot selector
-    decim: pilot_decim
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    coordinate: [312, 344]
-    state: enabled
-
-- name: pilot_filter_2
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    center_freq: pilot_offset
-    comment: Element 2 pilot selector (LibreSDR B RX2)
-    decim: pilot_decim
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    coordinate: [312, 560]
-    state: enabled
-
-- name: pilot_filter_3
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    center_freq: pilot_offset
-    comment: Element 3 pilot selector (LibreSDR B RX1)
-    decim: pilot_decim
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    coordinate: [312, 656]
-    state: enabled
-
 - name: ota_calibration
   id: doa_uca_pilot_calibration
   parameters:
+    affinity: ''
+    alias: ''
     calibration_samples: calibration_samples
-    comment: Prints averaged phase, predicted geometry, frozen correction and normalized coherence.
+    comment: Prints averaged phase, predicted geometry, frozen correction and normalized
+      coherence.
     config_filename: calibration_file
     element0_angle: element0_bearing
     element_angle_step: element_bearing_step
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    min_coherence: '0.90'
     norm_radius: norm_radius
     num_inputs: num_elements
     pilot_angle: pilot_bearing
     skip_samples: calibration_skip
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [568, 352]
+    rotation: 0
     state: enabled
-
-- name: raw_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    comment: Ettus instantaneous x0*conj(xi) phase diagnostic before calibration.
-    n_skip_ahead: calibration_skip
-    num_inputs: num_elements
-  states:
-    coordinate: [584, 568]
-    state: enabled
-
-- name: corrected_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    comment: Ettus instantaneous x0*conj(xi) phase diagnostic after calibration.
-    n_skip_ahead: calibration_skip + calibration_samples
-    num_inputs: num_elements
-  states:
-    coordinate: [952, 568]
-    state: enabled
-
-- name: covariance
-  id: doa_autocorrelate
-  parameters:
-    avg_method: Forward
-    comment: Forward-only covariance; no ULA reversal averaging.
-    inputs: num_elements
-    overlap_size: overlap_size
-    snapshot_size: snapshot_size
-  states:
-    coordinate: [952, 352]
-    state: enabled
-
-- name: music_uca
-  id: doa_MUSIC_uca
-  parameters:
-    comment: Full-circle source-bearing UCA steering model.
-    element0_angle: element0_bearing
-    element_angle_step: element_bearing_step
-    inputs: num_elements
-    norm_radius: norm_radius
-    num_targets: num_targets
-    pspectrum_len: pspectrum_len
-  states:
-    coordinate: [1168, 352]
-    state: enabled
-
 - name: peak_finder
   id: doa_find_local_max
   parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
     num_max_vals: num_targets
     vector_len: pspectrum_len
     x_max: '360.0'
     x_min: '0.0'
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1392, 352]
+    rotation: 0
     state: enabled
-
 - name: peak_magnitude_discard
   id: blocks_null_sink
   parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
     num_inputs: '1'
     type: float
     vlen: num_targets
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1600, 312]
+    rotation: 0
     state: enabled
-
-- name: bearing_streams
-  id: blocks_vector_to_streams
+- name: pilot_filter_0
+  id: freq_xlating_fir_filter_xxx
   parameters:
-    num_streams: num_targets
-    type: float
-    vlen: '1'
+    affinity: ''
+    alias: ''
+    center_freq: pilot_offset
+    comment: Element 0 pilot selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
   states:
-    coordinate: [1600, 400]
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 248]
+    rotation: 0
     state: enabled
-
-- name: bearing_display
-  id: qtgui_number_sink
+- name: pilot_filter_1
+  id: freq_xlating_fir_filter_xxx
   parameters:
-    autoscale: 'False'
-    avg: '0'
-    comment: Strongest MUSIC local maximum; inspect the spectrum before trusting a tied/flat result.
-    graph_type: qtgui.NUM_GRAPH_HORIZ
-    gui_hint: 0,0,1,1
-    label1: Estimated bearing
-    max: '360'
-    min: '0'
-    name: '"UCA MUSIC bearing"'
-    nconnections: '1'
-    type: float
-    unit1: degrees
-    update_time: '0.10'
+    affinity: ''
+    alias: ''
+    center_freq: pilot_offset
+    comment: Element 1 pilot selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
   states:
-    coordinate: [1808, 400]
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 344]
+    rotation: 0
     state: enabled
-
+- name: pilot_filter_2
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: pilot_offset
+    comment: Element 2 pilot selector (LibreSDR B RX2)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 560]
+    rotation: 0
+    state: enabled
+- name: pilot_filter_3
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: pilot_offset
+    comment: Element 3 pilot selector (LibreSDR B RX1)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 656]
+    rotation: 0
+    state: enabled
 - name: qtgui_compass_0
   id: qtgui_compass
   parameters:
+    affinity: ''
+    alias: ''
     backgroundColor: default
+    comment: ''
     fullNeedle: '1'
+    gui_hint: ''
     min_size: '250'
+    name: ''
     needleBodyColor: black
     needleTipColor: red
     position: '1'
@@ -462,23 +872,612 @@ blocks:
     update_time: '0.10'
     usemsg: 'False'
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1808, 488]
+    rotation: 0
     state: enabled
-
+- name: raw_fft_display
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: TRUE pre-filter spectra in physical UCA order. This GNU Radio QT sink
+      caps FFT size at 32768, giving about 85.4 Hz/bin at 2.8 MS/s.
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '32768'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label: Relative Gain
+    label1: A RX1 / element 0
+    label10: ''''''
+    label2: A RX2 / element 1
+    label3: B RX2 / element 2
+    label4: B RX1 / element 3
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"TRUE pre-filter raw spectra (32768-bin FFT)"'
+    nconnections: '4'
+    norm_window: 'False'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: window.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [568, 240]
+    rotation: 0
+    state: enabled
+- name: postfilter_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: This diagnostic is after the four independent translating/decimating
+      FIR filters and before calibration.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 2,0,1,1
+    label1: POST-FILTER A RX2 vs A RX1
+    label10: Signal 10
+    label2: POST-FILTER B RX2 vs A RX1
+    label3: POST-FILTER B RX1 vs A RX1
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"POST-FILTER relative phase (before calibration)"'
+    nconnections: '3'
+    size: '1024'
+    srate: proc_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 680]
+    rotation: 0
+    state: enabled
+- name: postfilter_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: POST-FILTER Ettus arg(x0*conj(xi)) diagnostic before calibration.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 568]
+    rotation: 0
+    state: enabled
+- name: prefilter_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Connected directly to IIO outputs before every FIR, calibration, or
+      correction block. Physical order is A RX1, A RX2, B RX2, B RX1.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 3,0,1,2
+    label1: TRUE PRE-FILTER A RX2 vs A RX1
+    label10: Signal 10
+    label2: TRUE PRE-FILTER B RX2 vs A RX1
+    label3: TRUE PRE-FILTER B RX1 vs A RX1
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"TRUE PRE-FILTER relative phase (direct IIO)"'
+    nconnections: '3'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 792]
+    rotation: 0
+    state: enabled
+- name: prefilter_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: TRUE pre-filter Ettus arg(x0*conj(xi)) diagnostic in physical order.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 792]
+    rotation: 0
+    state: enabled
+- name: alpha_internal_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Same-device Alpha RX phase before filtering.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 4,0,1,1
+    label1: 'arg(A RX1 * conj(A RX2))'
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Alpha internal pre-filter phase: RX1 vs RX2"'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 920]
+    rotation: 0
+    state: enabled
+- name: alpha_internal_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Alpha-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is RX2.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 920]
+    rotation: 0
+    state: enabled
+- name: bravo_internal_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Same-device Bravo RX phase before filtering. Input 0 is B RX1 and input
+      1 is B RX2, independent of the UCA permutation.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 4,1,1,1
+    label1: 'arg(B RX1 * conj(B RX2))'
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Bravo internal pre-filter phase: RX1 vs RX2"'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 920]
+    rotation: 0
+    state: enabled
+- name: bravo_internal_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Bravo-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is RX2.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 920]
+    rotation: 0
+    state: enabled
 - name: spectrum_display
   id: qtgui_vector_sink_f
   parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
     autoscale: 'False'
     average: '1.0'
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
     grid: 'True'
     gui_hint: 1,0,1,2
     label1: MUSIC pseudo-spectrum
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
     name: '"Full-circle UCA MUSIC"'
     nconnections: '1'
     ref_level: '0'
+    showports: 'False'
     update_time: '0.10'
     vlen: pspectrum_len
     width1: '2'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
     x_axis_label: '"Bearing (degrees)"'
     x_start: '0'
     x_step: 360.0/pspectrum_len
@@ -488,166 +1487,68 @@ blocks:
     ymax: '0'
     ymin: '-40'
   states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
     coordinate: [1392, 544]
-    state: enabled
-
-- name: corrected_channels
-  id: qtgui_time_sink_x
-  parameters:
-    autoscale: 'True'
-    axislabels: 'True'
-    entags: 'True'
-    grid: 'True'
-    gui_hint: 0,1,1,1
-    label1: Element 0
-    label2: Element 1
-    label3: Element 2
-    label4: Element 3
-    name: '"Calibrated UCA channels"'
-    nconnections: '4'
-    size: '1024'
-    srate: proc_rate
-    stemplot: 'False'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    type: complex
-    update_time: '0.10'
-    ylabel: Amplitude
-    ymax: '1'
-    ymin: '-1'
-    yunit: '""'
-  states:
-    coordinate: [952, 640]
-    state: enabled
-
-- name: raw_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    autoscale: 'False'
-    axislabels: 'True'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 2,0,1,1
-    label1: Raw ch1/ch0
-    label2: Raw ch2/ch0
-    label3: Raw ch3/ch0
-    name: '"Raw relative phase (instantaneous)"'
-    nconnections: '3'
-    size: '1024'
-    srate: proc_rate
-    stemplot: 'False'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    type: float
-    update_time: '0.10'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    coordinate: [1168, 680]
-    state: enabled
-
-- name: corrected_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    autoscale: 'False'
-    axislabels: 'True'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 2,1,1,1
-    label1: Corrected ch1/ch0
-    label2: Corrected ch2/ch0
-    label3: Corrected ch3/ch0
-    name: '"Corrected relative phase (instantaneous)"'
-    nconnections: '3'
-    size: '1024'
-    srate: proc_rate
-    stemplot: 'False'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    type: float
-    update_time: '0.10'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    coordinate: [1392, 680]
-    state: enabled
-
-- name: qtgui_freq_sink_x_0
-  id: qtgui_freq_sink_x
-  parameters:
-    average: '1.0'
-    axislabels: 'True'
-    bw: samp_rate
-    ctrlpanel: 'False'
-    fc: '0'
-    fftsize: '1024'
-    freqhalf: 'True'
-    grid: 'False'
-    label: Relative Gain
-    name: '"Raw RX1 spectrum - verify +50 kHz pilot"'
-    nconnections: '1'
-    norm_window: 'False'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    type: complex
-    units: dB
-    update_time: '0.10'
-    wintype: window.WIN_BLACKMAN_hARRIS
-    ymax: '10'
-    ymin: '-140'
-  states:
-    coordinate: [568, 240]
+    rotation: 0
     state: enabled
 
 connections:
-- [libresdr_a, '0', pilot_filter_0, '0']
-- [libresdr_a, '1', pilot_filter_1, '0']
-- [libresdr_b, '1', pilot_filter_2, '0']
-- [libresdr_b, '0', pilot_filter_3, '0']
-- [libresdr_a, '0', qtgui_freq_sink_x_0, '0']
-
-- [pilot_filter_0, '0', ota_calibration, '0']
-- [pilot_filter_1, '0', ota_calibration, '1']
-- [pilot_filter_2, '0', ota_calibration, '2']
-- [pilot_filter_3, '0', ota_calibration, '3']
-
-- [pilot_filter_0, '0', raw_phase_estimator, '0']
-- [pilot_filter_1, '0', raw_phase_estimator, '1']
-- [pilot_filter_2, '0', raw_phase_estimator, '2']
-- [pilot_filter_3, '0', raw_phase_estimator, '3']
-
-- [ota_calibration, '0', covariance, '0']
-- [ota_calibration, '1', covariance, '1']
-- [ota_calibration, '2', covariance, '2']
-- [ota_calibration, '3', covariance, '3']
-
-- [ota_calibration, '0', corrected_channels, '0']
-- [ota_calibration, '1', corrected_channels, '1']
-- [ota_calibration, '2', corrected_channels, '2']
-- [ota_calibration, '3', corrected_channels, '3']
-
-- [ota_calibration, '0', corrected_phase_estimator, '0']
-- [ota_calibration, '1', corrected_phase_estimator, '1']
-- [ota_calibration, '2', corrected_phase_estimator, '2']
-- [ota_calibration, '3', corrected_phase_estimator, '3']
-
-- [raw_phase_estimator, '0', raw_phase_display, '0']
-- [raw_phase_estimator, '1', raw_phase_display, '1']
-- [raw_phase_estimator, '2', raw_phase_display, '2']
+- [alpha_internal_phase_estimator, '0', alpha_internal_phase_display, '0']
+- [bearing_streams, '0', bearing_display, '0']
+- [bearing_streams, '0', qtgui_compass_0, '0']
+- [bravo_internal_phase_estimator, '0', bravo_internal_phase_display, '0']
 - [corrected_phase_estimator, '0', corrected_phase_display, '0']
 - [corrected_phase_estimator, '1', corrected_phase_display, '1']
 - [corrected_phase_estimator, '2', corrected_phase_display, '2']
-
 - [covariance, '0', music_uca, '0']
+- [libresdr_a, '0', pilot_filter_0, '0']
+- [libresdr_a, '0', alpha_internal_phase_estimator, '0']
+- [libresdr_a, '0', prefilter_phase_estimator, '0']
+- [libresdr_a, '0', raw_fft_display, '0']
+- [libresdr_a, '1', pilot_filter_1, '0']
+- [libresdr_a, '1', alpha_internal_phase_estimator, '1']
+- [libresdr_a, '1', prefilter_phase_estimator, '1']
+- [libresdr_a, '1', raw_fft_display, '1']
+- [libresdr_b, '0', pilot_filter_3, '0']
+- [libresdr_b, '0', bravo_internal_phase_estimator, '0']
+- [libresdr_b, '0', prefilter_phase_estimator, '3']
+- [libresdr_b, '0', raw_fft_display, '3']
+- [libresdr_b, '1', pilot_filter_2, '0']
+- [libresdr_b, '1', bravo_internal_phase_estimator, '1']
+- [libresdr_b, '1', prefilter_phase_estimator, '2']
+- [libresdr_b, '1', raw_fft_display, '2']
 - [music_uca, '0', peak_finder, '0']
 - [music_uca, '0', spectrum_display, '0']
+- [ota_calibration, '0', corrected_channels, '0']
+- [ota_calibration, '0', corrected_phase_estimator, '0']
+- [ota_calibration, '0', covariance, '0']
+- [ota_calibration, '1', corrected_channels, '1']
+- [ota_calibration, '1', corrected_phase_estimator, '1']
+- [ota_calibration, '1', covariance, '1']
+- [ota_calibration, '2', corrected_channels, '2']
+- [ota_calibration, '2', corrected_phase_estimator, '2']
+- [ota_calibration, '2', covariance, '2']
+- [ota_calibration, '3', corrected_channels, '3']
+- [ota_calibration, '3', corrected_phase_estimator, '3']
+- [ota_calibration, '3', covariance, '3']
 - [peak_finder, '0', peak_magnitude_discard, '0']
 - [peak_finder, '1', bearing_streams, '0']
-- [bearing_streams, '0', bearing_display, '0']
-- [bearing_streams, '0', qtgui_compass_0, '0']
+- [pilot_filter_0, '0', ota_calibration, '0']
+- [pilot_filter_0, '0', postfilter_phase_estimator, '0']
+- [pilot_filter_1, '0', ota_calibration, '1']
+- [pilot_filter_1, '0', postfilter_phase_estimator, '1']
+- [pilot_filter_2, '0', ota_calibration, '2']
+- [pilot_filter_2, '0', postfilter_phase_estimator, '2']
+- [pilot_filter_3, '0', ota_calibration, '3']
+- [pilot_filter_3, '0', postfilter_phase_estimator, '3']
+- [postfilter_phase_estimator, '0', postfilter_phase_display, '0']
+- [postfilter_phase_estimator, '1', postfilter_phase_display, '1']
+- [postfilter_phase_estimator, '2', postfilter_phase_display, '2']
+- [prefilter_phase_estimator, '0', prefilter_phase_display, '0']
+- [prefilter_phase_estimator, '1', prefilter_phase_display, '1']
+- [prefilter_phase_estimator, '2', prefilter_phase_display, '2']
 
 metadata:
   file_format: 1
