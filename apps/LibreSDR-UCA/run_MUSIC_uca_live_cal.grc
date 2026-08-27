@@ -393,8 +393,8 @@ blocks:
 - name: cfo_min_coherence
   id: variable
   parameters:
-    comment: Minimum de-rotated pilot phase coherence for both CFO estimates
-    value: '0.5'
+    comment: Minimum narrow-pilot coherence for coarse and residual CFO estimates
+    value: '0.90'
   states:
     bus_sink: false
     bus_source: false
@@ -807,6 +807,8 @@ blocks:
     alias: ''
     comment: 'Fixed order: ch0 Alpha RX1, ch1 Alpha RX2, ch2 Bravo RX2, ch3 Bravo RX1. Alpha is untouched; one common rotator corrects both Bravo channels.'
     estimation_samples: cfo_estimation_samples
+    pilot_offset_hz: pilot_offset
+    pilot_bandwidth_hz: pilot_passband
     validation_settling_samples: cfo_validation_settling_samples
     residual_tolerance_hz: cfo_residual_tolerance_hz
     max_refinement_rounds: cfo_max_refinement_rounds

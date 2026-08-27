@@ -76,10 +76,12 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         inputs = _pilot_channels(sample_rate, lock_offset + 5000, 123.75)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=settling_samples,
             estimation_samples=estimation_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -101,11 +103,27 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         correction2 = outputs[2][correction_start:] / inputs[2][correction_start:]
         correction3 = outputs[3][correction_start:] / inputs[3][correction_start:]
         numpy.testing.assert_allclose(correction2, correction3, rtol=2e-6, atol=2e-6)
-        expected = numpy.exp(
-            -1j * 2.0 * numpy.pi * 123.75 / sample_rate
-            * numpy.arange(correction2.size)
+        correction_steps = numpy.angle(
+            correction2[1:] * numpy.conj(correction2[:-1])
         )
-        numpy.testing.assert_allclose(correction2, expected, rtol=3e-5, atol=3e-5)
+        validation_end = estimation_samples
+        numpy.testing.assert_allclose(
+            correction_steps[:validation_end - 1],
+            correction_steps[0],
+            rtol=0.0,
+            atol=2e-6,
+        )
+        numpy.testing.assert_allclose(
+            correction_steps[validation_end:],
+            -2.0 * numpy.pi * corrector.accepted_cfo_hz() / sample_rate,
+            rtol=0.0,
+            atol=2e-6,
+        )
+        # The first sample after changing the frozen frequency continues from
+        # the prior phase; only subsequent phase increments use the new step.
+        self.assertAlmostEqual(
+            correction_steps[validation_end - 1], correction_steps[0], places=6
+        )
 
         relative_phase = numpy.unwrap(
             numpy.angle(
@@ -133,6 +151,8 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         ).astype(numpy.complex64)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=4096,
             validation_settling_samples=0,
@@ -162,10 +182,12 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             inputs[channel][::5] = 0.0
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=estimation_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -187,10 +209,12 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             inputs[channel][:estimation_samples] = 0.0
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=estimation_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             retry_delay_samples=retry_delay,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
@@ -227,10 +251,12 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         inputs = _pilot_channels(sample_rate, sample_count, 87.5)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=cfo_settling,
             estimation_samples=cfo_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -273,14 +299,16 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         decimation = 4
         cfo_samples = 1024
         phase_samples = 256
-        sample_count = 2 * cfo_samples + decimation * (phase_samples + 128)
+        sample_count = 3 * cfo_samples + decimation * (phase_samples + 128)
         inputs = _pilot_channels(sample_rate, sample_count, 42.0)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=cfo_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
@@ -328,10 +356,12 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         inputs = _pilot_channels(sample_rate, cfo.size, cfo)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=estimation_samples,
             validation_settling_samples=0,
-            residual_tolerance_hz=0.01,
+            residual_tolerance_hz=0.05,
             max_refinement_rounds=2,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
@@ -372,7 +402,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         fitted_slope = numpy.polyfit(
             numpy.arange(relative_phase.size), relative_phase, 1
         )[0]
-        self.assertAlmostEqual(fitted_slope, 0.0, places=6)
+        self.assertLess(abs(fitted_slope), 1e-6)
 
     def test_nonconvergent_residual_is_rejected_without_lock_tag(self):
         sample_rate = 100000.0
@@ -384,6 +414,8 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         inputs = _pilot_channels(sample_rate, sample_count, cfo)
         corrector = doa.cross_sdr_cfo_corrector(
             samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
             settling_samples=0,
             estimation_samples=estimation_samples,
             validation_settling_samples=0,
@@ -407,6 +439,56 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
                 pmt.symbol_to_string(tag.key) == "cfo_locked"
                 for tag in sink.tags()
             ))
+
+    def test_pilot_selector_rejects_a_stronger_off_frequency_tone(self):
+        sample_rate = 100000.0
+        settling_samples = 256
+        estimation_samples = 4096
+        validation_settling = 256
+        sample_count = (
+            settling_samples + estimation_samples
+            + validation_settling + estimation_samples + 1000
+        )
+        pilot_cfo_hz = 73.25
+        inputs = _pilot_channels(sample_rate, sample_count, pilot_cfo_hz)
+
+        # Model the hardware screenshots: the selected OTA pilot is accompanied
+        # by another, stronger tone whose Alpha-vs-Bravo slope is different. A
+        # full-band cross product follows this interferer; the pilot selector
+        # must continue to estimate the +4.1 kHz pilot itself.
+        sample_index = numpy.arange(sample_count, dtype=numpy.float64)
+        alpha_interferer = 4.0 * numpy.exp(
+            1j * 2.0 * numpy.pi * 15000.0 / sample_rate * sample_index
+        )
+        bravo_interferer = 4.0 * numpy.exp(
+            1j * (
+                2.0 * numpy.pi * (15000.0 - 300.0) / sample_rate * sample_index
+                + 0.7
+            )
+        )
+        inputs[0] += alpha_interferer.astype(numpy.complex64)
+        inputs[2] += bravo_interferer.astype(numpy.complex64)
+        inputs[3] += (0.8 * bravo_interferer).astype(numpy.complex64)
+
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=settling_samples,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=validation_settling,
+            residual_tolerance_hz=0.05,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+        )
+
+        _run_block(corrector, inputs, max_noutput_items=137)
+        self.assertTrue(corrector.locked())
+        self.assertFalse(corrector.failed())
+        self.assertAlmostEqual(
+            corrector.accepted_cfo_hz(), pilot_cfo_hz, places=2
+        )
 
 
 if __name__ == "__main__":

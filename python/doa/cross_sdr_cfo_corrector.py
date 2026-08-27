@@ -9,6 +9,7 @@ import threading
 
 import numpy
 import pmt
+from scipy import signal
 from gnuradio import gr
 
 
@@ -27,6 +28,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
     def __init__(self,
                  samp_rate=2.8e6,
+                 pilot_offset_hz=50e3,
+                 pilot_bandwidth_hz=10e3,
                  settling_samples=65536,
                  estimation_samples=262144,
                  validation_settling_samples=65536,
@@ -35,9 +38,13 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  retry_delay_samples=1048576,
                  agreement_tolerance_hz=10.0,
                  max_abs_cfo_hz=20000.0,
-                 min_coherence=0.5):
+                 min_coherence=0.90):
         if samp_rate <= 0.0:
             raise ValueError("Sample rate must be positive")
+        if pilot_bandwidth_hz <= 0.0:
+            raise ValueError("Pilot bandwidth must be positive")
+        if abs(pilot_offset_hz) + pilot_bandwidth_hz >= samp_rate / 2.0:
+            raise ValueError("Pilot passband must remain inside Nyquist")
         if settling_samples < 0:
             raise ValueError("CFO settling length must be non-negative")
         if estimation_samples < 2:
@@ -65,6 +72,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         )
 
         self.samp_rate = float(samp_rate)
+        self.pilot_offset_hz = float(pilot_offset_hz)
+        self.pilot_bandwidth_hz = float(pilot_bandwidth_hz)
         self.settling_remaining = int(settling_samples)
         self.estimation_samples = int(estimation_samples)
         self.validation_settling_samples = int(validation_settling_samples)
@@ -93,10 +102,30 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._lock_tag_pending = False
         self._lock = threading.Lock()
 
+        # Estimate from the configured OTA pilot only. The earlier full-band
+        # cross product could fit other strong tones visible in the raw FFT and
+        # falsely declare a flat residual while the selected pilot still ramped.
+        self._pilot_sos = signal.butter(
+            4,
+            self.pilot_bandwidth_hz,
+            btype="lowpass",
+            fs=self.samp_rate,
+            output="sos",
+        )
+        self._pilot_mix_step = -2.0 * numpy.pi * self.pilot_offset_hz / self.samp_rate
+        self._pilot_mix_phase = 0.0
+        self._pilot_filter_states = None
+        self._reset_pilot_filters()
+
         print(
             "Cross-SDR CFO: settling for "
             f"{self.settling_remaining} samples, then estimating over "
             f"{self.estimation_samples} pilot samples"
+        )
+        print(
+            "Cross-SDR CFO pilot selector: complex mix at "
+            f"{self.pilot_offset_hz:+.6f} Hz, low-pass bandwidth "
+            f"{self.pilot_bandwidth_hz:.6f} Hz"
         )
         print(
             "Cross-SDR CFO acceptance limits: disagreement <= "
@@ -211,6 +240,46 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         estimate_hz = float(slope * self.samp_rate / (2.0 * numpy.pi))
         return estimate_hz, coherence, valid_count, used_count
 
+    def _reset_pilot_filters(self):
+        state_shape = (self._pilot_sos.shape[0], 2)
+        self._pilot_filter_states = [
+            numpy.zeros(state_shape, dtype=numpy.complex128)
+            for _ in range(3)
+        ]
+
+    def _filter_pilot_segment(self, input_items, output_items, start, stop):
+        """Select the OTA pilot from Alpha RX1 and both Bravo channels."""
+        count = stop - start
+        if count <= 0:
+            return None
+        phases = self._pilot_mix_phase + self._pilot_mix_step * numpy.arange(count)
+        mixer = numpy.exp(1j * phases)
+        selected = [input_items[0][start:stop]]
+        for channel in (2, 3):
+            selected.append(
+                output_items[channel][start:stop]
+                if self._correction_active
+                else input_items[channel][start:stop]
+            )
+
+        filtered = []
+        for index, samples in enumerate(selected):
+            pilot, state = signal.sosfilt(
+                self._pilot_sos,
+                samples * mixer,
+                zi=self._pilot_filter_states[index],
+            )
+            self._pilot_filter_states[index] = state
+            filtered.append(pilot)
+
+        self._pilot_mix_phase = float(
+            numpy.remainder(
+                self._pilot_mix_phase + self._pilot_mix_step * count + numpy.pi,
+                2.0 * numpy.pi,
+            ) - numpy.pi
+        )
+        return filtered
+
     def _finish_estimation(self):
         estimating_residual = self._estimating_residual
         refinement_round = self._refinement_round
@@ -302,6 +371,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._failed = False
         self._samples_accumulated = 0
         self.settling_remaining = self.validation_settling_samples
+        self._reset_pilot_filters()
 
         print(f"Cross-SDR CFO coarse accepted average: {accepted:+.6f} Hz")
         print(
@@ -322,6 +392,13 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         )
         if abs(residual_hz) <= self.residual_tolerance_hz:
             with self._lock:
+                # The tolerance is an acceptance bound, not a reason to leave
+                # a known residual unapplied. Fold the final measured residual
+                # into the frozen total while retaining instantaneous phase.
+                self._accepted_cfo_hz += residual_hz
+                self._set_correction_frequency(
+                    self._accepted_cfo_hz, reset_phase=False
+                )
                 self._locked = True
                 self._failed = False
                 self._lock_tag_pending = True
@@ -358,6 +435,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             correction_step = self._correction_step
         self._samples_accumulated = 0
         self.settling_remaining = self.validation_settling_samples
+        self._reset_pilot_filters()
         print(
             f"Cross-SDR CFO refinement: total estimate {accepted:+.6f} Hz; "
             f"common correction {-accepted:+.6f} Hz, phase step "
@@ -383,6 +461,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._samples_accumulated = 0
         self._relative_samples = [[], []]
         self.retry_remaining = self.retry_delay_samples
+        self._reset_pilot_filters()
         print(f"Cross-SDR CFO REJECTED: {reason}")
         print(
             f"Cross-SDR CFO correction remains disabled; retry {rejection_count + 1} "
@@ -432,12 +511,18 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                     self._apply_correction(
                         input_items, output_items, cursor, cursor + skipped
                     )
+                self._filter_pilot_segment(
+                    input_items, output_items, cursor, cursor + skipped
+                )
                 self.settling_remaining -= skipped
                 cursor += skipped
                 continue
 
             if self.retry_remaining:
                 skipped = min(self.retry_remaining, item_count - cursor)
+                self._filter_pilot_segment(
+                    input_items, output_items, cursor, cursor + skipped
+                )
                 self.retry_remaining -= skipped
                 cursor += skipped
                 if self.retry_remaining == 0:
@@ -453,13 +538,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 self._apply_correction(
                     input_items, output_items, cursor, cursor + used
                 )
-            reference = input_items[0][cursor:cursor + used]
-            for relative_index, bravo_channel in enumerate((2, 3)):
-                bravo_samples = (
-                    output_items[bravo_channel][cursor:cursor + used]
-                    if self._correction_active
-                    else input_items[bravo_channel][cursor:cursor + used]
-                )
+            pilots = self._filter_pilot_segment(
+                input_items, output_items, cursor, cursor + used
+            )
+            reference = pilots[0]
+            for relative_index, bravo_samples in enumerate(pilots[1:]):
                 relative = (
                     bravo_samples * numpy.conj(reference)
                 ).astype(numpy.complex64, copy=False)

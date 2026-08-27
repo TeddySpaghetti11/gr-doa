@@ -7,6 +7,8 @@ templates:
   make: |-
     doa.cross_sdr_cfo_corrector(
         samp_rate=${samp_rate},
+        pilot_offset_hz=${pilot_offset_hz},
+        pilot_bandwidth_hz=${pilot_bandwidth_hz},
         settling_samples=${settling_samples},
         estimation_samples=${estimation_samples},
         validation_settling_samples=${validation_settling_samples},
@@ -22,6 +24,14 @@ parameters:
   label: Sample Rate
   dtype: float
   default: samp_rate
+- id: pilot_offset_hz
+  label: OTA Pilot Offset (Hz)
+  dtype: float
+  default: 50e3
+- id: pilot_bandwidth_hz
+  label: OTA Pilot Low-Pass Bandwidth (Hz)
+  dtype: float
+  default: 10e3
 - id: settling_samples
   label: Startup Settling Samples
   dtype: int
@@ -57,10 +67,12 @@ parameters:
 - id: min_coherence
   label: Minimum Pilot Coherence
   dtype: float
-  default: 0.5
+  default: 0.90
 
 asserts:
 - ${ samp_rate > 0.0 }
+- ${ pilot_bandwidth_hz > 0.0 }
+- ${ abs(pilot_offset_hz) + pilot_bandwidth_hz < samp_rate / 2.0 }
 - ${ settling_samples >= 0 }
 - ${ estimation_samples >= 2 }
 - ${ validation_settling_samples >= 0 }
@@ -87,9 +99,11 @@ documentation: |-
   Automatic OTA pilot CFO correction for two dual-channel LibreSDRs.
 
   Fixed channel order: ch0 Alpha RX1 reference, ch1 Alpha RX2, ch2 Bravo RX2,
-  ch3 Bravo RX1. Alpha passes through unchanged. The block independently fits
-  the ch2/ch0 and ch3/ch0 relative phase slopes, checks pilot coherence, maximum
-  CFO, and agreement, then applies their average provisionally. It measures the
+  ch3 Bravo RX1. Alpha passes through unchanged. A streaming complex mixer and
+  low-pass filter isolate the configured positive-frequency OTA pilot so other
+  raw-spectrum tones cannot bias the fit. The block independently fits the
+  ch2/ch0 and ch3/ch0 pilot phase slopes, checks coherence, maximum CFO, and
+  agreement, then applies their average provisionally. It measures the
   remaining post-correction phase slopes from both Bravo channels, refines the
   one shared correction when necessary, and freezes only after both residuals
   agree and their average is within residual_tolerance_hz. The common rotator is

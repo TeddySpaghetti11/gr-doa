@@ -72,9 +72,12 @@ retune.
 
 The two raw IIO sources first enter `Cross-SDR CFO Corrector` in fixed physical
 order: Alpha RX1, Alpha RX2, Bravo RX2, Bravo RX1. The block leaves Alpha
-bit-for-bit unchanged and estimates Bravo-minus-Alpha CFO independently from
-Bravo RX2/Alpha RX1 and Bravo RX1/Alpha RX1. Both estimates must pass the
-configured magnitude and phase-coherence checks and agree within `10 Hz`.
+bit-for-bit unchanged. A streaming complex mixer and fourth-order low-pass
+filter isolate `pilot_offset` with `pilot_passband` bandwidth before estimating
+Bravo-minus-Alpha CFO independently from Bravo RX2/Alpha RX1 and Bravo
+RX1/Alpha RX1. This prevents the other strong tones visible in the raw spectrum
+from biasing the OTA-pilot estimate. Both estimates must pass the configured
+magnitude and phase-coherence checks and agree within `10 Hz`.
 
 Accepted estimates are averaged once. One phase-continuous complex rotator with
 the opposite frequency is then applied identically to both Bravo channels, so
@@ -83,13 +86,14 @@ phase and therefore leaves all constant phase offsets for the existing OTA phase
 calibration.
 
 Defaults at `2.8 MS/s` are `2**16` startup-settling samples, a `2**18`-sample
-estimation window, maximum `20 kHz` absolute CFO, and minimum `0.5` CFO-fit
+estimation window, maximum `20 kHz` absolute CFO, and minimum `0.90` pilot-fit
 coherence. The accepted coarse estimate is applied provisionally to both Bravo
 channels. After another `2**16` settling samples, the block measures both
 post-correction residual slopes over another `2**18` samples. It refines the
 one common correction up to three times and freezes only when the averaged
-residual is at most `1 Hz`. Phase remains continuous when the correction
-frequency is refined.
+residual is at most `1 Hz`. The final measured residual is included in the
+frozen correction even when already inside that bound. Phase remains continuous
+when the correction frequency is refined.
 
 A rejected coarse or residual window prints finite/non-zero sample counts,
 waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
