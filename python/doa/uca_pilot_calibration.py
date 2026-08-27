@@ -9,6 +9,7 @@ import os
 import threading
 
 import numpy
+import pmt
 from gnuradio import gr
 
 
@@ -40,7 +41,8 @@ class uca_pilot_calibration(gr.sync_block):
                  skip_samples=8192,
                  calibration_samples=32768,
                  config_filename="",
-                 min_coherence=0.90):
+                 min_coherence=0.90,
+                 start_tag_key=""):
         if num_inputs < 2:
             raise ValueError("UCA pilot calibration requires at least two inputs")
         if norm_radius <= 0.0:
@@ -66,6 +68,8 @@ class uca_pilot_calibration(gr.sync_block):
         self.calibration_samples = int(calibration_samples)
         self.config_filename = str(config_filename)
         self.min_coherence = float(min_coherence)
+        self.start_tag_key = str(start_tag_key)
+        self._armed = not bool(self.start_tag_key)
 
         self._samples_accumulated = 0
         self._cross_sum = numpy.zeros(self.num_inputs, dtype=numpy.complex128)
@@ -86,12 +90,20 @@ class uca_pilot_calibration(gr.sync_block):
             * numpy.cos(theta - element_angles)
         )
 
-        print(
-            "UCA calibration: waiting for "
-            f"{self.calibration_samples} pilot samples after skipping "
-            f"{self.skip_remaining} samples; minimum coherence is "
-            f"{self.min_coherence:.2f}"
-        )
+        if self._armed:
+            print(
+                "UCA calibration: waiting for "
+                f"{self.calibration_samples} pilot samples after skipping "
+                f"{self.skip_remaining} samples; minimum coherence is "
+                f"{self.min_coherence:.2f}"
+            )
+        else:
+            print(
+                f"UCA calibration: waiting for '{self.start_tag_key}' before "
+                f"skipping {self.skip_remaining} samples and collecting "
+                f"{self.calibration_samples} pilot samples; minimum coherence "
+                f"is {self.min_coherence:.2f}"
+            )
 
     def calibrated(self):
         """Return True after coefficients have been frozen."""
@@ -249,8 +261,26 @@ class uca_pilot_calibration(gr.sync_block):
             output[:item_count] = 0.0
 
         cursor = 0
+        if not self._armed:
+            absolute_start = self.nitems_read(0)
+            tags = self.get_tags_in_range(
+                0,
+                absolute_start,
+                absolute_start + item_count,
+                pmt.intern(self.start_tag_key),
+            )
+            if not tags:
+                return item_count
+            first_tag = min(tags, key=lambda tag: tag.offset)
+            cursor = int(first_tag.offset - absolute_start)
+            self._armed = True
+            print(
+                f"UCA calibration: received '{self.start_tag_key}' at input "
+                f"sample {first_tag.offset}; post-lock settling begins"
+            )
+
         if self.skip_remaining:
-            skipped = min(self.skip_remaining, item_count)
+            skipped = min(self.skip_remaining, item_count - cursor)
             self.skip_remaining -= skipped
             cursor += skipped
 

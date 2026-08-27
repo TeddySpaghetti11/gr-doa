@@ -68,6 +68,27 @@ The B210 transmitter flowgraph uses the same `920.9 MHz` centre and `+50 kHz`
 tone by default. Keep those values matched to the receiver variables if you
 retune.
 
+## Automatic cross-SDR CFO correction
+
+The two raw IIO sources first enter `Cross-SDR CFO Corrector` in fixed physical
+order: Alpha RX1, Alpha RX2, Bravo RX2, Bravo RX1. The block leaves Alpha
+bit-for-bit unchanged and estimates Bravo-minus-Alpha CFO independently from
+Bravo RX2/Alpha RX1 and Bravo RX1/Alpha RX1. Both estimates must pass the
+configured magnitude and phase-coherence checks and agree within `10 Hz`.
+
+Accepted estimates are averaged once. One phase-continuous complex rotator with
+the opposite frequency is then applied identically to both Bravo channels, so
+Bravo's internal channel coherence is preserved. The rotator begins with zero
+phase and therefore leaves all constant phase offsets for the existing OTA phase
+calibration.
+
+Defaults at `2.8 MS/s` are `2**16` startup-settling samples, a `2**18`-sample
+estimation window, maximum `20 kHz` absolute CFO, and minimum `0.5` CFO-fit
+coherence. A rejected window prints finite/non-zero sample counts, waits
+`2**20` samples, and retries automatically. No `cfo_locked` tag is emitted until
+a complete window passes every check. The downstream phase calibration waits
+for that tag before counting its own skip or calibration samples.
+
 ## AD9361 settings
 
 Both LibreSDRs use:
@@ -90,9 +111,9 @@ can be localized without changing the receiver architecture:
 1. **TRUE pre-filter relative phase** is connected directly to the IIO source
    outputs in physical order `A RX1, A RX2, B RX2, B RX1` and runs at
    `samp_rate` (`2.8 MS/s`).
-2. **POST-FILTER relative phase** is the original diagnostic after the four
-   independent translating/decimating FIR filters and before calibration. It
-   runs at `proc_rate` (`350 kS/s`).
+2. **POST-CFO relative phase** is after the common CFO rotator and four identical
+   translating/decimating FIR filters, but before constant phase calibration. It
+   runs at `proc_rate` (`350 kS/s`) and should be flat after CFO lock.
 3. **Alpha internal** and **Bravo internal** plots compare RX1 with RX2 inside
    each LibreSDR before filtering. A flat same-radio trace with moving
    inter-radio traces isolates the problem to coherence between the devices.
@@ -100,10 +121,13 @@ can be localized without changing the receiver architecture:
 All phase displays use the Ettus convention `arg(x0 * conj(xi))`; their labels
 name both physical inputs to avoid an ambiguous channel number.
 
-The raw four-channel FFT is also connected before all filters in physical UCA
+The raw four-channel FFT remains connected before the CFO block and all filters in physical UCA
 order. It uses the QT sink's maximum valid size of 32,768 bins (about
 `85.4 Hz/bin` at `2.8 MS/s`) and explicit channel labels so a small frequency
-difference between the two radios can be seen directly. GNU Radio 3.11 rejects
+difference between the two radios can be seen directly. This raw display is
+expected to retain the original Alpha/Bravo separation. A second 8,192-bin
+**POST-CFO filtered pilot spectrum** runs at `proc_rate`; all four peaks should
+coincide there after lock. GNU Radio 3.11 rejects
 65,536 for this sink even though that would otherwise be preferred.
 
 ## Calibration coherence
@@ -144,7 +168,7 @@ plots are intended to reveal ramps, discontinuities, and where they first occur.
 ```sh
 cmake -S . -B build
 cmake --build build -j$(nproc)
-ctest --test-dir build -R 'qa_(MUSIC_uca|uca_pilot_calibration)' --output-on-failure
+ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)' --output-on-failure
 sudo cmake --install build
 sudo ldconfig
 ```
@@ -169,15 +193,19 @@ order, diagnostics, and calibration threshold.
 2. Set `pilot_bearing` to the actual B210 bearing for the current setup.
 3. Start the B210 calibration transmitter.
 4. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
-5. Compare TRUE pre-filter, POST-FILTER, Alpha-internal, and Bravo-internal phase.
-6. Inspect the 32,768-bin raw FFT for a channel- or radio-specific frequency shift.
-7. Wait for `UCA calibration complete` and inspect all three coherence values. If
+5. The console must print `Cross-SDR CFO lock established`. A rejection now
+   retries automatically; repeated rejection or `O` overruns means the stream or
+   pilot must be fixed before calibration can begin.
+6. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
+7. The raw FFT may show the original radio-specific shift; verify all four peaks
+   coincide in `POST-CFO filtered pilot spectra`.
+8. Wait for `UCA calibration complete` and inspect all three coherence values. If
    `UCA CALIBRATION FAILED` appears, treat the output as uncalibrated bypass data.
-8. Keep the source stationary and verify the MUSIC spectrum has clear structure.
-9. Rotate through several known off-axis bearings and compare the peak movement.
-10. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
+9. Keep the source stationary and verify the MUSIC spectrum has clear structure.
+10. Rotate through several known off-axis bearings and compare the peak movement.
+11. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
 
 The covariance estimator and MUSIC eigendecomposition remain based on the Ettus
 architecture. The intentional changes are the UCA geometry, full-circle scan,
 physical channel order, frequency-derived manifold, narrow pilot selection, and
-same-session phase correction.
+same-session CFO/phase correction.

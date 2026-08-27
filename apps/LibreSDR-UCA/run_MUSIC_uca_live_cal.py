@@ -89,6 +89,12 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.norm_radius = norm_radius = array_radius * pilot_rf / 299792458.0
         self.element_bearing_step = element_bearing_step = -90.0
         self.element0_bearing = element0_bearing = 225.0
+        self.cfo_settling_samples = cfo_settling_samples = 2**16
+        self.cfo_retry_delay_samples = cfo_retry_delay_samples = 2**20
+        self.cfo_min_coherence = cfo_min_coherence = 0.5
+        self.cfo_max_abs_hz = cfo_max_abs_hz = 20000.0
+        self.cfo_estimation_samples = cfo_estimation_samples = 2**18
+        self.cfo_agreement_tolerance_hz = cfo_agreement_tolerance_hz = 10.0
         self.calibration_skip = calibration_skip = 2**14
         self.calibration_samples = calibration_samples = 2**16
         self.calibration_file = calibration_file = "/tmp/gr-doa-uca-phase-offsets.cfg"
@@ -243,7 +249,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.postfilter_phase_display = qtgui.time_sink_f(
             1024, #size
             proc_rate, #samp_rate
-            "POST-FILTER relative phase (before calibration)", #name
+            "POST-CFO relative phase (before phase calibration)", #name
             3, #number of inputs
             None # parent
         )
@@ -261,7 +267,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.postfilter_phase_display.enable_stem_plot(False)
 
 
-        labels = ['POST-FILTER A RX2 vs A RX1', 'POST-FILTER B RX2 vs A RX1', 'POST-FILTER B RX1 vs A RX1', 'Signal 4', 'Signal 5',
+        labels = ['POST-CFO A RX2 vs A RX1', 'POST-CFO B RX2 vs A RX1', 'POST-CFO B RX1 vs A RX1', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -292,6 +298,48 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.post_cfo_fft_display = qtgui.freq_sink_c(
+            8192, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            proc_rate, #bw
+            "POST-CFO filtered pilot spectra (8192-bin FFT)", #name
+            4,
+            None # parent
+        )
+        self.post_cfo_fft_display.set_update_time(0.20)
+        self.post_cfo_fft_display.set_y_axis((-140), 10)
+        self.post_cfo_fft_display.set_y_label('Relative Gain', 'dB')
+        self.post_cfo_fft_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.post_cfo_fft_display.enable_autoscale(False)
+        self.post_cfo_fft_display.enable_grid(True)
+        self.post_cfo_fft_display.set_fft_average(0.2)
+        self.post_cfo_fft_display.enable_axis_labels(True)
+        self.post_cfo_fft_display.enable_control_panel(False)
+        self.post_cfo_fft_display.set_fft_window_normalized(False)
+
+
+
+        labels = ['A RX1 / element 0', 'A RX2 / element 1', 'B RX2 / element 2', 'B RX1 / element 3', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(4):
+            if len(labels[i]) == 0:
+                self.post_cfo_fft_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.post_cfo_fft_display.set_line_label(i, labels[i])
+            self.post_cfo_fft_display.set_line_width(i, widths[i])
+            self.post_cfo_fft_display.set_line_color(i, colors[i])
+            self.post_cfo_fft_display.set_line_alpha(i, alphas[i])
+
+        self._post_cfo_fft_display_win = sip.wrapinstance(self.post_cfo_fft_display.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._post_cfo_fft_display_win)
         self.pilot_filter_3 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
         self.pilot_filter_2 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
         self.pilot_filter_1 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
@@ -307,7 +355,8 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             skip_samples=calibration_skip,
             calibration_samples=calibration_samples,
             config_filename=calibration_file,
-            min_coherence=0.90)
+            min_coherence=0.90,
+            start_tag_key='cfo_locked')
         self.music_uca = doa.MUSIC_uca(norm_radius, num_targets, num_elements, pspectrum_len, element0_bearing, element_bearing_step)
         self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 32768)
         self.libresdr_b.set_len_tag_key('packet_len')
@@ -446,6 +495,14 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.cfo_correction = doa.cross_sdr_cfo_corrector(
+            samp_rate=samp_rate,
+            settling_samples=cfo_settling_samples,
+            estimation_samples=cfo_estimation_samples,
+            retry_delay_samples=cfo_retry_delay_samples,
+            agreement_tolerance_hz=cfo_agreement_tolerance_hz,
+            max_abs_cfo_hz=cfo_max_abs_hz,
+            min_coherence=cfo_min_coherence)
         self.bravo_internal_phase_estimator = doa.phase_offset_est(2, (calibration_skip * pilot_decim))
         self.bravo_internal_phase_display = qtgui.time_sink_f(
             1024, #size
@@ -599,55 +656,63 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.bearing_streams, 0), (self.bearing_display, 0))
         self.connect((self.bearing_streams, 0), (self.qtgui_compass_0, 0))
         self.connect((self.bravo_internal_phase_estimator, 0), (self.bravo_internal_phase_display, 0))
-        self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
-        self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
+        self.connect((self.cfo_correction, 0), (self.pilot_filter_0, 0))
+        self.connect((self.cfo_correction, 1), (self.pilot_filter_1, 0))
+        self.connect((self.cfo_correction, 2), (self.pilot_filter_2, 0))
+        self.connect((self.cfo_correction, 3), (self.pilot_filter_3, 0))
         self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
+        self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
+        self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
         self.connect((self.covariance, 0), (self.music_uca, 0))
         self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
         self.connect((self.libresdr_a, 0), (self.alpha_internal_phase_estimator, 0))
-        self.connect((self.libresdr_a, 0), (self.pilot_filter_0, 0))
-        self.connect((self.libresdr_a, 1), (self.pilot_filter_1, 0))
-        self.connect((self.libresdr_a, 0), (self.prefilter_phase_estimator, 0))
+        self.connect((self.libresdr_a, 1), (self.cfo_correction, 1))
+        self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
         self.connect((self.libresdr_a, 1), (self.prefilter_phase_estimator, 1))
-        self.connect((self.libresdr_a, 1), (self.raw_fft_display, 1))
+        self.connect((self.libresdr_a, 0), (self.prefilter_phase_estimator, 0))
         self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
-        self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
+        self.connect((self.libresdr_a, 1), (self.raw_fft_display, 1))
         self.connect((self.libresdr_b, 0), (self.bravo_internal_phase_estimator, 0))
-        self.connect((self.libresdr_b, 1), (self.pilot_filter_2, 0))
-        self.connect((self.libresdr_b, 0), (self.pilot_filter_3, 0))
-        self.connect((self.libresdr_b, 1), (self.prefilter_phase_estimator, 2))
+        self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
+        self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
+        self.connect((self.libresdr_b, 0), (self.cfo_correction, 3))
         self.connect((self.libresdr_b, 0), (self.prefilter_phase_estimator, 3))
+        self.connect((self.libresdr_b, 1), (self.prefilter_phase_estimator, 2))
         self.connect((self.libresdr_b, 0), (self.raw_fft_display, 3))
         self.connect((self.libresdr_b, 1), (self.raw_fft_display, 2))
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
+        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
         self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
         self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
-        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
-        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
-        self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
-        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
         self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
-        self.connect((self.ota_calibration, 0), (self.covariance, 0))
+        self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
+        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
+        self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
+        self.connect((self.pilot_filter_0, 0), (self.post_cfo_fft_display, 0))
         self.connect((self.pilot_filter_0, 0), (self.postfilter_phase_estimator, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
+        self.connect((self.pilot_filter_1, 0), (self.post_cfo_fft_display, 1))
         self.connect((self.pilot_filter_1, 0), (self.postfilter_phase_estimator, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))
+        self.connect((self.pilot_filter_2, 0), (self.post_cfo_fft_display, 2))
         self.connect((self.pilot_filter_2, 0), (self.postfilter_phase_estimator, 2))
         self.connect((self.pilot_filter_3, 0), (self.ota_calibration, 3))
+        self.connect((self.pilot_filter_3, 0), (self.post_cfo_fft_display, 3))
         self.connect((self.pilot_filter_3, 0), (self.postfilter_phase_estimator, 3))
         self.connect((self.postfilter_phase_estimator, 0), (self.postfilter_phase_display, 0))
         self.connect((self.postfilter_phase_estimator, 1), (self.postfilter_phase_display, 1))
         self.connect((self.postfilter_phase_estimator, 2), (self.postfilter_phase_display, 2))
-        self.connect((self.prefilter_phase_estimator, 2), (self.prefilter_phase_display, 2))
         self.connect((self.prefilter_phase_estimator, 1), (self.prefilter_phase_display, 1))
+        self.connect((self.prefilter_phase_estimator, 2), (self.prefilter_phase_display, 2))
         self.connect((self.prefilter_phase_estimator, 0), (self.prefilter_phase_display, 0))
 
 
@@ -753,6 +818,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.proc_rate = proc_rate
         self.corrected_channels.set_samp_rate(self.proc_rate)
         self.corrected_phase_display.set_samp_rate(self.proc_rate)
+        self.post_cfo_fft_display.set_frequency_range(0, self.proc_rate)
         self.postfilter_phase_display.set_samp_rate(self.proc_rate)
 
     def get_pilot_transition(self):
@@ -816,6 +882,42 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
 
     def set_element0_bearing(self, element0_bearing):
         self.element0_bearing = element0_bearing
+
+    def get_cfo_settling_samples(self):
+        return self.cfo_settling_samples
+
+    def set_cfo_settling_samples(self, cfo_settling_samples):
+        self.cfo_settling_samples = cfo_settling_samples
+
+    def get_cfo_retry_delay_samples(self):
+        return self.cfo_retry_delay_samples
+
+    def set_cfo_retry_delay_samples(self, cfo_retry_delay_samples):
+        self.cfo_retry_delay_samples = cfo_retry_delay_samples
+
+    def get_cfo_min_coherence(self):
+        return self.cfo_min_coherence
+
+    def set_cfo_min_coherence(self, cfo_min_coherence):
+        self.cfo_min_coherence = cfo_min_coherence
+
+    def get_cfo_max_abs_hz(self):
+        return self.cfo_max_abs_hz
+
+    def set_cfo_max_abs_hz(self, cfo_max_abs_hz):
+        self.cfo_max_abs_hz = cfo_max_abs_hz
+
+    def get_cfo_estimation_samples(self):
+        return self.cfo_estimation_samples
+
+    def set_cfo_estimation_samples(self, cfo_estimation_samples):
+        self.cfo_estimation_samples = cfo_estimation_samples
+
+    def get_cfo_agreement_tolerance_hz(self):
+        return self.cfo_agreement_tolerance_hz
+
+    def set_cfo_agreement_tolerance_hz(self, cfo_agreement_tolerance_hz):
+        self.cfo_agreement_tolerance_hz = cfo_agreement_tolerance_hz
 
     def get_calibration_skip(self):
         return self.calibration_skip

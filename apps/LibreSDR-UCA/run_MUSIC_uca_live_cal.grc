@@ -294,6 +294,78 @@ blocks:
     coordinate: [144, 16]
     rotation: 0
     state: enabled
+- name: cfo_settling_samples
+  id: variable
+  parameters:
+    comment: Initial IIO/network/RF settling before cross-SDR CFO estimation
+    value: 2**16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_estimation_samples
+  id: variable
+  parameters:
+    comment: Raw OTA pilot samples in each Bravo-vs-Alpha CFO window
+    value: 2**18
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_retry_delay_samples
+  id: variable
+  parameters:
+    comment: Raw samples to pass before retrying a rejected CFO window
+    value: 2**20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_agreement_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum accepted disagreement between ch2/ch0 and ch3/ch0
+    value: '10.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_max_abs_hz
+  id: variable
+  parameters:
+    comment: Reject implausibly large Bravo-minus-Alpha CFO estimates
+    value: '20000.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_min_coherence
+  id: variable
+  parameters:
+    comment: Minimum de-rotated pilot phase coherence for both CFO estimates
+    value: '0.5'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [880, 176]
+    rotation: 0
+    state: enabled
 - name: snapshot_size
   id: variable
   parameters:
@@ -691,6 +763,28 @@ blocks:
     coordinate: [48, 520]
     rotation: 0
     state: enabled
+- name: cfo_correction
+  id: doa_cross_sdr_cfo_corrector
+  parameters:
+    affinity: ''
+    agreement_tolerance_hz: cfo_agreement_tolerance_hz
+    alias: ''
+    comment: 'Fixed order: ch0 Alpha RX1, ch1 Alpha RX2, ch2 Bravo RX2, ch3 Bravo RX1. Alpha is untouched; one common rotator corrects both Bravo channels.'
+    estimation_samples: cfo_estimation_samples
+    max_abs_cfo_hz: cfo_max_abs_hz
+    maxoutbuf: '0'
+    min_coherence: cfo_min_coherence
+    minoutbuf: '0'
+    retry_delay_samples: cfo_retry_delay_samples
+    samp_rate: samp_rate
+    settling_samples: cfo_settling_samples
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 456]
+    rotation: 0
+    state: enabled
 - name: music_uca
   id: doa_MUSIC_uca
   parameters:
@@ -730,6 +824,7 @@ blocks:
     num_inputs: num_elements
     pilot_angle: pilot_bearing
     skip_samples: calibration_skip
+    start_tag_key: '''cfo_locked'''
   states:
     bus_sink: false
     bus_source: false
@@ -960,6 +1055,87 @@ blocks:
     coordinate: [568, 240]
     rotation: 0
     state: enabled
+- name: post_cfo_fft_display
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '0.2'
+    axislabels: 'True'
+    bw: proc_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: CFO-corrected streams after the existing translating/decimating pilot filters. All four pilot peaks should coincide after CFO lock.
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '8192'
+    freqhalf: 'True'
+    grid: 'True'
+    gui_hint: ''
+    label: Relative Gain
+    label1: A RX1 / element 0
+    label10: ''''''
+    label2: A RX2 / element 1
+    label3: B RX2 / element 2
+    label4: B RX1 / element 3
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"POST-CFO filtered pilot spectra (8192-bin FFT)"'
+    nconnections: '4'
+    norm_window: 'False'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.20'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: window.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 240]
+    rotation: 0
+    state: enabled
 - name: postfilter_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -987,16 +1163,16 @@ blocks:
     color7: yellow
     color8: dark red
     color9: dark green
-    comment: This diagnostic is after the four independent translating/decimating
-      FIR filters and before calibration.
+    comment: This diagnostic is after the common CFO correction and four identical
+      translating/decimating FIR filters, but before constant phase calibration.
     ctrlpanel: 'False'
     entags: 'False'
     grid: 'True'
     gui_hint: 2,0,1,1
-    label1: POST-FILTER A RX2 vs A RX1
+    label1: POST-CFO A RX2 vs A RX1
     label10: Signal 10
-    label2: POST-FILTER B RX2 vs A RX1
-    label3: POST-FILTER B RX1 vs A RX1
+    label2: POST-CFO B RX2 vs A RX1
+    label3: POST-CFO B RX1 vs A RX1
     label4: Signal 4
     label5: Signal 5
     label6: Signal 6
@@ -1014,7 +1190,7 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '"POST-FILTER relative phase (before calibration)"'
+    name: '"POST-CFO relative phase (before phase calibration)"'
     nconnections: '3'
     size: '1024'
     srate: proc_rate
@@ -1063,7 +1239,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: POST-FILTER Ettus arg(x0*conj(xi)) diagnostic before calibration.
+    comment: POST-CFO Ettus arg(x0*conj(xi)) diagnostic before constant phase calibration.
     maxoutbuf: '0'
     minoutbuf: '0'
     n_skip_ahead: calibration_skip
@@ -1502,20 +1678,24 @@ connections:
 - [corrected_phase_estimator, '0', corrected_phase_display, '0']
 - [corrected_phase_estimator, '1', corrected_phase_display, '1']
 - [corrected_phase_estimator, '2', corrected_phase_display, '2']
+- [cfo_correction, '0', pilot_filter_0, '0']
+- [cfo_correction, '1', pilot_filter_1, '0']
+- [cfo_correction, '2', pilot_filter_2, '0']
+- [cfo_correction, '3', pilot_filter_3, '0']
 - [covariance, '0', music_uca, '0']
-- [libresdr_a, '0', pilot_filter_0, '0']
+- [libresdr_a, '0', cfo_correction, '0']
 - [libresdr_a, '0', alpha_internal_phase_estimator, '0']
 - [libresdr_a, '0', prefilter_phase_estimator, '0']
 - [libresdr_a, '0', raw_fft_display, '0']
-- [libresdr_a, '1', pilot_filter_1, '0']
+- [libresdr_a, '1', cfo_correction, '1']
 - [libresdr_a, '1', alpha_internal_phase_estimator, '1']
 - [libresdr_a, '1', prefilter_phase_estimator, '1']
 - [libresdr_a, '1', raw_fft_display, '1']
-- [libresdr_b, '0', pilot_filter_3, '0']
+- [libresdr_b, '0', cfo_correction, '3']
 - [libresdr_b, '0', bravo_internal_phase_estimator, '0']
 - [libresdr_b, '0', prefilter_phase_estimator, '3']
 - [libresdr_b, '0', raw_fft_display, '3']
-- [libresdr_b, '1', pilot_filter_2, '0']
+- [libresdr_b, '1', cfo_correction, '2']
 - [libresdr_b, '1', bravo_internal_phase_estimator, '1']
 - [libresdr_b, '1', prefilter_phase_estimator, '2']
 - [libresdr_b, '1', raw_fft_display, '2']
@@ -1536,12 +1716,16 @@ connections:
 - [peak_finder, '0', peak_magnitude_discard, '0']
 - [peak_finder, '1', bearing_streams, '0']
 - [pilot_filter_0, '0', ota_calibration, '0']
+- [pilot_filter_0, '0', post_cfo_fft_display, '0']
 - [pilot_filter_0, '0', postfilter_phase_estimator, '0']
 - [pilot_filter_1, '0', ota_calibration, '1']
+- [pilot_filter_1, '0', post_cfo_fft_display, '1']
 - [pilot_filter_1, '0', postfilter_phase_estimator, '1']
 - [pilot_filter_2, '0', ota_calibration, '2']
+- [pilot_filter_2, '0', post_cfo_fft_display, '2']
 - [pilot_filter_2, '0', postfilter_phase_estimator, '2']
 - [pilot_filter_3, '0', ota_calibration, '3']
+- [pilot_filter_3, '0', post_cfo_fft_display, '3']
 - [pilot_filter_3, '0', postfilter_phase_estimator, '3']
 - [postfilter_phase_estimator, '0', postfilter_phase_display, '0']
 - [postfilter_phase_estimator, '1', postfilter_phase_display, '1']

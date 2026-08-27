@@ -1,0 +1,87 @@
+id: doa_cross_sdr_cfo_corrector
+label: Cross-SDR CFO Corrector
+category: '[doa]'
+
+templates:
+  imports: from gnuradio import doa
+  make: |-
+    doa.cross_sdr_cfo_corrector(
+        samp_rate=${samp_rate},
+        settling_samples=${settling_samples},
+        estimation_samples=${estimation_samples},
+        retry_delay_samples=${retry_delay_samples},
+        agreement_tolerance_hz=${agreement_tolerance_hz},
+        max_abs_cfo_hz=${max_abs_cfo_hz},
+        min_coherence=${min_coherence})
+
+parameters:
+- id: samp_rate
+  label: Sample Rate
+  dtype: float
+  default: samp_rate
+- id: settling_samples
+  label: Startup Settling Samples
+  dtype: int
+  default: 65536
+- id: estimation_samples
+  label: CFO Estimation Samples
+  dtype: int
+  default: 262144
+- id: retry_delay_samples
+  label: Samples Before Retrying Rejection
+  dtype: int
+  default: 1048576
+- id: agreement_tolerance_hz
+  label: Estimate Agreement Tolerance (Hz)
+  dtype: float
+  default: 10.0
+- id: max_abs_cfo_hz
+  label: Maximum Absolute CFO (Hz)
+  dtype: float
+  default: 20000.0
+- id: min_coherence
+  label: Minimum Pilot Coherence
+  dtype: float
+  default: 0.5
+
+asserts:
+- ${ samp_rate > 0.0 }
+- ${ settling_samples >= 0 }
+- ${ estimation_samples >= 2 }
+- ${ retry_delay_samples >= 0 }
+- ${ agreement_tolerance_hz >= 0.0 }
+- ${ max_abs_cfo_hz > 0.0 and max_abs_cfo_hz < samp_rate / 2.0 }
+- ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
+
+inputs:
+- label: array
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+
+outputs:
+- label: corrected
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+
+documentation: |-
+  Automatic OTA pilot CFO correction for two dual-channel LibreSDRs.
+
+  Fixed channel order: ch0 Alpha RX1 reference, ch1 Alpha RX2, ch2 Bravo RX2,
+  ch3 Bravo RX1. Alpha passes through unchanged. The block independently fits
+  the ch2/ch0 and ch3/ch0 relative phase slopes, checks pilot coherence, maximum
+  CFO, and agreement, then freezes their average. One phase-continuous rotator
+  corrects both Bravo channels, preserving their internal phase relationship.
+
+  Before lock, all channels pass through unmodified. On acceptance the block
+  emits a cfo_locked stream tag on the first corrected sample. A downstream UCA
+  OTA Pilot Calibration block can require that tag so it never estimates phase
+  from uncorrected or rejected data. Constant phase offsets are intentionally
+  retained for that downstream phase calibration.
+
+  Rejected windows do not stop the flowgraph or emit cfo_locked. The block waits
+  retry_delay_samples, prints detailed finite/non-zero sample statistics, and
+  automatically collects another complete estimation window.
+
+file_format: 1

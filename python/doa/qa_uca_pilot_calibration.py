@@ -4,9 +4,21 @@
 # Copyright 2026
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import numpy
 import os
+import sys
 import tempfile
+
+import gnuradio
+import numpy
+
+# Ensure GR_ADD_TEST exercises the source package copied under
+# test_modules/gnuradio, not an older system-installed gr-doa package.
+for search_path in sys.path:
+    test_gnuradio = os.path.join(search_path, "gnuradio")
+    if os.path.isfile(os.path.join(test_gnuradio, "doa", "uca_pilot_calibration.py")):
+        gnuradio.__path__.insert(0, test_gnuradio)
+        break
+
 from gnuradio import doa
 from gnuradio import gr_unittest
 

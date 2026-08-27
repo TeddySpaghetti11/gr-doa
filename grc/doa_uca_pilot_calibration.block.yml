@@ -14,7 +14,8 @@ templates:
         skip_samples=${skip_samples},
         calibration_samples=${calibration_samples},
         config_filename=${config_filename},
-        min_coherence=${min_coherence})
+        min_coherence=${min_coherence},
+        start_tag_key=${start_tag_key})
 
 parameters:
 - id: num_inputs
@@ -53,6 +54,10 @@ parameters:
   label: Minimum Valid Coherence
   dtype: float
   default: 0.90
+- id: start_tag_key
+  label: Required Start Tag (optional)
+  dtype: string
+  default: "''"
 
 asserts:
 - ${ num_inputs > 1 }
@@ -99,8 +104,13 @@ documentation: |-
   is supplied, the saved radians are directly compatible with Ettus's Phase
   Correct Chains block (channel 0 is the reference and is omitted).
 
+  When Required Start Tag is non-empty, this block emits zeros and does not
+  count its skip or calibration samples until that tag arrives on input 0. Use
+  cfo_locked after a Cross-SDR CFO Corrector so constant phase calibration can
+  never begin before a valid CFO correction has frozen.
+
   Compute norm_radius at the actual pilot RF frequency. A pure tone corrects fixed
-  delay only at that tone frequency; this block is intended for narrowband MUSIC
-  and is not a wideband sample synchronizer.
+  delay only at that tone frequency; this block is
+  intended for narrowband MUSIC and is not a wideband sample synchronizer.
 
 file_format: 1

@@ -29,5 +29,6 @@ from .x440_usrp_source import x440_usrp_source
 from .serial_connection import serial_connection
 from .signal_replay import signal_replay
 from .power_detection import power_detection
+from .cross_sdr_cfo_corrector import cross_sdr_cfo_corrector
 from .uca_pilot_calibration import uca_pilot_calibration
 #
