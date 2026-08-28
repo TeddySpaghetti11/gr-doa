@@ -6,8 +6,8 @@ options:
     comment: Minimal four-channel LibreSDR receive-path overflow diagnostic.
     copyright: null
     description: Streams both RX channels from both LibreSDRs directly into a null
-      sink for a fixed interval. Any printed O is an IIO receive overflow independent
-      of CFO correction, calibration, MUSIC, and GUI processing.
+      sink until the user stops the flowgraph. Any printed O is an IIO receive overflow
+      independent of CFO correction, calibration, MUSIC, and GUI processing.
     gen_linking: dynamic
     generate_options: no_gui
     generator_class_name: PythonNoGuiGenerator
@@ -78,11 +78,12 @@ blocks:
     coordinate: [424, 16]
     rotation: 0
     state: enabled
-- name: test_seconds
-  id: variable
+- name: import_doa
+  id: import
   parameters:
-    comment: Diagnostic duration; every channel must deliver this many samples
-    value: '20'
+    alias: ''
+    comment: Required by the PPS synchronization startup snippet
+    imports: from gnuradio import doa
   states:
     bus_sink: false
     bus_source: false
@@ -176,70 +177,6 @@ blocks:
     coordinate: [48, 448]
     rotation: 0
     state: enabled
-- name: alpha_rx1_head
-  id: blocks_head
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Stops Alpha RX1 after the fixed test interval
-    num_items: int(test_seconds * samp_rate)
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [400, 192]
-    rotation: 0
-    state: enabled
-- name: alpha_rx2_head
-  id: blocks_head
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Stops Alpha RX2 after the fixed test interval
-    num_items: int(test_seconds * samp_rate)
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [400, 280]
-    rotation: 0
-    state: enabled
-- name: bravo_rx1_head
-  id: blocks_head
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Stops Bravo RX1 after the fixed test interval
-    num_items: int(test_seconds * samp_rate)
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [400, 464]
-    rotation: 0
-    state: enabled
-- name: bravo_rx2_head
-  id: blocks_head
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Stops Bravo RX2 after the fixed test interval
-    num_items: int(test_seconds * samp_rate)
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [400, 552]
-    rotation: 0
-    state: enabled
 - name: all_channels_sink
   id: blocks_null_sink
   parameters:
@@ -290,15 +227,11 @@ blocks:
     state: enabled
 
 connections:
-- [alpha_rx1_head, '0', alpha_rx1_rate, '0']
 - [alpha_rx1_rate, rate, rate_messages, print]
-- [alpha_rx2_head, '0', all_channels_sink, '0']
-- [bravo_rx1_head, '0', all_channels_sink, '1']
-- [bravo_rx2_head, '0', all_channels_sink, '2']
-- [libresdr_a, '0', alpha_rx1_head, '0']
-- [libresdr_a, '1', alpha_rx2_head, '0']
-- [libresdr_b, '0', bravo_rx1_head, '0']
-- [libresdr_b, '1', bravo_rx2_head, '0']
+- [libresdr_a, '0', alpha_rx1_rate, '0']
+- [libresdr_a, '1', all_channels_sink, '0']
+- [libresdr_b, '0', all_channels_sink, '1']
+- [libresdr_b, '1', all_channels_sink, '2']
 
 metadata:
   file_format: 1

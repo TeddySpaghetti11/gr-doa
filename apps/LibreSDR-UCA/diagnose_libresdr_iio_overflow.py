@@ -8,11 +8,12 @@
 # Title: LibreSDR Four-Channel IIO Overflow Diagnostic
 # Author: gr-doa LibreSDR research port
 # Copyright: None
-# Description: Streams both RX channels from both LibreSDRs directly into a null sink for a fixed interval. Any printed O is an IIO receive overflow independent of CFO correction, calibration, MUSIC, and GUI processing.
+# Description: Streams both RX channels from both LibreSDRs directly into a null sink until the user stops the flowgraph. Any printed O is an IIO receive overflow independent of CFO correction, calibration, MUSIC, and GUI processing.
 # GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
 from gnuradio import blocks
 from gnuradio import blocks, gr
+from gnuradio import doa
 from gnuradio import iio
 import threading
 from gnuradio import gr
@@ -41,7 +42,6 @@ class diagnose_libresdr_iio_overflow(gr.top_block):
         ##################################################
         # Variables
         ##################################################
-        self.test_seconds = test_seconds = 20
         self.samp_rate = samp_rate = int(525e3)
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
@@ -80,11 +80,7 @@ class diagnose_libresdr_iio_overflow(gr.top_block):
         self.libresdr_a.set_rfdc(True)
         self.libresdr_a.set_bbdc(True)
         self.libresdr_a.set_filter_params('Auto', '', 0, 0)
-        self.bravo_rx2_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
-        self.bravo_rx1_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
-        self.alpha_rx2_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
         self.alpha_rx1_rate = blocks.probe_rate(gr.sizeof_gr_complex*1, 2000.0, 0.25, "Alpha RX1 source-only rate")
-        self.alpha_rx1_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
         self.all_channels_sink = blocks.null_sink(gr.sizeof_gr_complex*1)
 
 
@@ -92,25 +88,11 @@ class diagnose_libresdr_iio_overflow(gr.top_block):
         # Connections
         ##################################################
         self.msg_connect((self.alpha_rx1_rate, 'rate'), (self.rate_messages, 'print'))
-        self.connect((self.alpha_rx1_head, 0), (self.alpha_rx1_rate, 0))
-        self.connect((self.alpha_rx2_head, 0), (self.all_channels_sink, 0))
-        self.connect((self.bravo_rx1_head, 0), (self.all_channels_sink, 1))
-        self.connect((self.bravo_rx2_head, 0), (self.all_channels_sink, 2))
-        self.connect((self.libresdr_a, 0), (self.alpha_rx1_head, 0))
-        self.connect((self.libresdr_a, 1), (self.alpha_rx2_head, 0))
-        self.connect((self.libresdr_b, 0), (self.bravo_rx1_head, 0))
-        self.connect((self.libresdr_b, 1), (self.bravo_rx2_head, 0))
+        self.connect((self.libresdr_a, 1), (self.all_channels_sink, 0))
+        self.connect((self.libresdr_a, 0), (self.alpha_rx1_rate, 0))
+        self.connect((self.libresdr_b, 0), (self.all_channels_sink, 1))
+        self.connect((self.libresdr_b, 1), (self.all_channels_sink, 2))
 
-
-    def get_test_seconds(self):
-        return self.test_seconds
-
-    def set_test_seconds(self, test_seconds):
-        self.test_seconds = test_seconds
-        self.alpha_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.alpha_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -119,10 +101,6 @@ class diagnose_libresdr_iio_overflow(gr.top_block):
         self.samp_rate = samp_rate
         self.libresdr_a.set_samplerate(self.samp_rate)
         self.libresdr_b.set_samplerate(self.samp_rate)
-        self.alpha_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.alpha_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx1_head.set_length((int(self.test_seconds * self.samp_rate)))
-        self.bravo_rx2_head.set_length((int(self.test_seconds * self.samp_rate)))
 
     def get_rx_gain(self):
         return self.rx_gain

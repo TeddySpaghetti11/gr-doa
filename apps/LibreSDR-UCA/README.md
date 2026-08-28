@@ -362,15 +362,16 @@ rate and restart until the run is overrun-free.
 Use `diagnose_libresdr_iio_overflow.grc` before changing CFO or calibration
 thresholds when the live graph prints `O`. It uses the same two IIO addresses,
 two channels per radio, `525 kS/s` sample rate, and `262144`-sample IIO buffers,
-but contains no CFO, calibration, MUSIC, or GUI blocks. Four Head blocks feed a
-rate probe and Null Sink, so the test prints the measured Alpha RX1 stream rate
-every two seconds and stops automatically after 20 seconds.
+but contains no CFO, calibration, MUSIC, or GUI blocks. All four receive streams
+run continuously into a rate probe and Null Sink. The graph prints the measured
+Alpha RX1 stream rate every two seconds and runs until it is stopped manually.
 
 1. Stop every other receiver flowgraph using either LibreSDR.
 2. Open `diagnose_libresdr_iio_overflow.grc` in GNU Radio Companion.
 3. Generate and run it without changing the wiring.
-4. Confirm that the periodic `Alpha RX1 source-only rate` messages are close to
-   `525e3` samples/second, then check the complete 20-second console output:
+4. Confirm `LibreSDR PPS SYNC CONFIRMED`, then leave it running for at least five
+   minutes. The periodic `Alpha RX1 source-only rate` should settle close to
+   `525e3` samples/second. Stop it manually and check the complete console output:
    - no `O`: raw four-channel acquisition is sustainable; the added processing
      in the live graph is causing the overruns;
    - any `O`: the failure already exists in the IIO/device/transport path and
