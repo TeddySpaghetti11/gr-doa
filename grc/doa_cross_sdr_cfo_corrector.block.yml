@@ -1,11 +1,11 @@
 id: doa_cross_sdr_cfo_corrector
-label: Cross-SDR CFO Corrector
+label: Cross-SDR Continuous CFO Corrector
 category: '[doa]'
 
 templates:
   imports: from gnuradio import doa
   make: |-
-    doa.cross_sdr_cfo_corrector(
+    doa.continuous_cross_sdr_cfo_corrector(
         samp_rate=${samp_rate},
         pilot_offset_hz=${pilot_offset_hz},
         pilot_bandwidth_hz=${pilot_bandwidth_hz},
@@ -19,9 +19,13 @@ templates:
         max_abs_cfo_hz=${max_abs_cfo_hz},
         min_coherence=${min_coherence},
         tracking_window_samples=${tracking_window_samples},
-        tracking_phase_gain=${tracking_phase_gain},
-        phase_jump_threshold_rad=${phase_jump_threshold_rad},
-        tracking_bad_window_grace=${tracking_bad_window_grace})
+        tracking_warmup_samples=${tracking_warmup_samples},
+        tracking_lock_tolerance_hz=${tracking_lock_tolerance_hz},
+        tracking_agreement_tolerance_hz=${tracking_agreement_tolerance_hz},
+        tracking_max_residual_hz=${tracking_max_residual_hz},
+        tracking_gain=${tracking_gain},
+        tracking_lock_windows=${tracking_lock_windows},
+        tracking_min_coherence=${tracking_min_coherence})
 
 parameters:
 - id: samp_rate
@@ -41,7 +45,7 @@ parameters:
   dtype: int
   default: 65536
 - id: estimation_samples
-  label: CFO Estimation Samples
+  label: CFO Acquisition Samples
   dtype: int
   default: 262144
 - id: validation_settling_samples
@@ -49,11 +53,11 @@ parameters:
   dtype: int
   default: 65536
 - id: residual_tolerance_hz
-  label: Maximum Residual CFO Before Lock (Hz)
+  label: Acquisition Residual CFO Tolerance (Hz)
   dtype: float
   default: 1.0
 - id: max_refinement_rounds
-  label: Maximum Residual Refinement Rounds
+  label: Maximum Acquisition Refinement Rounds
   dtype: int
   default: 3
 - id: retry_delay_samples
@@ -61,7 +65,7 @@ parameters:
   dtype: int
   default: 1048576
 - id: agreement_tolerance_hz
-  label: Estimate Agreement Tolerance (Hz)
+  label: Acquisition Estimate Agreement (Hz)
   dtype: float
   default: 10.0
 - id: max_abs_cfo_hz
@@ -69,25 +73,41 @@ parameters:
   dtype: float
   default: 20000.0
 - id: min_coherence
-  label: Minimum Pilot Coherence
+  label: Acquisition Minimum Pilot Coherence
   dtype: float
   default: 0.90
 - id: tracking_window_samples
   label: Continuous Tracking Window Samples
   dtype: int
-  default: 16384
-- id: tracking_phase_gain
-  label: Tracking Phase-Restoration Gain
+  default: 262144
+- id: tracking_warmup_samples
+  label: Tracking Filter Warm-up Samples
+  dtype: int
+  default: 4096
+- id: tracking_lock_tolerance_hz
+  label: Continuous Lock Residual Tolerance (Hz)
+  dtype: float
+  default: 0.05
+- id: tracking_agreement_tolerance_hz
+  label: Tracking Estimate Agreement (Hz)
   dtype: float
   default: 0.25
-- id: phase_jump_threshold_rad
-  label: Reacquire Phase-Jump Threshold (rad)
+- id: tracking_max_residual_hz
+  label: Maximum Trackable Residual CFO (Hz)
   dtype: float
-  default: 2.0
-- id: tracking_bad_window_grace
-  label: Invalid Tracking Windows Before Reacquire
+  default: 20.0
+- id: tracking_gain
+  label: Tracking Frequency Update Gain
+  dtype: float
+  default: 1.0
+- id: tracking_lock_windows
+  label: Stable Windows Before cfo_locked
   dtype: int
-  default: 1
+  default: 2
+- id: tracking_min_coherence
+  label: Tracking Minimum Pilot Coherence
+  dtype: float
+  default: 0.90
 
 asserts:
 - ${ samp_rate > 0.0 }
@@ -103,9 +123,13 @@ asserts:
 - ${ max_abs_cfo_hz > 0.0 and max_abs_cfo_hz < samp_rate / 2.0 }
 - ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
 - ${ tracking_window_samples >= 64 }
-- ${ tracking_phase_gain >= 0.0 and tracking_phase_gain <= 1.0 }
-- ${ phase_jump_threshold_rad > 0.0 and phase_jump_threshold_rad <= 3.141592653589793 }
-- ${ tracking_bad_window_grace >= 0 }
+- ${ tracking_warmup_samples >= 0 }
+- ${ tracking_lock_tolerance_hz >= 0.0 }
+- ${ tracking_agreement_tolerance_hz >= 0.0 }
+- ${ tracking_max_residual_hz > 0.0 and tracking_max_residual_hz < samp_rate / 2.0 }
+- ${ tracking_gain > 0.0 and tracking_gain <= 1.0 }
+- ${ tracking_lock_windows >= 1 }
+- ${ tracking_min_coherence >= 0.0 and tracking_min_coherence <= 1.0 }
 
 inputs:
 - label: array
@@ -120,39 +144,24 @@ outputs:
   multiplicity: 4
 
 documentation: |-
-  Automatic OTA pilot CFO correction for two dual-channel LibreSDRs.
+  Continuous OTA-pilot CFO correction for two dual-channel LibreSDRs.
 
   Fixed channel order: ch0 Alpha RX1 reference, ch1 Alpha RX2, ch2 Bravo RX2,
-  ch3 Bravo RX1. Alpha passes through unchanged. A streaming complex mixer and
-  low-pass filter isolate the configured positive-frequency OTA pilot so other
-  raw-spectrum tones cannot bias the fit. The block independently fits the
-  ch2/ch0 and ch3/ch0 pilot phase slopes, checks coherence, maximum CFO, and
-  agreement, then applies their average provisionally. It measures the
-  remaining post-correction phase slopes from both Bravo channels and refines the
-  one shared correction until both residuals agree and their average is within
-  residual_tolerance_hz. It then continues measuring short pilot windows and
-  updates the correction frequency. A low-gain phase servo holds the arbitrary
-  phase captured at lock; it never drives Alpha-vs-Bravo phase to zero. The common
-  rotator is phase-continuous across scheduler calls and updates, preserving
-  Bravo's internal phase relationship.
+  ch3 Bravo RX1. Alpha passes through unchanged and one common, phase-continuous
+  rotator is always applied to both Bravo channels.
 
-  Before the coarse estimate, all channels pass through unmodified. Provisional
-  correction affects both Bravo outputs during residual validation, but no lock
-  tag is emitted. After validation the block emits cfo_locked on the first sample
-  using the tracked correction. A downstream UCA OTA Pilot Calibration block can
-  require that tag so it never estimates phase from uncorrected, provisional, or
-  rejected data. Constant phase offsets are intentionally retained for that
-  downstream phase calibration. One invalid tracking window is tolerated so a
-  mixed window at a coherent SDR frequency-state transition does not repeatedly
-  disarm calibration. A following coherent common phase slope updates the shared
-  correction without moving the captured phase reference or emitting an unlock
-  tag. A common phase jump without a matching slope change, a differential phase
-  jump, or persistent loss of coherence/disagreement emits cfo_unlocked and starts
-  a phase-continuous reacquisition. Every successful reacquisition emits a new
-  cfo_locked tag so downstream calibration can restart.
+  The block first performs the existing coarse pilot CFO fit and residual
+  refinement. Unlike the former implementation, it does not freeze after that
+  acquisition. It keeps filtering the configured pilot, independently measures
+  the ch2/ch0 and ch3/ch0 residual phase slopes, checks their coherence and
+  agreement, and continuously updates the common Bravo correction frequency.
+  Only frequency/phase slope is corrected; absolute Alpha-vs-Bravo phase is not
+  forced to zero, so the downstream OTA phase calibration still sees the fixed
+  hardware and array geometry phase that it must calibrate.
 
-  Rejected windows do not stop the flowgraph or emit cfo_locked. The block waits
-  retry_delay_samples, prints detailed finite/non-zero sample statistics, and
-  automatically collects another complete estimation window.
+  The cfo_locked tag is withheld until tracking_lock_windows consecutive
+  tracking windows are within tracking_lock_tolerance_hz. Tracking remains
+  active after the tag, so a small changing residual CFO cannot accumulate into
+  the continuous phase ramp seen with the old frozen correction.
 
 file_format: 1
