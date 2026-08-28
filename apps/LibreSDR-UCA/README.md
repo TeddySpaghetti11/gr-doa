@@ -380,17 +380,14 @@ Alpha RX1 stream rate every two seconds and runs until it is stopped manually.
 The buffer-allocation alignment warning is unrelated and can be ignored for
 this test.
 
-If the source-only test completes without any `O`, run the next-stage
-`diagnose_libresdr_cfo_calibration_load.py` directly from a terminal. This
-20-second graph retains the live CFO corrector, four pilot filters, and gated
-phase calibration, but replaces MUSIC and every GUI branch with a four-input
-Null Sink. It waits five seconds after the IIO sources start before taking its
-first CFO window so RF/PLL startup drift is not mistaken for a stable offset:
-
-```sh
-python3 -u apps/LibreSDR-UCA/diagnose_libresdr_cfo_calibration_load.py \
-  2>&1 | tee /tmp/libresdr_cfo_calibration_load.txt
-```
+If the source-only test completes without any `O`, open, generate, and run the
+next-stage `diagnose_libresdr_cfo_calibration_load.grc`. This 20-second graph
+retains the live CFO corrector, four pilot filters, and gated phase calibration,
+but replaces MUSIC and every GUI branch with a four-input Null Sink. It waits
+five seconds after the IIO sources start before taking its first CFO window so
+RF/PLL startup drift is not mistaken for a stable offset. The GRC run command
+saves the complete console output, including errors, to
+`/tmp/libresdr_cfo_calibration_load.txt` before its temporary terminal closes.
 
 - no `O` and `UCA calibration complete`: CFO/calibration processing is
   sustainable, so the downstream MUSIC/diagnostic workload causes the live

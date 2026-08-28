@@ -17,7 +17,7 @@ options:
     max_nouts: '0'
     output_language: python
     realtime_scheduling: ''
-    run_command: '{python} -u {filename}'
+    run_command: bash -lc '{python} -u {filename} 2>&1 | tee /tmp/libresdr_cfo_calibration_load.txt'
     run_options: run
     thread_safe_setters: ''
     title: LibreSDR CFO and Calibration Load Diagnostic
