@@ -117,14 +117,14 @@ blocks:
 - name: element0_bearing
   id: variable
   parameters:
-    comment: Alpha RX1 physical element bearing
-    value: '225.0'
+    comment: Alpha RX1 top-right physical element bearing
+    value: '315.0'
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 96], rotation: 0, state: enabled}
 - name: element_bearing_step
   id: variable
   parameters:
-    comment: Physical stream order proceeds clockwise around the UCA
-    value: '-90.0'
+    comment: Physical stream order proceeds counter-clockwise around the UCA
+    value: '90.0'
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [424, 96], rotation: 0, state: enabled}
 - name: calibration_skip
   id: variable

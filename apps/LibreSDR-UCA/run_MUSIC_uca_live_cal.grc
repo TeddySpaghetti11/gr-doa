@@ -203,8 +203,8 @@ blocks:
 - name: element0_bearing
   id: variable
   parameters:
-    comment: 192.168.4.1 RX1 bottom-right element
-    value: '225.0'
+    comment: 192.168.4.1 RX1 top-right element
+    value: '315.0'
   states:
     bus_sink: false
     bus_source: false
@@ -215,8 +215,8 @@ blocks:
 - name: element_bearing_step
   id: variable
   parameters:
-    comment: Physical stream order proceeds clockwise around the UCA
-    value: '-90.0'
+    comment: Physical stream order proceeds counter-clockwise around the UCA
+    value: '90.0'
   states:
     bus_sink: false
     bus_source: false
@@ -1036,7 +1036,7 @@ blocks:
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '1048576'
-    comment: Element 0 = RX1 bottom-right; element 1 = RX2 bottom-left.
+    comment: Element 0 = RX1 top-right; element 1 = RX2 top-left.
     filter: ''
     filter_source: '''Auto'''
     fpass: '0'
@@ -1072,7 +1072,7 @@ blocks:
     bandwidth: rf_bandwidth
     bbdc: 'True'
     buffer_size: '1048576'
-    comment: 'Outputs are permuted below: RX2 top-left = element 2; RX1 top-right
+    comment: 'Outputs are permuted below: RX2 bottom-left = element 2; RX1 bottom-right
       = element 3.'
     filter: ''
     filter_source: '''Auto'''

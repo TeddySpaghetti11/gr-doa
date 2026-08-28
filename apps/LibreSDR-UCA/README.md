@@ -10,13 +10,13 @@ which gives a radius of `114.997 mm`.
 
 Stream order is fixed as:
 
-1. `192.168.4.1 RX1` - bottom-right - `225 deg`
-2. `192.168.4.1 RX2` - bottom-left - `135 deg`
-3. `192.168.5.1 RX2` - top-left - `45 deg`
-4. `192.168.5.1 RX1` - top-right - `315 deg`
+1. `192.168.4.1 RX1` - top-right - `315 deg`
+2. `192.168.4.1 RX2` - top-left - `45 deg`
+3. `192.168.5.1 RX2` - bottom-left - `135 deg`
+4. `192.168.5.1 RX1` - bottom-right - `225 deg`
 
-The second LibreSDR is intentionally permuted in the flowgraph so the element
-step is `-90 deg`.
+The second LibreSDR is intentionally permuted in the flowgraph so the physical
+stream order proceeds counter-clockwise with an element step of `+90 deg`.
 
 Angles are **source bearings**, measured from the array centre towards the
 transmitter. Calibration and MUSIC use the same manifold:
@@ -256,8 +256,8 @@ sudo cmake --install build
 sudo ldconfig
 ```
 
-The UCA tests now exercise the real `225, 135, 45, 315 deg` stream order and the
-source-bearing steering convention.
+The UCA tests exercise the source-bearing steering convention, and the live
+flowgraph uses the real `315, 45, 135, 225 deg` stream order shown above.
 
 After installation, first run the headless dual-channel B210 flowgraph. It sends
 the fixed calibration pilot on RF A and the movable target on RF B, both at

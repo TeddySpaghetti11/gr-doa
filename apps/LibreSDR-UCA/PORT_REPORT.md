@@ -77,14 +77,14 @@ The authoritative GRC maps channels as follows:
 
 | Global index | SDR channel | Required physical antenna |
 |---:|---|---|
-| 0 | `192.168.4.1` RX1 | bottom-right, element 0, 225 degrees |
-| 1 | `192.168.4.1` RX2 | bottom-left, element 1, 135 degrees |
-| 2 | `192.168.5.1` RX2 | top-left, element 2, 45 degrees |
-| 3 | `192.168.5.1` RX1 | top-right, element 3, 315 degrees |
+| 0 | `192.168.4.1` RX1 | top-right, element 0, 315 degrees |
+| 1 | `192.168.4.1` RX2 | top-left, element 1, 45 degrees |
+| 2 | `192.168.5.1` RX2 | bottom-left, element 2, 135 degrees |
+| 3 | `192.168.5.1` RX1 | bottom-right, element 3, 225 degrees |
 
 The GRC connections deliberately permute the two `192.168.5.1` outputs to match
 the existing physical wiring. With the B210 direction defined as 0 degrees, the
-default element-0 angle is 225 degrees and the step is -90 degrees. This
+default element-0 angle is 315 degrees and the step is +90 degrees. This
 identical logical index order is used by OTA calibration, covariance, and MUSIC.
 
 ### UCA steering vector

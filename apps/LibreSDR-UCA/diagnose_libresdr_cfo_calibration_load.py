@@ -51,8 +51,8 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.pilot_bearing = pilot_bearing = 0
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = array_radius * pilot_rf / 299792458.0
-        self.element_bearing_step = element_bearing_step = -90.0
-        self.element0_bearing = element0_bearing = 225.0
+        self.element_bearing_step = element_bearing_step = 90.0
+        self.element0_bearing = element0_bearing = 315.0
         self.cfo_validation_settling_samples = cfo_validation_settling_samples = 2**12
         self.cfo_settling_samples = cfo_settling_samples = int(5 * samp_rate)
         self.cfo_retry_delay_samples = cfo_retry_delay_samples = 2**16
