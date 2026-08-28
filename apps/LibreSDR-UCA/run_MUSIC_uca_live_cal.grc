@@ -59,7 +59,7 @@ blocks:
   id: variable
   parameters:
     comment: Filtered pilot samples used for complex averaging/coherence
-    value: 2**14
+    value: 2**12
   states:
     bus_sink: false
     bus_source: false
@@ -71,7 +71,7 @@ blocks:
   id: variable
   parameters:
     comment: Filtered samples skipped before calibration
-    value: 2**12
+    value: 2**11
   states:
     bus_sink: false
     bus_source: false
@@ -408,7 +408,7 @@ blocks:
   id: variable
   parameters:
     comment: Samples per MUSIC covariance estimate
-    value: 2**15
+    value: 2**13
   states:
     bus_sink: false
     bus_source: false
@@ -804,6 +804,7 @@ blocks:
     tracking_lock_windows: '2'
     tracking_max_residual_hz: '20.0'
     tracking_min_coherence: '0.9'
+    post_lock_tracking_window_samples: '4096'
     tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
@@ -1152,7 +1153,7 @@ blocks:
     element0_angle: element0_bearing
     element_angle_step: element_bearing_step
     maxoutbuf: '0'
-    min_coherence: '0.90'
+    min_coherence: '0.995'
     minoutbuf: '65536'
     norm_radius: norm_radius
     num_inputs: num_elements

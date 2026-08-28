@@ -169,6 +169,7 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             max_abs_cfo_hz=1000.0,
             min_coherence=0.99,
             tracking_window_samples=window,
+            post_lock_tracking_window_samples=128,
             tracking_warmup_samples=0,
             tracking_lock_tolerance_hz=0.03,
             tracking_agreement_tolerance_hz=0.05,
@@ -188,8 +189,25 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         self.assertAlmostEqual(corrector.accepted_cfo_hz(), 180.0, places=1)
         self.assertEqual(corrector.discontinuity_count(), 0)
         self.assertEqual(corrector.relock_count(), 0)
+        self.assertEqual(corrector.tracking_window_samples, 128)
         numpy.testing.assert_array_equal(outputs[0], inputs[0])
         numpy.testing.assert_array_equal(outputs[1], inputs[1])
+
+        # A long post-lock window would allow this +80 Hz state change to
+        # rotate the cross-SDR array phase through most of a circle before the
+        # next update. Fast tracking plus direct phase feedback bounds nearly
+        # all of the excursion while preserving the non-zero phase reference.
+        relative_phase = numpy.angle(outputs[2] * numpy.conj(outputs[0]))
+        reference_phase = numpy.angle(numpy.mean(numpy.exp(
+            1j * relative_phase[transition_at - 128:transition_at]
+        )))
+        phase_error = numpy.angle(numpy.exp(
+            1j * (relative_phase[transition_at:] - reference_phase)
+        ))
+        self.assertLess(
+            numpy.percentile(numpy.abs(phase_error), 95),
+            numpy.deg2rad(30.0),
+        )
 
         lock_tags = [
             tag for tag in sinks[0].tags()

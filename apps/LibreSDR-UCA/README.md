@@ -137,18 +137,21 @@ the tracker captures the resulting non-zero Alpha-vs-Bravo pilot phase at lock.
 It holds that arbitrary phase instead of driving it to zero, leaving propagation
 and hardware phase for the existing OTA phase calibration.
 
-Defaults at `525 kS/s` are five seconds of startup settling, a `2**16`-sample
+Defaults at `2.8 MS/s` are five seconds of startup settling, a `2**16`-sample
 estimation window, maximum `20 kHz` absolute CFO, and minimum `0.90` pilot-fit
 coherence. The accepted coarse estimate is applied provisionally to both Bravo
 channels. After another `2**12` settling samples, the block measures both
 post-correction residual slopes over another `2**16` samples. It refines the
 one common correction up to three times and declares lock only when the averaged
 residual is at most `1 Hz`. The final measured residual is included even when
-already inside that bound. Once locked, the pilot remains active and the block
-continues fitting `16,384`-sample tracking windows. Each window updates the
-common correction frequency; a low-gain phase servo removes accumulated drift
-relative to the captured lock-time phase without removing that fixed phase.
-Phase remains continuous whenever the correction frequency changes.
+already inside that bound. Lock is qualified with `16,384`-sample tracking
+windows. Once qualified, the live graph switches to `4,096`-sample post-lock
+windows so the common rotator reacts before the recurring LibreSDR frequency
+states can rotate phase across most of a MUSIC covariance snapshot. A direct
+phase-feedback term returns the output to the captured non-zero lock-time phase
+instead of turning phase error into another frequency ramp. It does not force
+absolute Alpha-vs-Bravo phase to zero and is applied identically to both Bravo
+channels.
 
 To avoid blocking the GNU Radio scheduler at multi-MS/s input rates, each CFO
 fit retains the complete configured time window but uses a phase-unambiguous
@@ -181,12 +184,16 @@ rotator phase. A successful reacquisition emits another `cfo_locked`. The
 downstream phase calibration discards its old coefficients on `cfo_unlocked`
 and restarts its skip/calibration interval on the new lock tag.
 
-Reacquisition uses the `16,384`-sample tracking window and only the final 4,096
-samples of filter warm-up, rather than repeating the long startup acquisition.
+Reacquisition returns to the `16,384`-sample qualification window and uses only
+the final 4,096 samples of filter warm-up, rather than repeating the long
+startup acquisition.
 This lets the graph recover from a stream slip or receiver frequency step while
-the retained common rotator remains phase-continuous. The live graph uses 4,096
-post-lock settling samples and 16,384 calibration samples so phase calibration
-finishes inside a stable interval.
+the retained common rotator remains phase-continuous. The live graph skips 2,048
+decimated pilot samples, collects 4,096 calibration samples, and requires
+`0.995` coherence. A transition-contaminated calibration window is discarded
+and retried instead of freezing a biased correction. MUSIC uses an
+8,192-sample covariance snapshot (about 23 ms) so one bearing does not average
+across several recurring hardware frequency states.
 
 ## AD9361 settings
 
@@ -228,7 +235,7 @@ short inspection; the POST-CFO relative-phase display is the preferred check
 that the corrected cross-SDR phase is flat.
 
 The raw four-channel FFT remains connected before the CFO block and all filters in physical UCA
-order. It uses 8,192 bins (about `64.1 Hz/bin` at `525 kS/s`) and explicit
+order. It uses 8,192 bins (about `341.8 Hz/bin` at `2.8 MS/s`) and explicit
 channel labels so a small frequency difference between the two radios can be
 seen directly. This raw display is expected to retain the original Alpha/Bravo
 separation. A second 8,192-bin
@@ -252,8 +259,10 @@ gamma_i = |sum(x_0 conj(x_i))|
 ```
 
 for each channel relative to channel 0. `gamma` is between 0 and 1. A clean
-stationary pilot should be close to 1. Calibration now **fails** if any
-non-reference channel is below `0.90`; values around `0.98-1.00` are preferable.
+stationary pilot should be close to 1. In the live direction-finding graph,
+calibration now **fails and retries** if any non-reference channel is below
+`0.995`. Other callers retain their configured threshold. A successful live
+calibration should therefore report `0.995-1.000` on every channel.
 
 On failure the console prints `UCA CALIBRATION FAILED` and no coefficient file
 is written. The live and load-diagnostic graphs enable automatic retry: the bad

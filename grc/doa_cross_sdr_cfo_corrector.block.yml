@@ -19,6 +19,7 @@ templates:
         max_abs_cfo_hz=${max_abs_cfo_hz},
         min_coherence=${min_coherence},
         tracking_window_samples=${tracking_window_samples},
+        post_lock_tracking_window_samples=${post_lock_tracking_window_samples},
         tracking_warmup_samples=${tracking_warmup_samples},
         tracking_lock_tolerance_hz=${tracking_lock_tolerance_hz},
         tracking_agreement_tolerance_hz=${tracking_agreement_tolerance_hz},
@@ -77,9 +78,13 @@ parameters:
   dtype: float
   default: 0.90
 - id: tracking_window_samples
-  label: Continuous Tracking Window Samples
+  label: Lock Qualification Window Samples
   dtype: int
   default: 262144
+- id: post_lock_tracking_window_samples
+  label: Post-Lock Tracking Window Samples
+  dtype: int
+  default: 16384
 - id: tracking_warmup_samples
   label: Tracking Filter Warm-up Samples
   dtype: int
@@ -123,6 +128,7 @@ asserts:
 - ${ max_abs_cfo_hz > 0.0 and max_abs_cfo_hz < samp_rate / 2.0 }
 - ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
 - ${ tracking_window_samples >= 64 }
+- ${ post_lock_tracking_window_samples >= 64 }
 - ${ tracking_warmup_samples >= 0 }
 - ${ tracking_lock_tolerance_hz >= 0.0 }
 - ${ tracking_agreement_tolerance_hz >= 0.0 }
@@ -162,6 +168,8 @@ documentation: |-
   The cfo_locked tag is withheld until tracking_lock_windows consecutive
   tracking windows are within tracking_lock_tolerance_hz. Tracking remains
   active after the tag, so a small changing residual CFO cannot accumulate into
-  the continuous phase ramp seen with the old frozen correction.
+  the continuous phase ramp seen with the old frozen correction. A separate,
+  shorter post-lock window can react quickly to coherent frequency-state
+  transitions after the longer qualification window has established lock.
 
 file_format: 1

@@ -21,10 +21,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
     through bit-for-bit. Both Bravo channels pass through unchanged during the
     coarse estimate. A common provisional correction is then applied while its
     post-correction residual is measured and refined. After lock, short pilot
-    windows keep updating the common correction frequency and gently return the
-    pilot phase to its captured lock-time value. The captured value is not zero,
-    so fixed propagation and hardware phase remains for downstream calibration.
-    Exactly one phase-continuous rotator is always shared by both Bravo inputs.
+    windows keep updating the common correction frequency and return the pilot
+    to its captured non-zero lock-time phase. Phase feedback is applied only to
+    the one rotator shared by both Bravo inputs, so Bravo's internal phase and
+    the captured fixed propagation/hardware phase remain available to
+    downstream calibration.
     """
 
     _LOCK_TAG = "cfo_locked"
@@ -746,20 +747,35 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 f"{skipped_bad_windows}"
             )
 
-        phase_servo_hz = (
-            self.tracking_phase_gain
-            * common_phase_error
-            * self.samp_rate
-            / (2.0 * numpy.pi * self.tracking_window_samples)
+        phase_feedback = self.tracking_phase_gain * common_phase_error
+        feedback_factor = numpy.exp(-1j * phase_feedback)
+        corrected_endpoint_phases = tuple(
+            self._wrapped_phase(phase - phase_feedback)
+            for phase in endpoint_phases
         )
         with self._lock:
-            self._accepted_cfo_hz += residual_hz + phase_servo_hz
+            # Frequency feedback removes the measured phase slope. Phase
+            # feedback separately returns the next output window to the
+            # captured, non-zero pilot phase. Converting phase error into
+            # another frequency term made the recurring LibreSDR frequency
+            # states overshoot for several windows and contaminate MUSIC.
+            self._accepted_cfo_hz += residual_hz
             accepted = self._accepted_cfo_hz
             self._set_correction_frequency(accepted, reset_phase=False)
+            self._correction_phase = self._wrapped_phase(
+                self._correction_phase - phase_feedback
+            )
             self._estimates_hz = tuple(estimates)
             self._coherences = tuple(coherences)
-            self._last_tracked_phase = tuple(endpoint_phases)
+            self._last_tracked_phase = corrected_endpoint_phases
             self._last_tracked_tail_samples = tuple(endpoint_tail_samples)
+
+        # The estimator filters see the same corrected Bravo streams as the
+        # outputs. Rotate their internal states by the identical common factor
+        # so direct phase feedback does not create an artificial IIR transient
+        # and false residual-CFO estimate in the following window.
+        self._pilot_filter_states[1] *= feedback_factor
+        self._pilot_filter_states[2] *= feedback_factor
 
     def _handle_bad_tracking_window(self, reason):
         """Hold lock briefly across one mixed hardware transition window."""

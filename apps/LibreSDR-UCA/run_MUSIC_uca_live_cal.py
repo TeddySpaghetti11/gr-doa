@@ -84,7 +84,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_decim = pilot_decim = 8
         self.array_radius = array_radius = 0.16263 / (2**0.5)
         self.target_norm_radius = target_norm_radius = array_radius * target_rf / 299792458.0
-        self.snapshot_size = snapshot_size = 2**15
+        self.snapshot_size = snapshot_size = 2**13
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
         self.pspectrum_len = pspectrum_len = 720
@@ -107,8 +107,8 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.cfo_max_abs_hz = cfo_max_abs_hz = 20000.0
         self.cfo_estimation_samples = cfo_estimation_samples = 2**16
         self.cfo_agreement_tolerance_hz = cfo_agreement_tolerance_hz = 10.0
-        self.calibration_skip = calibration_skip = 2**12
-        self.calibration_samples = calibration_samples = 2**14
+        self.calibration_skip = calibration_skip = 2**11
+        self.calibration_samples = calibration_samples = 2**12
         self.calibration_file = calibration_file = "/tmp/gr-doa-uca-phase-offsets.cfg"
 
         ##################################################
@@ -371,7 +371,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             skip_samples=calibration_skip,
             calibration_samples=calibration_samples,
             config_filename=calibration_file,
-            min_coherence=0.90,
+            min_coherence=0.995,
             start_tag_key='cfo_locked',
             separate_data_inputs=True,
             retry_on_failure=True)
@@ -528,6 +528,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             max_abs_cfo_hz=cfo_max_abs_hz,
             min_coherence=cfo_min_coherence,
             tracking_window_samples=16384,
+            post_lock_tracking_window_samples=4096,
             tracking_warmup_samples=4096,
             tracking_lock_tolerance_hz=0.05,
             tracking_agreement_tolerance_hz=0.25,
@@ -700,18 +701,18 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
         self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
         self.connect((self.covariance, 0), (self.music_uca, 0))
-        self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
         self.connect((self.libresdr_a, 0), (self.alpha_internal_phase_estimator, 0))
-        self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
+        self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
         self.connect((self.libresdr_a, 1), (self.cfo_correction, 1))
+        self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
         self.connect((self.libresdr_a, 0), (self.prefilter_phase_estimator, 0))
         self.connect((self.libresdr_a, 1), (self.prefilter_phase_estimator, 1))
-        self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
         self.connect((self.libresdr_a, 1), (self.raw_fft_display, 1))
-        self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
+        self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
         self.connect((self.libresdr_b, 0), (self.bravo_internal_phase_estimator, 0))
-        self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
+        self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
         self.connect((self.libresdr_b, 0), (self.cfo_correction, 3))
+        self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
         self.connect((self.libresdr_b, 1), (self.prefilter_phase_estimator, 2))
         self.connect((self.libresdr_b, 0), (self.prefilter_phase_estimator, 3))
         self.connect((self.libresdr_b, 1), (self.raw_fft_display, 2))
@@ -719,17 +720,17 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
         self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
-        self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
-        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
-        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
-        self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
+        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
+        self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
         self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
+        self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
         self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
-        self.connect((self.ota_calibration, 3), (self.covariance, 3))
+        self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
-        self.connect((self.ota_calibration, 0), (self.covariance, 0))
+        self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
@@ -747,9 +748,9 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.postfilter_phase_estimator, 0), (self.postfilter_phase_display, 0))
         self.connect((self.postfilter_phase_estimator, 1), (self.postfilter_phase_display, 1))
         self.connect((self.postfilter_phase_estimator, 2), (self.postfilter_phase_display, 2))
+        self.connect((self.prefilter_phase_estimator, 1), (self.prefilter_phase_display, 1))
         self.connect((self.prefilter_phase_estimator, 2), (self.prefilter_phase_display, 2))
         self.connect((self.prefilter_phase_estimator, 0), (self.prefilter_phase_display, 0))
-        self.connect((self.prefilter_phase_estimator, 1), (self.prefilter_phase_display, 1))
         self.connect((self.target_filter_0, 0), (self.ota_calibration, 4))
         self.connect((self.target_filter_1, 0), (self.ota_calibration, 5))
         self.connect((self.target_filter_2, 0), (self.ota_calibration, 6))

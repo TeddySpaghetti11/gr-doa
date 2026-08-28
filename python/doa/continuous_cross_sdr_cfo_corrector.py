@@ -40,6 +40,7 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  max_abs_cfo_hz=20000.0,
                  min_coherence=0.90,
                  tracking_window_samples=262144,
+                 post_lock_tracking_window_samples=None,
                  tracking_warmup_samples=4096,
                  tracking_lock_tolerance_hz=0.05,
                  tracking_agreement_tolerance_hz=0.25,
@@ -47,9 +48,15 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  tracking_gain=1.0,
                  tracking_lock_windows=2,
                  tracking_min_coherence=None,
-                 tracking_log_every=8):
+                 tracking_log_every=128):
         if tracking_warmup_samples < 0:
             raise ValueError("Tracking warm-up must be non-negative")
+        if post_lock_tracking_window_samples is None:
+            post_lock_tracking_window_samples = tracking_window_samples
+        if post_lock_tracking_window_samples < 64:
+            raise ValueError(
+                "Post-lock tracking window must contain at least 64 samples"
+            )
         if tracking_lock_tolerance_hz < 0.0:
             raise ValueError("Tracking lock tolerance must be non-negative")
         if tracking_agreement_tolerance_hz < 0.0:
@@ -90,6 +97,12 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
         )
 
         self.tracking_warmup_samples = int(tracking_warmup_samples)
+        self.qualification_tracking_window_samples = int(
+            tracking_window_samples
+        )
+        self.post_lock_tracking_window_samples = int(
+            post_lock_tracking_window_samples
+        )
         self.tracking_lock_tolerance_hz = float(tracking_lock_tolerance_hz)
         self.tracking_agreement_tolerance_hz = float(
             tracking_agreement_tolerance_hz
@@ -117,7 +130,8 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
             f"residual <= {self.tracking_lock_tolerance_hz:.6f} Hz for "
             f"{self.tracking_lock_windows} consecutive accepted windows; "
             "frequency-state tracking and discontinuity reacquisition remain "
-            "active after cfo_locked."
+            "active after cfo_locked. Post-lock tracking window: "
+            f"{self.post_lock_tracking_window_samples} samples."
         )
 
     def locked(self):
@@ -158,6 +172,9 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
             self._qualification_warmup_remaining = self.tracking_warmup_samples
             self._qualification_stable_windows = 0
             self._qualification_window_rejected = False
+        self.tracking_window_samples = (
+            self.qualification_tracking_window_samples
+        )
 
     def _start_qualification(self):
         with self._qualification_lock:
@@ -246,11 +263,25 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
             )
             if became_ready:
                 self._qualification_ready = True
+            ready = self._qualification_ready
+
+        if became_ready:
+            # Long windows provide a precise initial residual estimate. Once
+            # qualified, use a shorter window so the live rotator reacts before
+            # the LibreSDR's recurring frequency-state changes can rotate the
+            # array phase across most of a MUSIC covariance snapshot. This
+            # switch occurs exactly between completed tracking windows.
+            self.tracking_window_samples = (
+                self.post_lock_tracking_window_samples
+            )
 
         if (
                 update_count == 1
                 or update_count % self.tracking_log_every == 0
-                or abs(residual_hz) > self.tracking_lock_tolerance_hz
+                or (
+                    not ready
+                    and abs(residual_hz) > self.tracking_lock_tolerance_hz
+                )
                 or became_ready):
             print(
                 f"Cross-SDR qualification {update_count}: ch2/ch0 "

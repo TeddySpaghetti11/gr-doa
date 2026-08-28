@@ -106,14 +106,14 @@ class uca_pilot_calibration(gr.sync_block):
                 "UCA calibration: waiting for "
                 f"{self.calibration_samples} pilot samples after skipping "
                 f"{self.skip_remaining} samples; minimum coherence is "
-                f"{self.min_coherence:.2f}"
+                f"{self.min_coherence:.3f}"
             )
         else:
             print(
                 f"UCA calibration: waiting for '{self.start_tag_key}' before "
                 f"skipping {self.skip_remaining} samples and collecting "
                 f"{self.calibration_samples} pilot samples; minimum coherence "
-                f"is {self.min_coherence:.2f}"
+                f"is {self.min_coherence:.3f}"
             )
 
     def calibrated(self):
@@ -240,7 +240,7 @@ class uca_pilot_calibration(gr.sync_block):
             if coherence < self.min_coherence:
                 failures.append(
                     f"ch{channel}/ch0 coherence {coherence:.4f} is below "
-                    f"{self.min_coherence:.2f}"
+                    f"{self.min_coherence:.3f}"
                 )
 
         if failures:
