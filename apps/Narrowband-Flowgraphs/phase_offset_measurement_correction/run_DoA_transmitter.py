@@ -5,10 +5,10 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: B210 OTA Calibration Tone
+# Title: B210 Dual-Channel Calibration and Target TX
 # Author: Ettus Research; LibreSDR UCA configuration
 # Copyright: None
-# Description: 50 kHz complex pilot kept away from receiver DC for narrow translated filtering.
+# Description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends the movable +150 kHz direction-finding target. Both use 40 dB gain.
 # GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
 def struct(data): return type('Struct', (object,), data)()
@@ -31,14 +31,14 @@ from gnuradio import eng_notation
 class run_DoA_transmitter(gr.top_block):
 
     def __init__(self):
-        gr.top_block.__init__(self, "B210 OTA Calibration Tone", catch_exceptions=True)
+        gr.top_block.__init__(self, "B210 Dual-Channel Calibration and Target TX", catch_exceptions=True)
 
         ##################################################
         # Variables
         ##################################################
         self.input_variables = input_variables = struct({
 
-            'ToneFreq': 50e3,
+            'PilotToneFreq': 50e3,
 
             'SampleRate': 1e6,
 
@@ -48,6 +48,7 @@ class run_DoA_transmitter(gr.top_block):
 
             'Gain': 40,
 
+            'TargetToneFreq': 150e3,
 
 
 
@@ -73,7 +74,7 @@ class run_DoA_transmitter(gr.top_block):
             uhd.stream_args(
                 cpu_format="fc32",
                 args='',
-                channels=list(range(0,1)),
+                channels=[0, 1],
             ),
             '',
         )
@@ -84,13 +85,19 @@ class run_DoA_transmitter(gr.top_block):
         self.uhd_usrp_sink_0.set_center_freq(input_variables.CenterFreq, 0)
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
         self.uhd_usrp_sink_0.set_gain(input_variables.Gain, 0)
-        self.analog_sig_source_x_0 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.ToneFreq, 1, 0, 0)
+
+        self.uhd_usrp_sink_0.set_center_freq(input_variables.CenterFreq, 1)
+        self.uhd_usrp_sink_0.set_antenna("TX/RX", 1)
+        self.uhd_usrp_sink_0.set_gain(input_variables.Gain, 1)
+        self.analog_sig_source_x_1 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.TargetToneFreq, 1, 0, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.PilotToneFreq, 1, 0, 0)
 
 
         ##################################################
         # Connections
         ##################################################
         self.connect((self.analog_sig_source_x_0, 0), (self.uhd_usrp_sink_0, 0))
+        self.connect((self.analog_sig_source_x_1, 0), (self.uhd_usrp_sink_0, 1))
 
 
     def get_input_variables(self):

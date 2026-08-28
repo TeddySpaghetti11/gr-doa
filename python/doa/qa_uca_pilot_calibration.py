@@ -24,6 +24,75 @@ from gnuradio import gr_unittest
 
 
 class qa_uca_pilot_calibration(gr_unittest.TestCase):
+    def test_pilot_coefficients_are_applied_to_separate_target(self):
+        num_elements = 4
+        norm_radius = 0.26857
+        pilot_bearing = 0.0
+        target_bearing = 117.0
+        element0_deg = 225.0
+        element_step_deg = -90.0
+        sample_count = 2048
+
+        element_bearings = numpy.deg2rad(
+            element0_deg + numpy.arange(num_elements) * element_step_deg
+        )
+        pilot_steering = numpy.exp(
+            1j * 2.0 * numpy.pi * norm_radius
+            * numpy.cos(numpy.deg2rad(pilot_bearing) - element_bearings)
+        )
+        target_steering = numpy.exp(
+            1j * 2.0 * numpy.pi * norm_radius
+            * numpy.cos(numpy.deg2rad(target_bearing) - element_bearings)
+        )
+        hardware = numpy.exp(1j * numpy.asarray([0.0, 0.43, -1.17, 2.08]))
+        pilot_tone = numpy.exp(1j * 0.031 * numpy.arange(sample_count))
+        target_tone = numpy.exp(1j * 0.083 * numpy.arange(sample_count))
+        pilot_inputs = [
+            (hardware[channel] * pilot_steering[channel] * pilot_tone).astype(
+                numpy.complex64
+            )
+            for channel in range(num_elements)
+        ]
+        target_inputs = [
+            (hardware[channel] * target_steering[channel] * target_tone).astype(
+                numpy.complex64
+            )
+            for channel in range(num_elements)
+        ]
+
+        calibration = doa.uca_pilot_calibration(
+            num_inputs=num_elements,
+            norm_radius=norm_radius,
+            pilot_angle=pilot_bearing,
+            element0_angle=element0_deg,
+            element_angle_step=element_step_deg,
+            skip_samples=0,
+            calibration_samples=sample_count,
+            config_filename="",
+            separate_data_inputs=True,
+        )
+        outputs = [
+            numpy.empty(sample_count, dtype=numpy.complex64)
+            for _ in range(num_elements)
+        ]
+        calibration.work(pilot_inputs + target_inputs, outputs)
+        self.assertTrue(calibration.calibrated())
+
+        calibration.work(pilot_inputs + target_inputs, outputs)
+        for channel in range(num_elements):
+            expected = target_steering[channel] * target_tone
+            numpy.testing.assert_allclose(
+                outputs[channel], expected, rtol=2e-5, atol=2e-5
+            )
+
+        # The target output must retain its own bearing manifold, not the known
+        # calibration-pilot manifold.
+        target_ratio = outputs[1][0] / outputs[0][0]
+        expected_target_ratio = target_steering[1] / target_steering[0]
+        pilot_ratio = pilot_steering[1] / pilot_steering[0]
+        self.assertAlmostEqual(abs(target_ratio - expected_target_ratio), 0.0, 5)
+        self.assertGreater(abs(target_ratio - pilot_ratio), 0.25)
+
     def test_geometry_preserved_and_hardware_removed(self):
         num_elements = 4
         norm_radius = 0.353265327

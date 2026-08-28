@@ -3,10 +3,11 @@ options:
     alias: ''
     author: gr-doa LibreSDR research port
     catch_exceptions: 'True'
-    comment: Four-channel LibreSDR UCA MUSIC with same-session OTA calibration.
+    comment: Four-channel LibreSDR UCA MUSIC with a fixed calibration beacon and
+      a separate movable target.
     copyright: null
-    description: Narrow translated pilot, source-bearing UCA steering, and calibration
-      coherence diagnostics.
+    description: Continuously tracked +50 kHz calibration pilot and independently
+      filtered +150 kHz target for live direction finding.
     gen_linking: dynamic
     generate_options: qt_gui
     generator_class_name: PythonQtGuiGenerator
@@ -235,6 +236,18 @@ blocks:
     coordinate: [1424, 16]
     rotation: 0
     state: enabled
+- name: target_norm_radius
+  id: variable
+  parameters:
+    comment: UCA radius in wavelengths at the target RF, used by MUSIC
+    value: array_radius * target_rf / 299792458.0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1424, 64]
+    rotation: 0
+    state: enabled
 - name: num_elements
   id: variable
   parameters:
@@ -322,7 +335,7 @@ blocks:
 - name: pilot_rf
   id: variable
   parameters:
-    comment: Actual RF of the calibration/DF pilot
+    comment: Actual RF of the fixed calibration pilot
     value: center_freq + pilot_offset
   states:
     bus_sink: false
@@ -341,6 +354,30 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [912, 16]
+    rotation: 0
+    state: enabled
+- name: target_offset
+  id: variable
+  parameters:
+    comment: Movable B210 TX/RX1 target offset from centre frequency
+    value: 150e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 64]
+    rotation: 0
+    state: enabled
+- name: target_rf
+  id: variable
+  parameters:
+    comment: Actual RF of the direction-finding target
+    value: center_freq + target_offset
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 64]
     rotation: 0
     state: enabled
 - name: proc_rate
@@ -812,7 +849,7 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '"Calibrated UCA channels"'
+    name: '"Calibrated movable-target channels"'
     nconnections: '4'
     size: '1024'
     srate: proc_rate
@@ -909,7 +946,7 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '"Corrected relative phase (instantaneous)"'
+    name: '"Corrected target relative phase (instantaneous)"'
     nconnections: '3'
     size: '1024'
     srate: proc_rate
@@ -958,7 +995,8 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: Ettus instantaneous x0*conj(xi) phase diagnostic after calibration.
+    comment: Instantaneous x0*conj(xi) phase of the separately filtered target after
+      pilot-derived calibration.
     maxoutbuf: '0'
     minoutbuf: '0'
     n_skip_ahead: calibration_skip + calibration_samples
@@ -976,7 +1014,7 @@ blocks:
     affinity: ''
     alias: ''
     avg_method: Forward
-    comment: Forward-only covariance; no ULA reversal averaging.
+    comment: Target-only forward covariance; the calibration pilot does not enter MUSIC.
     inputs: num_elements
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1073,7 +1111,7 @@ blocks:
     inputs: num_elements
     maxoutbuf: '0'
     minoutbuf: '0'
-    norm_radius: norm_radius
+    norm_radius: target_norm_radius
     num_targets: num_targets
     pspectrum_len: pspectrum_len
   states:
@@ -1089,8 +1127,8 @@ blocks:
     affinity: ''
     alias: ''
     calibration_samples: calibration_samples
-    comment: Prints averaged phase, predicted geometry, frozen correction and normalized
-      coherence.
+    comment: Estimates coefficients from pilot inputs 0-3 and applies them only to
+      target inputs 4-7.
     config_filename: calibration_file
     element0_angle: element0_bearing
     element_angle_step: element_bearing_step
@@ -1100,6 +1138,7 @@ blocks:
     norm_radius: norm_radius
     num_inputs: num_elements
     pilot_angle: pilot_bearing
+    separate_data_inputs: 'True'
     skip_samples: calibration_skip
     start_tag_key: '''cfo_locked'''
   states:
@@ -1223,6 +1262,86 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [312, 656]
+    rotation: 0
+    state: enabled
+- name: target_filter_0
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 0 movable-target selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [544, 728]
+    rotation: 0
+    state: enabled
+- name: target_filter_1
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 1 movable-target selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [544, 792]
+    rotation: 0
+    state: enabled
+- name: target_filter_2
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 2 movable-target selector (LibreSDR B RX2)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 728]
+    rotation: 0
+    state: enabled
+- name: target_filter_3
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 3 movable-target selector (LibreSDR B RX1)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 792]
     rotation: 0
     state: enabled
 - name: post_cfo_fft_display
@@ -1726,9 +1845,13 @@ connections:
 - [bearing_streams, '0', qtgui_compass_0, '0']
 - [bravo_internal_phase_estimator, '0', bravo_internal_phase_display, '0']
 - [cfo_correction, '0', pilot_filter_0, '0']
+- [cfo_correction, '0', target_filter_0, '0']
 - [cfo_correction, '1', pilot_filter_1, '0']
+- [cfo_correction, '1', target_filter_1, '0']
 - [cfo_correction, '2', pilot_filter_2, '0']
+- [cfo_correction, '2', target_filter_2, '0']
 - [cfo_correction, '3', pilot_filter_3, '0']
+- [cfo_correction, '3', target_filter_3, '0']
 - [corrected_phase_estimator, '0', corrected_phase_display, '0']
 - [corrected_phase_estimator, '1', corrected_phase_display, '1']
 - [corrected_phase_estimator, '2', corrected_phase_display, '2']
@@ -1783,6 +1906,10 @@ connections:
 - [prefilter_phase_estimator, '0', prefilter_phase_display, '0']
 - [prefilter_phase_estimator, '1', prefilter_phase_display, '1']
 - [prefilter_phase_estimator, '2', prefilter_phase_display, '2']
+- [target_filter_0, '0', ota_calibration, '4']
+- [target_filter_1, '0', ota_calibration, '5']
+- [target_filter_2, '0', ota_calibration, '6']
+- [target_filter_3, '0', ota_calibration, '7']
 
 metadata:
   file_format: 1

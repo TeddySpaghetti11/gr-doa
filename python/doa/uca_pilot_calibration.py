@@ -42,7 +42,8 @@ class uca_pilot_calibration(gr.sync_block):
                  calibration_samples=32768,
                  config_filename="",
                  min_coherence=0.90,
-                 start_tag_key=""):
+                 start_tag_key="",
+                 separate_data_inputs=False):
         if num_inputs < 2:
             raise ValueError("UCA pilot calibration requires at least two inputs")
         if norm_radius <= 0.0:
@@ -55,11 +56,17 @@ class uca_pilot_calibration(gr.sync_block):
         gr.sync_block.__init__(
             self,
             name="UCA OTA Pilot Calibration",
-            in_sig=[numpy.complex64] * num_inputs,
+            in_sig=[numpy.complex64] * (
+                num_inputs * (2 if separate_data_inputs else 1)
+            ),
             out_sig=[numpy.complex64] * num_inputs,
         )
 
         self.num_inputs = int(num_inputs)
+        self.separate_data_inputs = bool(separate_data_inputs)
+        self._data_input_offset = (
+            self.num_inputs if self.separate_data_inputs else 0
+        )
         self.norm_radius = float(norm_radius)
         self.pilot_angle = float(pilot_angle)
         self.element0_angle = float(element0_angle)
@@ -309,13 +316,15 @@ class uca_pilot_calibration(gr.sync_block):
         state = self.status()
         if state == "calibrated" and cursor < stop:
             for channel in range(self.num_inputs):
+                data_input = self._data_input_offset + channel
                 output_items[channel][cursor:stop] = (
-                    input_items[channel][cursor:stop]
+                    input_items[data_input][cursor:stop]
                     * self._coefficients[channel]
                 )
         elif state == "failed" and cursor < stop:
             for channel in range(self.num_inputs):
-                output_items[channel][cursor:stop] = input_items[channel][
+                data_input = self._data_input_offset + channel
+                output_items[channel][cursor:stop] = input_items[data_input][
                     cursor:stop
                 ]
         return stop

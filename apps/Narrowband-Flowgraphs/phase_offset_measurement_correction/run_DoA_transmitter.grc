@@ -3,10 +3,10 @@ options:
     alias: ''
     author: Ettus Research; LibreSDR UCA configuration
     catch_exceptions: 'True'
-    comment: B210 OTA calibration pilot for the LibreSDR UCA.
+    comment: Dual-channel B210 source for LibreSDR UCA calibration and direction finding.
     copyright: null
-    description: 50 kHz complex pilot kept away from receiver DC for narrow translated
-      filtering.
+    description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends
+      the movable +150 kHz direction-finding target. Both use 40 dB gain.
     gen_linking: dynamic
     generate_options: no_gui
     generator_class_name: PythonNoGuiGenerator
@@ -20,7 +20,7 @@ options:
     run: 'True'
     run_command: '{python} -u {filename}'
     thread_safe_setters: ''
-    title: B210 OTA Calibration Tone
+    title: B210 Dual-Channel Calibration and Target TX
   states:
     bus_sink: false
     bus_source: false
@@ -33,9 +33,9 @@ blocks:
 - name: input_variables
   id: variable_struct
   parameters:
-    comment: Calibration pilot settings. CenterFreq must match the LibreSDR LO; ToneFreq
-      must match pilot_offset in the receiver graph.
-    field0: ToneFreq
+    comment: TX/RX0 is the stationary calibration antenna; TX/RX1 is the movable
+      target antenna. Offsets must match the receiver pilot_offset and target_offset.
+    field0: PilotToneFreq
     field1: SampleRate
     field10: ''
     field11: ''
@@ -50,7 +50,7 @@ blocks:
     field2: CenterFreq
     field3: TxAddr
     field4: Gain
-    field5: ''
+    field5: TargetToneFreq
     field6: ''
     field7: ''
     field8: ''
@@ -70,7 +70,7 @@ blocks:
     value2: 700e6
     value3: '"serial=310C4AE"'
     value4: '40'
-    value5: '0'
+    value5: 150e3
     value6: '0'
     value7: '0'
     value8: '0'
@@ -88,8 +88,8 @@ blocks:
     affinity: ''
     alias: ''
     amp: '1'
-    comment: ''
-    freq: input_variables.ToneFreq
+    comment: Fixed calibration beacon connected to B210 TX/RX0
+    freq: input_variables.PilotToneFreq
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -103,6 +103,29 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [328, 120]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_1
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: Movable direction-finding target connected to B210 TX/RX1
+    freq: input_variables.TargetToneFreq
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: input_variables.SampleRate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_SIN_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 216]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -272,7 +295,7 @@ blocks:
     bw8: '0'
     bw9: '0'
     center_freq0: input_variables.CenterFreq
-    center_freq1: '0'
+    center_freq1: input_variables.CenterFreq
     center_freq10: '0'
     center_freq11: '0'
     center_freq12: '0'
@@ -316,7 +339,7 @@ blocks:
     dev_addr: input_variables.TxAddr
     dev_args: '""'
     gain0: input_variables.Gain
-    gain1: '0'
+    gain1: input_variables.Gain
     gain10: '0'
     gain11: '0'
     gain12: '0'
@@ -446,7 +469,7 @@ blocks:
     lo_source9: internal
     maxoutbuf: '0'
     minoutbuf: '0'
-    nchan: '1'
+    nchan: '2'
     num_mboards: '1'
     otw: ''
     samp_rate: input_variables.SampleRate
@@ -461,7 +484,7 @@ blocks:
     show_lo_controls: 'False'
     start_time: '-1.0'
     stream_args: ''
-    stream_chans: '[]'
+    stream_chans: '[0, 1]'
     sync: sync
     time_source0: ''
     time_source1: ''
@@ -482,6 +505,7 @@ blocks:
 
 connections:
 - [analog_sig_source_x_0, '0', uhd_usrp_sink_0, '0']
+- [analog_sig_source_x_1, '0', uhd_usrp_sink_0, '1']
 
 metadata:
   file_format: 1

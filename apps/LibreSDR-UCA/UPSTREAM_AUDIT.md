@@ -27,7 +27,7 @@ This audit records the repository state before the minimal-port corrections.
 | `estimate_constant_phase_offsets_and_save.grc` | Required source experiment mixed with unnecessary deviation | The two FMComms sources are relevant, but the edits duplicate and disable the upstream X440 graph rather than providing a clean LibreSDR-specific graph. |
 | `view_op_with_corrected_phase_offsets.grc` | Diagnostic-only mixed with unnecessary deviation | The four-channel viewing path is useful diagnostics, but it was embedded as a duplicate branch in an upstream example. |
 | Generated `.py` files beside those GRC files | Generated artifacts / unnecessary repository divergence | These files were generated from the modified examples and are not authoritative source. |
-| `run_DoA_transmitter.grc` | Required OTA transmitter configuration | B210 serial selection, 700 MHz center frequency, 50 kHz pilot, and 40 dB TX gain are hardware/calibration changes. |
+| `run_DoA_transmitter.grc` | Required OTA transmitter configuration | B210 serial selection, 700 MHz center frequency, separate 50 kHz pilot and 150 kHz target outputs, and 40 dB gain on both TX channels are hardware/calibration changes. |
 
 ## Failure-chain assessment before correction
 

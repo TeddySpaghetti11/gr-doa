@@ -330,6 +330,7 @@ blocks:
     norm_radius: norm_radius
     num_inputs: num_elements
     pilot_angle: pilot_bearing
+    separate_data_inputs: 'False'
     skip_samples: calibration_skip
     start_tag_key: '''cfo_locked'''
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [1000, 448], rotation: 0, state: enabled}

@@ -8,7 +8,7 @@
 # Title: LibreSDR UCA MUSIC - Live OTA Calibration
 # Author: gr-doa LibreSDR research port
 # Copyright: None
-# Description: Narrow translated pilot, source-bearing UCA steering, and calibration coherence diagnostics.
+# Description: Continuously tracked +50 kHz calibration pilot and independently filtered +150 kHz target for live direction finding.
 # GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
 from gnuradio import qtgui
@@ -69,12 +69,15 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.target_offset = target_offset = 150e3
         self.pilot_offset = pilot_offset = 50e3
         self.center_freq = center_freq = int(700e6)
+        self.target_rf = target_rf = center_freq + target_offset
         self.samp_rate = samp_rate = int(525e3)
         self.pilot_rf = pilot_rf = center_freq + pilot_offset
         self.pilot_decim = pilot_decim = 8
         self.array_radius = array_radius = 0.16263 / (2**0.5)
+        self.target_norm_radius = target_norm_radius = array_radius * target_rf / 299792458.0
         self.snapshot_size = snapshot_size = 2**15
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
@@ -106,6 +109,10 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
+        self.target_filter_3 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), target_offset, samp_rate)
+        self.target_filter_2 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), target_offset, samp_rate)
+        self.target_filter_1 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), target_offset, samp_rate)
+        self.target_filter_0 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), target_offset, samp_rate)
         self.spectrum_display = qtgui.vector_sink_f(
             pspectrum_len,
             0,
@@ -359,9 +366,10 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             calibration_samples=calibration_samples,
             config_filename=calibration_file,
             min_coherence=0.90,
-            start_tag_key='cfo_locked')
+            start_tag_key='cfo_locked',
+            separate_data_inputs=True)
         self.ota_calibration.set_min_output_buffer(65536)
-        self.music_uca = doa.MUSIC_uca(norm_radius, num_targets, num_elements, pspectrum_len, element0_bearing, element_bearing_step)
+        self.music_uca = doa.MUSIC_uca(target_norm_radius, num_targets, num_elements, pspectrum_len, element0_bearing, element_bearing_step)
         self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 1048576)
         self.libresdr_b.set_len_tag_key('packet_len')
         self.libresdr_b.set_frequency(center_freq)
@@ -395,7 +403,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.corrected_phase_display = qtgui.time_sink_f(
             1024, #size
             proc_rate, #samp_rate
-            "Corrected relative phase (instantaneous)", #name
+            "Corrected target relative phase (instantaneous)", #name
             3, #number of inputs
             None # parent
         )
@@ -447,7 +455,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.corrected_channels = qtgui.time_sink_c(
             1024, #size
             proc_rate, #samp_rate
-            "Calibrated UCA channels", #name
+            "Calibrated movable-target channels", #name
             4, #number of inputs
             None # parent
         )
@@ -672,22 +680,26 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.cfo_correction, 1), (self.pilot_filter_1, 0))
         self.connect((self.cfo_correction, 2), (self.pilot_filter_2, 0))
         self.connect((self.cfo_correction, 3), (self.pilot_filter_3, 0))
+        self.connect((self.cfo_correction, 0), (self.target_filter_0, 0))
+        self.connect((self.cfo_correction, 1), (self.target_filter_1, 0))
+        self.connect((self.cfo_correction, 2), (self.target_filter_2, 0))
+        self.connect((self.cfo_correction, 3), (self.target_filter_3, 0))
         self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
-        self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
         self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
+        self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
         self.connect((self.covariance, 0), (self.music_uca, 0))
-        self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
         self.connect((self.libresdr_a, 0), (self.alpha_internal_phase_estimator, 0))
-        self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
+        self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
         self.connect((self.libresdr_a, 1), (self.cfo_correction, 1))
+        self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
         self.connect((self.libresdr_a, 1), (self.prefilter_phase_estimator, 1))
         self.connect((self.libresdr_a, 0), (self.prefilter_phase_estimator, 0))
-        self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
         self.connect((self.libresdr_a, 1), (self.raw_fft_display, 1))
+        self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
         self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
         self.connect((self.libresdr_b, 0), (self.bravo_internal_phase_estimator, 0))
-        self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
         self.connect((self.libresdr_b, 0), (self.cfo_correction, 3))
+        self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
         self.connect((self.libresdr_b, 0), (self.prefilter_phase_estimator, 3))
         self.connect((self.libresdr_b, 1), (self.prefilter_phase_estimator, 2))
         self.connect((self.libresdr_b, 1), (self.raw_fft_display, 2))
@@ -695,17 +707,17 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
         self.connect((self.music_uca, 0), (self.spectrum_display, 0))
         self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
+        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
         self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
         self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
-        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
+        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
         self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
         self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
-        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
-        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
-        self.connect((self.ota_calibration, 0), (self.covariance, 0))
+        self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
         self.connect((self.ota_calibration, 3), (self.covariance, 3))
-        self.connect((self.ota_calibration, 1), (self.covariance, 1))
+        self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
@@ -720,12 +732,16 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.pilot_filter_3, 0), (self.ota_calibration, 3))
         self.connect((self.pilot_filter_3, 0), (self.post_cfo_fft_display, 3))
         self.connect((self.pilot_filter_3, 0), (self.postfilter_phase_estimator, 3))
+        self.connect((self.postfilter_phase_estimator, 1), (self.postfilter_phase_display, 1))
         self.connect((self.postfilter_phase_estimator, 0), (self.postfilter_phase_display, 0))
         self.connect((self.postfilter_phase_estimator, 2), (self.postfilter_phase_display, 2))
-        self.connect((self.postfilter_phase_estimator, 1), (self.postfilter_phase_display, 1))
-        self.connect((self.prefilter_phase_estimator, 0), (self.prefilter_phase_display, 0))
         self.connect((self.prefilter_phase_estimator, 1), (self.prefilter_phase_display, 1))
         self.connect((self.prefilter_phase_estimator, 2), (self.prefilter_phase_display, 2))
+        self.connect((self.prefilter_phase_estimator, 0), (self.prefilter_phase_display, 0))
+        self.connect((self.target_filter_0, 0), (self.ota_calibration, 4))
+        self.connect((self.target_filter_1, 0), (self.ota_calibration, 5))
+        self.connect((self.target_filter_2, 0), (self.ota_calibration, 6))
+        self.connect((self.target_filter_3, 0), (self.ota_calibration, 7))
 
 
     def closeEvent(self, event):
@@ -735,6 +751,17 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.wait()
 
         event.accept()
+
+    def get_target_offset(self):
+        return self.target_offset
+
+    def set_target_offset(self, target_offset):
+        self.target_offset = target_offset
+        self.set_target_rf(self.center_freq + self.target_offset)
+        self.target_filter_0.set_center_freq(self.target_offset)
+        self.target_filter_1.set_center_freq(self.target_offset)
+        self.target_filter_2.set_center_freq(self.target_offset)
+        self.target_filter_3.set_center_freq(self.target_offset)
 
     def get_pilot_offset(self):
         return self.pilot_offset
@@ -753,8 +780,16 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
         self.set_pilot_rf(self.center_freq + self.pilot_offset)
+        self.set_target_rf(self.center_freq + self.target_offset)
         self.libresdr_a.set_frequency(self.center_freq)
         self.libresdr_b.set_frequency(self.center_freq)
+
+    def get_target_rf(self):
+        return self.target_rf
+
+    def set_target_rf(self, target_rf):
+        self.target_rf = target_rf
+        self.set_target_norm_radius(self.array_radius * self.target_rf / 299792458.0)
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -771,6 +806,10 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.prefilter_phase_display.set_samp_rate(self.samp_rate)
         self.raw_fft_display.set_frequency_range(0, self.samp_rate)
 
@@ -794,6 +833,13 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
     def set_array_radius(self, array_radius):
         self.array_radius = array_radius
         self.set_norm_radius(self.array_radius * self.pilot_rf / 299792458.0)
+        self.set_target_norm_radius(self.array_radius * self.target_rf / 299792458.0)
+
+    def get_target_norm_radius(self):
+        return self.target_norm_radius
+
+    def set_target_norm_radius(self, target_norm_radius):
+        self.target_norm_radius = target_norm_radius
 
     def get_snapshot_size(self):
         return self.snapshot_size
@@ -843,6 +889,10 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
 
     def get_pilot_passband(self):
         return self.pilot_passband
@@ -853,6 +903,10 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.target_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
 
     def get_pilot_bearing(self):
         return self.pilot_bearing

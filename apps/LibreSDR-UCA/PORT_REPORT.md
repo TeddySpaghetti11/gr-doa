@@ -52,7 +52,10 @@ upstream, and their locally generated Python artifacts were removed:
 - `apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/estimate_constant_phase_offsets_and_save.grc`
 - `apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/view_op_with_corrected_phase_offsets.grc`
 
-The B210 calibration transmitter is configured for 40 dB TX gain.
+The B210 transmitter uses two simultaneous 40 dB channels: RF A `TX/RX` sends
+the fixed `+50 kHz` calibration beacon, while RF B `TX/RX` sends the movable
+`+150 kHz` direction-finding target. MUSIC receives only the separately filtered
+target; the known `pilot_bearing` is used only to derive phase calibration.
 
 ## Reverted deviations
 
@@ -171,7 +174,8 @@ The corrected software passes:
 - synthetic four streams -> unchanged Ettus autocorrelation -> UCA MUSIC,
   resolving the injected 73 degree bearing within 0.5 degree.
 
-The GRC file compiles successfully with GNU Radio Companion Compiler 3.10.12.
+The live, transmitter, and compatibility diagnostic GRC files compile
+successfully with GNU Radio Companion Compiler 3.11.0.
 
 Live source-only acquisition from both LibreSDRs completed without an IIO `O`
 overrun at 1 MS/s and again at 625 kS/s. A separate pre-correction pilot probe at
@@ -186,20 +190,26 @@ remains locked.
 The corrector now detects that transition, emits `cfo_unlocked`, retains the
 phase-continuous common Bravo rotator, and reacquires with short tracking
 windows. Initial hardware acquisition, retries, and downstream OTA calibration
-were shortened to fit inside Alpha's stable intervals. The final connected-radio
-rerun could not be completed because Alpha stopped responding at
-`192.168.4.1`, while Bravo remained reachable; the B210 also reported a transient
-USB disconnect. Fast recovery is covered by synthetic CFO-step and phase-jump
-regressions, but the final duty cycle and MUSIC bearing accuracy still require a
-complete overrun-free hardware run after Alpha is restored.
+were shortened to fit inside Alpha's stable intervals.
+
+On 2026-08-28 the dual-channel B210 graph was run on the attached B210 over USB
+2: UHD accepted both TX channels at `40 dB`, and a 15-second run produced no
+`U` underflows. Both LibreSDRs were reachable and the full rebuilt receiver
+established CFO lock and repeatedly completed OTA calibration with coherence
+between roughly `0.97` and `0.99`. The same previously isolated Alpha frequency
+state transitions then caused repeated unlock/reacquire cycles without printed
+IIO `O` overruns. The dual-signal wiring is operational, but a trustworthy
+continuously updating hardware bearing still depends on eliminating those Alpha
+input discontinuities; the software correctly refuses to present target data as
+calibrated while that lock is invalid.
 
 ## Test summary
 
 ```text
-cmake --build build-work -j2
+cmake --build build -j4
   PASS
 
-ctest --test-dir build-work -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)'
+ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)'
   3/3 test programs passed
 
 grcc -o /tmp apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc

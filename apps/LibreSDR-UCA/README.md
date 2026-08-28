@@ -29,17 +29,20 @@ where `rho = r/lambda`.
 
 ## Frequency-derived normalized radius
 
-`norm_radius` is no longer hard-coded. The flowgraph calculates it from the
-actual pilot RF frequency:
+The normalized radius is no longer hard-coded. The flowgraph calculates a pilot
+value for calibration and a target value for MUSIC from their actual RFs:
 
 ```text
 array_radius = 0.16263 / sqrt(2)
 pilot_rf = center_freq + pilot_offset
 norm_radius = array_radius * pilot_rf / 299792458.0
+target_rf = center_freq + target_offset
+target_norm_radius = array_radius * target_rf / 299792458.0
 ```
 
-With the current defaults (`center_freq = 700 MHz`, `pilot_offset = +50 kHz`),
-the processed RF is `700.05 MHz` and `norm_radius` is about `0.2685307`.
+With the current defaults, calibration uses `700.050 MHz` and MUSIC uses
+`700.150 MHz`. The small difference is retained rather than silently treating
+the target as if it were the pilot.
 
 Note that `162.63 mm` equals exactly half a wavelength at about `921.70 MHz`.
 The present test frequency is therefore extremely close to half-wavelength
@@ -47,11 +50,35 @@ adjacent spacing. A strong 180-degree ambiguity can still occur on array
 symmetry axes even when the processing is correct. Validate at several off-axis
 bearings rather than using only `0/90/180/270 deg`.
 
-## Pilot filtering
+## Separate calibration and target signals
+
+The live direction finder now uses two simultaneous B210 transmit channels. They
+have deliberately different RF offsets and deliberately different jobs:
+
+| B210 connector | Offset / RF | Antenna placement | Receiver use |
+|---|---:|---|---|
+| RF A `TX/RX` (UHD channel 0) | `+50 kHz` / `700.050 MHz` | Fixed at the bearing entered as `pilot_bearing` | Continuous cross-SDR tracking and OTA phase calibration only |
+| RF B `TX/RX` (UHD channel 1) | `+150 kHz` / `700.150 MHz` | Movable target | MUSIC direction finding only |
+
+Both channels use `40 dB` TX gain. Do not connect either antenna to an `RX2`
+connector. Leave the RF A calibration antenna stationary and transmitting for
+the entire run. Move only the RF B target antenna after lock and calibration.
+The value of `pilot_bearing` tells the calibration block where the fixed RF A
+antenna is; it is not supplied to MUSIC as the target answer.
+
+The four CFO-corrected receiver streams are split into two identical translated
+filter banks. The `+50 kHz` bank estimates one phase-only coefficient per array
+channel. Those coefficients are applied to the separate `+150 kHz` bank, and
+only that corrected target bank enters covariance and MUSIC. Therefore moving
+the RF B antenna changes the measured bearing while the RF A antenna continues
+to provide the phase/frequency reference.
+
+## Pilot and target filtering
 
 The B210 pilot is now `+50 kHz` from the receiver centre instead of `+5 kHz`.
-Each of the four receiver channels passes through an identical Frequency Xlating
-FIR Filter before calibration and covariance formation:
+Each of the four receiver channels passes through matching Frequency Xlating FIR
+filters. The pilot filter at `+50 kHz` feeds calibration; the target filter at
+`+150 kHz` feeds covariance and MUSIC after pilot-derived phase correction:
 
 ```text
 pilot_offset     = 50 kHz
@@ -64,9 +91,9 @@ proc_rate        = 65.625 kS/s
 After translation the desired pilot is at DC, receiver DC is at `-50 kHz`, and
 the pilot image is around `-100 kHz`, so the narrow low-pass rejects both.
 
-The B210 transmitter flowgraph uses the same `700 MHz` centre, `+50 kHz` tone,
-and `40 dB` TX gain by default. Keep the centre and offset matched to the
-receiver variables if you retune.
+The B210 transmitter flowgraph uses the same `700 MHz` centre, `+50 kHz` pilot,
+`+150 kHz` target, and `40 dB` gain on both channels by default. Keep both
+offsets matched to the receiver variables if you retune.
 
 ## Automatic cross-SDR CFO correction
 
@@ -221,8 +248,9 @@ sudo ldconfig
 The UCA tests now exercise the real `225, 135, 45, 315 deg` stream order and the
 source-bearing steering convention.
 
-After installation, first run the headless B210 `+50 kHz` pilot flowgraph. It is
-fixed at `40 dB` TX gain:
+After installation, first run the headless dual-channel B210 flowgraph. It sends
+the fixed calibration pilot on RF A and the movable target on RF B, both at
+`40 dB` TX gain:
 
 ```sh
 python3 apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.py
@@ -234,30 +262,42 @@ Leave it running, then start the checked-in receiver Python equivalent:
 python3 apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.py
 ```
 
-Alternatively, open and run
-`apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.grc`
-first, then open and run `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc`. The
-transmitter is intentionally headless, so success is a running console without
-`U` underflows; it does not open a plot window. The Python and GRC versions use
-the same channel order, diagnostics, and calibration threshold.
+Alternatively, run exactly these two GRC files in this order:
+
+1. `apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.grc`
+2. `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc`
+
+The transmitter is intentionally headless, so success is a running console
+without `U` underflows; it does not open a plot window. In the receiver raw FFT,
+success first appears as distinct peaks near `+50 kHz` and `+150 kHz`. The Python
+and GRC versions use the same channel order, diagnostics, and calibration
+threshold.
 
 ## Test procedure
 
-1. Confirm the physical channel order above.
-2. Set `pilot_bearing` to the actual B210 bearing for the current setup.
-3. Start the B210 calibration transmitter.
-4. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
-5. The console must print `Cross-SDR CFO lock established`. A rejection now
+1. Confirm the physical four-element receive-channel order above.
+2. Connect the stationary calibration antenna to B210 RF A `TX/RX`, place it at
+   a known bearing, and set `pilot_bearing` to that physical bearing.
+3. Connect the movable target antenna to B210 RF B `TX/RX` and place it at a
+   different starting bearing. Do not enter this target bearing in the graph.
+4. Start `run_DoA_transmitter.grc`; leave it running and verify there are no
+   repeated `U` underflow characters.
+5. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
+6. Verify the raw FFT contains both the `+50 kHz` pilot and `+150 kHz` target.
+7. The console must print `Cross-SDR CFO lock established`. A rejection now
    retries automatically; repeated rejection or `O` overruns means the stream or
    pilot must be fixed before calibration can begin.
-6. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
-7. The raw FFT may show the original radio-specific shift; verify all four peaks
+8. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
+9. The raw FFT may show the original radio-specific shift; verify all four peaks
    coincide in `POST-CFO filtered pilot spectra`.
-8. Wait for `UCA calibration complete` and inspect all three coherence values. If
+10. Wait for `UCA calibration complete` and inspect all three coherence values. If
    `UCA CALIBRATION FAILED` appears, treat the output as uncalibrated bypass data.
-9. Keep the source stationary and verify the MUSIC spectrum has clear structure.
-10. Rotate through several known off-axis bearings and compare the peak movement.
-11. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
+11. Keep RF A fixed. Move only the RF B antenna around the receive array. The
+    compass and peak bearing should follow RF B after the covariance-window
+    update delay; they should not remain pinned to `pilot_bearing`.
+12. Test several off-axis positions and avoid judging the system from only the
+    symmetric `0/90/180/270` axes or a strong indoor reflection.
+13. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
 
 A stream of `O` characters is an IIO receive overrun, not a 10 MHz lock report.
 It means samples were lost because the host/network/GUI did not drain one or

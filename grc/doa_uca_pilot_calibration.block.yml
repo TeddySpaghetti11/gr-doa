@@ -15,7 +15,8 @@ templates:
         calibration_samples=${calibration_samples},
         config_filename=${config_filename},
         min_coherence=${min_coherence},
-        start_tag_key=${start_tag_key})
+        start_tag_key=${start_tag_key},
+        separate_data_inputs=${separate_data_inputs})
 
 parameters:
 - id: num_inputs
@@ -58,6 +59,10 @@ parameters:
   label: Required Start Tag (optional)
   dtype: string
   default: "''"
+- id: separate_data_inputs
+  label: Separate Target Inputs
+  dtype: bool
+  default: 'False'
 
 asserts:
 - ${ num_inputs > 1 }
@@ -67,10 +72,15 @@ asserts:
 - ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
 
 inputs:
-- label: in
+- label: pilot
   domain: stream
   dtype: complex
   multiplicity: ${ num_inputs }
+- label: target
+  domain: stream
+  dtype: complex
+  multiplicity: ${ num_inputs }
+  optional: true
 
 outputs:
 - label: corrected
@@ -87,10 +97,13 @@ documentation: |-
 
   Place a strong narrowband pilot at the configured known bearing before the
   flowgraph starts. The block removes the predicted UCA steering phase from the
-  measured channel ratios, freezes one unit-magnitude phase correction per
-  channel, and then passes corrected samples. It emits zeros during the
-  skip/calibration interval. Channel amplitudes are intentionally left unchanged,
-  matching Ettus's relative phase-correction stage.
+  measured pilot-channel ratios and freezes one unit-magnitude phase correction
+  per channel. With Separate Target Inputs disabled it applies those coefficients
+  to the pilot inputs for backwards compatibility. With Separate Target Inputs
+  enabled, the first input group is used only to estimate calibration and the
+  second group is passed through the frozen coefficients for direction finding.
+  It emits zeros during the skip/calibration interval. Channel amplitudes are
+  intentionally left unchanged, matching Ettus's relative phase-correction stage.
 
   The console also prints normalized complex coherence for every channel relative
   to channel 0. Values close to 1 are expected for a clean stationary pilot; a
