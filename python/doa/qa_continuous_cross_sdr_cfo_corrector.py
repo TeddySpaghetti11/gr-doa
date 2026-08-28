@@ -141,16 +141,17 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         self.assertEqual(len(lock_tags), 1)
         self.assertGreater(lock_tags[0].offset, acquisition_end)
 
-    def test_large_common_frequency_state_change_keeps_qualified_lock(self):
+    def test_large_common_frequency_state_change_reacquires(self):
         sample_rate = 100000.0
         window = 2048
         acquisition_end = 4 * window
         transition_at = acquisition_end + 4 * window
-        sample_count = transition_at + 5 * window
+        sample_count = transition_at + 10 * window
 
-        # This mirrors the piecewise-stable 50--100 Hz state changes observed
-        # with the Lesha firmware. Once qualified, a coherent common slope
-        # change is trackable frequency drift, not a phase discontinuity.
+        # A large common slope can be genuine hardware drift, but it can also
+        # be a stream/state discontinuity whose fitted slope looks coherent.
+        # Above the configured post-lock limit it must disarm downstream
+        # calibration and reacquire instead of silently changing the rotator.
         cfo = numpy.full(sample_count, 180.0, dtype=numpy.float64)
         cfo[:transition_at] = 100.0
         inputs = _pilot_channels(sample_rate, sample_count, cfo)
@@ -163,7 +164,7 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             estimation_samples=window,
             validation_settling_samples=0,
             residual_tolerance_hz=0.05,
-            max_refinement_rounds=2,
+            max_refinement_rounds=3,
             retry_delay_samples=10000,
             agreement_tolerance_hz=0.1,
             max_abs_cfo_hz=1000.0,
@@ -173,9 +174,7 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             tracking_warmup_samples=0,
             tracking_lock_tolerance_hz=0.03,
             tracking_agreement_tolerance_hz=0.05,
-            # Deliberately below the later +80 Hz state change. This limit
-            # qualifies initial lock; it must not disable the base tracker's
-            # coherent post-lock frequency-state handling.
+            # Deliberately below the later +80 Hz state change.
             tracking_max_residual_hz=5.0,
             tracking_gain=1.0,
             tracking_lock_windows=2,
@@ -187,27 +186,12 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
 
         self.assertTrue(corrector.locked())
         self.assertAlmostEqual(corrector.accepted_cfo_hz(), 180.0, places=1)
-        self.assertEqual(corrector.discontinuity_count(), 0)
-        self.assertEqual(corrector.relock_count(), 0)
+        self.assertEqual(corrector.discontinuity_count(), 1)
+        self.assertEqual(corrector.relock_count(), 1)
+        self.assertGreaterEqual(corrector.tracking_rejection_count(), 2)
         self.assertEqual(corrector.tracking_window_samples, 128)
         numpy.testing.assert_array_equal(outputs[0], inputs[0])
         numpy.testing.assert_array_equal(outputs[1], inputs[1])
-
-        # A long post-lock window would allow this +80 Hz state change to
-        # rotate the cross-SDR array phase through most of a circle before the
-        # next update. Fast tracking plus direct phase feedback bounds nearly
-        # all of the excursion while preserving the non-zero phase reference.
-        relative_phase = numpy.angle(outputs[2] * numpy.conj(outputs[0]))
-        reference_phase = numpy.angle(numpy.mean(numpy.exp(
-            1j * relative_phase[transition_at - 128:transition_at]
-        )))
-        phase_error = numpy.angle(numpy.exp(
-            1j * (relative_phase[transition_at:] - reference_phase)
-        ))
-        self.assertLess(
-            numpy.percentile(numpy.abs(phase_error), 95),
-            numpy.deg2rad(30.0),
-        )
 
         lock_tags = [
             tag for tag in sinks[0].tags()
@@ -217,8 +201,10 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             tag for tag in sinks[0].tags()
             if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
         ]
-        self.assertEqual(len(lock_tags), 1)
-        self.assertEqual(len(unlock_tags), 0)
+        self.assertEqual(len(lock_tags), 2)
+        self.assertEqual(len(unlock_tags), 1)
+        self.assertLess(lock_tags[0].offset, unlock_tags[0].offset)
+        self.assertLess(unlock_tags[0].offset, lock_tags[1].offset)
 
 
 if __name__ == "__main__":

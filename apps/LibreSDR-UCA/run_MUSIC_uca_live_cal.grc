@@ -802,7 +802,7 @@ blocks:
     tracking_gain: '1.0'
     tracking_lock_tolerance_hz: '0.05'
     tracking_lock_windows: '2'
-    tracking_max_residual_hz: '20.0'
+    tracking_max_residual_hz: '80.0'
     tracking_min_coherence: '0.9'
     post_lock_tracking_window_samples: '4096'
     tracking_warmup_samples: '4096'

@@ -54,7 +54,7 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.pilot_transition = pilot_transition = 10e3
         self.pilot_passband = pilot_passband = 10e3
         self.pilot_decim = pilot_decim = 8
-        self.pilot_bearing = pilot_bearing = 0
+        self.pilot_bearing = pilot_bearing = 180
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = array_radius * pilot_rf / 299792458.0
         self.element_bearing_step = element_bearing_step = 90.0
@@ -68,8 +68,8 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.cfo_max_abs_hz = cfo_max_abs_hz = 20000.0
         self.cfo_estimation_samples = cfo_estimation_samples = 2**16
         self.cfo_agreement_tolerance_hz = cfo_agreement_tolerance_hz = 10.0
-        self.calibration_skip = calibration_skip = 2**12
-        self.calibration_samples = calibration_samples = 2**14
+        self.calibration_skip = calibration_skip = 2**11
+        self.calibration_samples = calibration_samples = 2**12
         self.calibration_file = calibration_file = "/tmp/gr-doa-uca-phase-offsets-load-diagnostic.cfg"
 
         ##################################################
@@ -89,11 +89,11 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             skip_samples=calibration_skip,
             calibration_samples=calibration_samples,
             config_filename=calibration_file,
-            min_coherence=0.90,
+            min_coherence=0.995,
             start_tag_key='cfo_locked',
             separate_data_inputs=False,
             retry_on_failure=True)
-        self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 262144)
+        self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 1048576)
         self.libresdr_b.set_len_tag_key('packet_len')
         self.libresdr_b.set_frequency(center_freq)
         self.libresdr_b.set_samplerate(samp_rate)
@@ -107,7 +107,7 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.libresdr_b.set_rfdc(True)
         self.libresdr_b.set_bbdc(True)
         self.libresdr_b.set_filter_params('Auto', '', 0, 0)
-        self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 262144)
+        self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 1048576)
         self.libresdr_a.set_len_tag_key('packet_len')
         self.libresdr_a.set_frequency(center_freq)
         self.libresdr_a.set_samplerate(samp_rate)
@@ -135,10 +135,11 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             max_abs_cfo_hz=cfo_max_abs_hz,
             min_coherence=cfo_min_coherence,
             tracking_window_samples=16384,
+            post_lock_tracking_window_samples=4096,
             tracking_warmup_samples=4096,
             tracking_lock_tolerance_hz=0.05,
             tracking_agreement_tolerance_hz=0.25,
-            tracking_max_residual_hz=20.0,
+            tracking_max_residual_hz=80.0,
             tracking_gain=1.0,
             tracking_lock_windows=2,
             tracking_min_coherence=0.9)
@@ -164,10 +165,10 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.connect((self.libresdr_a, 1), (self.alpha_rx2_head, 0))
         self.connect((self.libresdr_b, 0), (self.bravo_rx1_head, 0))
         self.connect((self.libresdr_b, 1), (self.bravo_rx2_head, 0))
-        self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
-        self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
         self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
+        self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
         self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
+        self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))

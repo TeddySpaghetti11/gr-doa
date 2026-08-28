@@ -532,7 +532,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             tracking_warmup_samples=4096,
             tracking_lock_tolerance_hz=0.05,
             tracking_agreement_tolerance_hz=0.25,
-            tracking_max_residual_hz=20.0,
+            tracking_max_residual_hz=80.0,
             tracking_gain=1.0,
             tracking_lock_windows=2,
             tracking_min_coherence=0.9)

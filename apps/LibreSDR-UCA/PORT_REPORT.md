@@ -187,12 +187,19 @@ lost coherence, producing an observed Bravo-minus-Alpha CFO alternation near
 correction-loop oscillation; a deterministic replay at the hardware settings
 remains locked.
 
-The corrector now distinguishes that coherent common frequency-state transition
-from a phase-only stream discontinuity. It tolerates one mixed low-coherence
-tracking window, retains the phase-continuous common Bravo rotator and existing
-lock, then follows the new common slope while preserving the original non-zero
-phase reference. Phase-only jumps, differential jumps, and persistent bad
-windows still emit `cfo_unlocked` and take the short reacquisition path.
+The corrector continuously estimates Alpha-versus-Bravo pilot phase slope and
+applies one common complex rotator to both Bravo channels. Alpha is copied
+unchanged, Bravo's internal phase difference is therefore preserved, and the
+loop does not servo the absolute cross-SDR phase to zero. A fixed geometric or
+hardware phase remains available to the downstream OTA calibration.
+
+Acquisition and post-lock quality limits are separate. Residual slope,
+two-channel agreement, and coherence are checked before a post-lock estimate
+can update the Bravo rotator. A rejected update cannot briefly corrupt the
+array phase and only then cause an unlock. Phase jumps, differential jumps,
+out-of-limit residual slopes, and persistent bad windows emit `cfo_unlocked`
+and take the short reacquisition path; a later qualified lock emits a new
+`cfo_locked` tag so downstream OTA calibration starts a fresh measurement.
 
 On 2026-08-28 the dual-channel B210 graph was run on the attached B210 over USB
 2: UHD accepted both TX channels at `40 dB`, and a 15-second run produced no
@@ -203,16 +210,27 @@ state transitions then caused repeated unlock/reacquire cycles without printed
 IIO `O` overruns; those cycles are the failure reproduced and corrected by the
 new recurring-transition regression. The dual-signal wiring is operational.
 
-A follow-up headless hardware run against the newly built module observed the
-same repeated state changes of approximately `+/-2.84` to `+/-3.07 kHz` for
-20 seconds with no
-`Cross-SDR CFO LOCK LOST` event. One initial OTA calibration window overlapped a
-transition and was rejected; automatic calibration retry then succeeded with
-non-reference coherences `0.9894`, `0.9402`, and `0.9385` while CFO tracking
-continued through later state changes. A real live-GUI bearing walk-around is
-still required to quantify short bearing transients during each correction
-update and the room's multipath error. Any actual `O` overrun remains a hard
-invalidation of that run and must still force reacquisition.
+On 2026-08-29 a full headless hardware run used both LibreSDRs, PPS arming, and
+the dual-channel B210 at `700 MHz` and `40 dB` TX gain. An initial run exposed
+that post-lock estimates were applied before their stricter qualification was
+checked: 41 of 54 accepted updates exceeded the configured 20 Hz limit, with a
+maximum of 236.457 Hz. Moving the qualification into the base tracker fixed
+that ordering bug. A strict 20 Hz run then correctly rejected the recurrent
+Lesha frequency states, but was too restrictive to acquire a stable operating
+period. The deployed limit is therefore 80 Hz: it accepts the observed normal
+40--60 Hz states while rejecting the separate 100--236 Hz events.
+
+The final 80 Hz run produced no IIO `O` overruns. It qualified one continuous
+lock, completed OTA calibration once with channel coherences `0.9995`, `0.9995`,
+and `0.9994`, and had no lock loss after calibration for the remainder of the
+run. There were four reacquisitions before final calibration, including one
+strict-limit rejection; the largest accepted residual was 77.772 Hz and the
+largest two-Bravo-estimate disagreement was 0.126 Hz against a 0.25 Hz limit.
+This validates the correction and reacquisition path on the attached hardware.
+A real live-GUI bearing walk-around is still required to quantify room
+multipath, antenna-pattern error, and short bearing transients. Any actual `O`
+overrun remains a hard invalidation of that run and must still force
+reacquisition.
 
 ## Test summary
 
@@ -220,17 +238,17 @@ invalidation of that run and must still force reacquisition.
 cmake --build build -j4
   PASS
 
-ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)'
-  3/3 test programs passed
+ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|continuous_cross_sdr_cfo_corrector|libresdr_pps_sync|uca_pilot_calibration)'
+  5/5 test programs passed
 
 grcc -o /tmp apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc
   PASS
 ```
 
-The complete upstream suite runs 7 test programs: the two UCA programs pass;
-the other five stop at import because the environment lacks the upstream QA
-dependency `oct2py`. That is an environment dependency failure, not a DSP test
-failure.
+The complete configured suite has ten test programs. The five relevant programs
+above pass. The other five legacy linear-array/Octave programs stop at import
+because the environment lacks the upstream QA dependency `oct2py`. That is an
+environment dependency failure, not a failure of the cross-SDR or UCA DSP.
 
 ## Concise diff summary
 

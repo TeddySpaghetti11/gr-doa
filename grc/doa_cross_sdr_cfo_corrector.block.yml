@@ -100,7 +100,7 @@ parameters:
 - id: tracking_max_residual_hz
   label: Maximum Trackable Residual CFO (Hz)
   dtype: float
-  default: 20.0
+  default: 80.0
 - id: tracking_gain
   label: Tracking Frequency Update Gain
   dtype: float
@@ -132,7 +132,7 @@ asserts:
 - ${ tracking_warmup_samples >= 0 }
 - ${ tracking_lock_tolerance_hz >= 0.0 }
 - ${ tracking_agreement_tolerance_hz >= 0.0 }
-- ${ tracking_max_residual_hz > 0.0 and tracking_max_residual_hz < samp_rate / 2.0 }
+- ${ tracking_max_residual_hz > 0.0 and tracking_max_residual_hz <= max_abs_cfo_hz }
 - ${ tracking_gain > 0.0 and tracking_gain <= 1.0 }
 - ${ tracking_lock_windows >= 1 }
 - ${ tracking_min_coherence >= 0.0 and tracking_min_coherence <= 1.0 }

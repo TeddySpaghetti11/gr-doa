@@ -44,7 +44,7 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  tracking_warmup_samples=4096,
                  tracking_lock_tolerance_hz=0.05,
                  tracking_agreement_tolerance_hz=0.25,
-                 tracking_max_residual_hz=20.0,
+                 tracking_max_residual_hz=80.0,
                  tracking_gain=1.0,
                  tracking_lock_windows=2,
                  tracking_min_coherence=None,
@@ -74,9 +74,10 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
         if tracking_log_every < 1:
             raise ValueError("Tracking log interval must be at least one")
 
-        # Apply the full measured frequency residual; use tracking_gain only
-        # for the slow phase-error servo. This follows the LibreSDR's observed
-        # 50--100 Hz common states without erasing fixed absolute phase.
+        # Apply accepted frequency residuals in full and use tracking_gain only
+        # for the slow phase-error servo. Post-lock residual, agreement, and
+        # coherence limits are passed into the parent so a suspect update is
+        # rejected before it can alter the common Bravo rotator.
         super().__init__(
             samp_rate=samp_rate,
             pilot_offset_hz=pilot_offset_hz,
@@ -94,6 +95,11 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
             tracking_phase_gain=tracking_gain,
             phase_jump_threshold_rad=2.0,
             tracking_bad_window_grace=1,
+            tracking_agreement_tolerance_hz=(
+                tracking_agreement_tolerance_hz
+            ),
+            tracking_max_residual_hz=tracking_max_residual_hz,
+            tracking_min_coherence=tracking_min_coherence,
         )
 
         self.tracking_warmup_samples = int(tracking_warmup_samples)

@@ -47,7 +47,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  tracking_window_samples=16384,
                  tracking_phase_gain=0.25,
                  phase_jump_threshold_rad=2.0,
-                 tracking_bad_window_grace=1):
+                 tracking_bad_window_grace=1,
+                 tracking_agreement_tolerance_hz=None,
+                 tracking_max_residual_hz=None,
+                 tracking_min_coherence=None):
         if samp_rate <= 0.0:
             raise ValueError("Sample rate must be positive")
         if pilot_bandwidth_hz <= 0.0:
@@ -80,6 +83,24 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             raise ValueError("Phase-jump threshold must be in (0, pi]")
         if tracking_bad_window_grace < 0:
             raise ValueError("Tracking bad-window grace must be non-negative")
+        if tracking_agreement_tolerance_hz is None:
+            tracking_agreement_tolerance_hz = agreement_tolerance_hz
+        if tracking_agreement_tolerance_hz < 0.0:
+            raise ValueError(
+                "Tracking CFO agreement tolerance must be non-negative"
+            )
+        if tracking_max_residual_hz is None:
+            tracking_max_residual_hz = max_abs_cfo_hz
+        if (tracking_max_residual_hz <= 0.0
+                or tracking_max_residual_hz > max_abs_cfo_hz):
+            raise ValueError(
+                "Tracking maximum residual must be positive and no greater "
+                "than the acquisition CFO limit"
+            )
+        if tracking_min_coherence is None:
+            tracking_min_coherence = min_coherence
+        if tracking_min_coherence < 0.0 or tracking_min_coherence > 1.0:
+            raise ValueError("Tracking minimum coherence must be in [0, 1]")
 
         gr.sync_block.__init__(
             self,
@@ -105,6 +126,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self.tracking_phase_gain = float(tracking_phase_gain)
         self.phase_jump_threshold_rad = float(phase_jump_threshold_rad)
         self.tracking_bad_window_grace = int(tracking_bad_window_grace)
+        self.tracking_agreement_tolerance_hz = float(
+            tracking_agreement_tolerance_hz
+        )
+        self.tracking_max_residual_hz = float(tracking_max_residual_hz)
+        self.tracking_min_coherence = float(tracking_min_coherence)
 
         self._relative_samples = [[], []]
         self._samples_accumulated = 0
@@ -666,18 +692,23 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         quality_failures = []
         for channel, (estimate, coherence) in enumerate(
                 zip(estimates, coherences), start=2):
-            if not numpy.isfinite(estimate) or abs(estimate) > self.max_abs_cfo_hz:
+            if (not numpy.isfinite(estimate)
+                    or abs(estimate) > self.tracking_max_residual_hz):
                 quality_failures.append(
-                    f"ch{channel}/ch0 residual {estimate:+.6f} Hz is invalid"
+                    f"ch{channel}/ch0 residual {estimate:+.6f} Hz exceeds "
+                    f"the tracking limit {self.tracking_max_residual_hz:.6f} Hz"
                 )
-            if not numpy.isfinite(coherence) or coherence < self.min_coherence:
+            if (not numpy.isfinite(coherence)
+                    or coherence < self.tracking_min_coherence):
                 quality_failures.append(
                     f"ch{channel}/ch0 coherence {coherence:.6f} is below "
-                    f"{self.min_coherence:.6f}"
+                    f"{self.tracking_min_coherence:.6f}"
                 )
-        if disagreement > self.agreement_tolerance_hz:
+        if disagreement > self.tracking_agreement_tolerance_hz:
             quality_failures.append(
-                f"the two tracking estimates disagree by {disagreement:.6f} Hz"
+                f"the two tracking estimates disagree by {disagreement:.6f} "
+                f"Hz, above the tracking limit "
+                f"{self.tracking_agreement_tolerance_hz:.6f} Hz"
             )
         if quality_failures:
             self._handle_bad_tracking_window("; ".join(quality_failures))

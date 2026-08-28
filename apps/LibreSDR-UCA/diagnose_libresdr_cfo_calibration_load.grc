@@ -112,7 +112,7 @@ blocks:
   id: variable
   parameters:
     comment: Source bearing from array centre towards the B210 pilot
-    value: '0'
+    value: '180'
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 96], rotation: 0, state: enabled}
 - name: element0_bearing
   id: variable
@@ -130,13 +130,13 @@ blocks:
   id: variable
   parameters:
     comment: Filtered samples skipped after CFO lock
-    value: 2**12
+    value: 2**11
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [560, 96], rotation: 0, state: enabled}
 - name: calibration_samples
   id: variable
   parameters:
     comment: Filtered pilot samples used for phase/coherence averaging
-    value: 2**14
+    value: 2**12
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [696, 96], rotation: 0, state: enabled}
 - name: calibration_file
   id: variable
@@ -218,7 +218,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '262144'
+    buffer_size: '1048576'
     comment: Alpha RX1 and RX2
     filter: ''
     filter_source: '''Auto'''
@@ -248,7 +248,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '262144'
+    buffer_size: '1048576'
     comment: Bravo; outputs are permuted into physical order below
     filter: ''
     filter_source: '''Auto'''
@@ -302,13 +302,18 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
-    phase_jump_threshold_rad: '2.0'
+    post_lock_tracking_window_samples: '4096'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
-    tracking_bad_window_grace: '1'
-    tracking_phase_gain: '0.25'
+    tracking_agreement_tolerance_hz: '0.25'
+    tracking_gain: '1.0'
+    tracking_lock_tolerance_hz: '0.05'
+    tracking_lock_windows: '2'
+    tracking_max_residual_hz: '80.0'
+    tracking_min_coherence: '0.9'
+    tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [520, 448], rotation: 0, state: enabled}
@@ -339,7 +344,7 @@ blocks:
     element0_angle: element0_bearing
     element_angle_step: element_bearing_step
     maxoutbuf: '0'
-    min_coherence: '0.90'
+    min_coherence: '0.995'
     minoutbuf: '0'
     norm_radius: norm_radius
     num_inputs: num_elements
