@@ -17,7 +17,10 @@ templates:
         retry_delay_samples=${retry_delay_samples},
         agreement_tolerance_hz=${agreement_tolerance_hz},
         max_abs_cfo_hz=${max_abs_cfo_hz},
-        min_coherence=${min_coherence})
+        min_coherence=${min_coherence},
+        tracking_window_samples=${tracking_window_samples},
+        tracking_phase_gain=${tracking_phase_gain},
+        phase_jump_threshold_rad=${phase_jump_threshold_rad})
 
 parameters:
 - id: samp_rate
@@ -68,6 +71,18 @@ parameters:
   label: Minimum Pilot Coherence
   dtype: float
   default: 0.90
+- id: tracking_window_samples
+  label: Continuous Tracking Window Samples
+  dtype: int
+  default: 16384
+- id: tracking_phase_gain
+  label: Tracking Phase-Restoration Gain
+  dtype: float
+  default: 0.25
+- id: phase_jump_threshold_rad
+  label: Reacquire Phase-Jump Threshold (rad)
+  dtype: float
+  default: 1.0
 
 asserts:
 - ${ samp_rate > 0.0 }
@@ -82,6 +97,9 @@ asserts:
 - ${ agreement_tolerance_hz >= 0.0 }
 - ${ max_abs_cfo_hz > 0.0 and max_abs_cfo_hz < samp_rate / 2.0 }
 - ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
+- ${ tracking_window_samples >= 64 }
+- ${ tracking_phase_gain >= 0.0 and tracking_phase_gain <= 1.0 }
+- ${ phase_jump_threshold_rad > 0.0 and phase_jump_threshold_rad <= 3.141592653589793 }
 
 inputs:
 - label: array
@@ -104,19 +122,23 @@ documentation: |-
   raw-spectrum tones cannot bias the fit. The block independently fits the
   ch2/ch0 and ch3/ch0 pilot phase slopes, checks coherence, maximum CFO, and
   agreement, then applies their average provisionally. It measures the
-  remaining post-correction phase slopes from both Bravo channels, refines the
-  one shared correction when necessary, and freezes only after both residuals
-  agree and their average is within residual_tolerance_hz. The common rotator is
-  phase-continuous across scheduler calls and refinements, preserving Bravo's
-  internal phase relationship.
+  remaining post-correction phase slopes from both Bravo channels and refines the
+  one shared correction until both residuals agree and their average is within
+  residual_tolerance_hz. It then continues measuring short pilot windows and
+  updates the correction frequency. A low-gain phase servo holds the arbitrary
+  phase captured at lock; it never drives Alpha-vs-Bravo phase to zero. The common
+  rotator is phase-continuous across scheduler calls and updates, preserving
+  Bravo's internal phase relationship.
 
   Before the coarse estimate, all channels pass through unmodified. Provisional
   correction affects both Bravo outputs during residual validation, but no lock
   tag is emitted. After validation the block emits cfo_locked on the first sample
-  using the frozen correction. A downstream UCA OTA Pilot Calibration block can
+  using the tracked correction. A downstream UCA OTA Pilot Calibration block can
   require that tag so it never estimates phase from uncorrected, provisional, or
   rejected data. Constant phase offsets are intentionally retained for that
-  downstream phase calibration.
+  downstream phase calibration. A phase jump, loss of coherence, or disagreement
+  emits cfo_unlocked and starts a phase-continuous reacquisition. Every successful
+  reacquisition emits a new cfo_locked tag so downstream calibration can restart.
 
   Rejected windows do not stop the flowgraph or emit cfo_locked. The block waits
   retry_delay_samples, prints detailed finite/non-zero sample statistics, and

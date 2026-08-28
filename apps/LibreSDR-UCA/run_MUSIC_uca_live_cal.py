@@ -18,6 +18,7 @@ from gnuradio import doa
 from gnuradio import filter
 from gnuradio.filter import firdes
 from gnuradio import iio
+import gnuradio.doa as doa
 import sip
 import threading
 from gnuradio import gr
@@ -69,7 +70,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.pilot_offset = pilot_offset = 50e3
-        self.center_freq = center_freq = int(920.9e6)
+        self.center_freq = center_freq = int(700e6)
         self.samp_rate = samp_rate = int(2.1e6)
         self.pilot_rf = pilot_rf = center_freq + pilot_offset
         self.pilot_decim = pilot_decim = 8
@@ -82,7 +83,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_transition = pilot_transition = 10e3
         self.pilot_passband = pilot_passband = 10e3
         self.pilot_bearing = pilot_bearing = 0
-        self.overlap_size = overlap_size = 2**14
+        self.overlap_size = overlap_size = 0
         self.num_targets = num_targets = 1
         self.num_elements = num_elements = 4
         self.norm_radius = norm_radius = array_radius * pilot_rf / 299792458.0
@@ -105,10 +106,243 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
+        self.spectrum_display = qtgui.vector_sink_f(
+            pspectrum_len,
+            0,
+            (360.0/pspectrum_len),
+            "Bearing (degrees)",
+            "Normalized pseudo-spectrum (dB)",
+            "Full-circle UCA MUSIC",
+            1, # Number of inputs
+            None # parent
+        )
+        self.spectrum_display.set_update_time(0.10)
+        self.spectrum_display.set_y_axis((-7), 0)
+        self.spectrum_display.enable_autoscale(False)
+        self.spectrum_display.enable_grid(True)
+        self.spectrum_display.set_x_axis_units("degrees")
+        self.spectrum_display.set_y_axis_units("dB")
+        self.spectrum_display.set_ref_level(0)
+
+
+        labels = ['MUSIC pseudo-spectrum', '', '', '', '',
+            '', '', '', '', '']
+        widths = [2, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.spectrum_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.spectrum_display.set_line_label(i, labels[i])
+            self.spectrum_display.set_line_width(i, widths[i])
+            self.spectrum_display.set_line_color(i, colors[i])
+            self.spectrum_display.set_line_alpha(i, alphas[i])
+
+        self._spectrum_display_win = sip.wrapinstance(self.spectrum_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._spectrum_display_win, 1, 0, 1, 2)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.raw_fft_display = qtgui.freq_sink_c(
+            8192, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "TRUE pre-filter raw spectra (8192-bin FFT)", #name
+            4,
+            None # parent
+        )
+        self.raw_fft_display.set_update_time(0.50)
+        self.raw_fft_display.set_y_axis((-140), 10)
+        self.raw_fft_display.set_y_label('Relative Gain', 'dB')
+        self.raw_fft_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.raw_fft_display.enable_autoscale(False)
+        self.raw_fft_display.enable_grid(False)
+        self.raw_fft_display.set_fft_average(1.0)
+        self.raw_fft_display.enable_axis_labels(True)
+        self.raw_fft_display.enable_control_panel(False)
+        self.raw_fft_display.set_fft_window_normalized(False)
+
+
+
+        labels = ['A RX1 / element 0', 'A RX2 / element 1', 'B RX2 / element 2', 'B RX1 / element 3', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(4):
+            if len(labels[i]) == 0:
+                self.raw_fft_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.raw_fft_display.set_line_label(i, labels[i])
+            self.raw_fft_display.set_line_width(i, widths[i])
+            self.raw_fft_display.set_line_color(i, colors[i])
+            self.raw_fft_display.set_line_alpha(i, alphas[i])
+
+        self._raw_fft_display_win = sip.wrapinstance(self.raw_fft_display.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._raw_fft_display_win)
         self.qtgui_compass_0 = self._qtgui_compass_0_win = qtgui.GrCompass('', 250, 0.10, False, 1,False,1,"default")
         self._qtgui_compass_0_win.setColors("default","red", "black", "black")
         self._qtgui_compass_0 = self._qtgui_compass_0_win
         self.top_layout.addWidget(self._qtgui_compass_0_win)
+        self.prefilter_phase_estimator = doa.phase_offset_est(num_elements, (calibration_skip * pilot_decim))
+        self.prefilter_phase_display = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "TRUE PRE-FILTER relative phase (direct IIO)", #name
+            3, #number of inputs
+            None # parent
+        )
+        self.prefilter_phase_display.set_update_time(0.10)
+        self.prefilter_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.prefilter_phase_display.set_y_label('Phase', 'radians')
+
+        self.prefilter_phase_display.enable_tags(False)
+        self.prefilter_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.prefilter_phase_display.enable_autoscale(False)
+        self.prefilter_phase_display.enable_grid(True)
+        self.prefilter_phase_display.enable_axis_labels(True)
+        self.prefilter_phase_display.enable_control_panel(False)
+        self.prefilter_phase_display.enable_stem_plot(False)
+
+
+        labels = ['TRUE PRE-FILTER A RX2 vs A RX1', 'TRUE PRE-FILTER B RX2 vs A RX1', 'TRUE PRE-FILTER B RX1 vs A RX1', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(3):
+            if len(labels[i]) == 0:
+                self.prefilter_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.prefilter_phase_display.set_line_label(i, labels[i])
+            self.prefilter_phase_display.set_line_width(i, widths[i])
+            self.prefilter_phase_display.set_line_color(i, colors[i])
+            self.prefilter_phase_display.set_line_style(i, styles[i])
+            self.prefilter_phase_display.set_line_marker(i, markers[i])
+            self.prefilter_phase_display.set_line_alpha(i, alphas[i])
+
+        self._prefilter_phase_display_win = sip.wrapinstance(self.prefilter_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._prefilter_phase_display_win, 3, 0, 1, 2)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.postfilter_phase_estimator = doa.phase_offset_est(num_elements, calibration_skip)
+        self.postfilter_phase_display = qtgui.time_sink_f(
+            1024, #size
+            proc_rate, #samp_rate
+            "POST-CFO relative phase (before phase calibration)", #name
+            3, #number of inputs
+            None # parent
+        )
+        self.postfilter_phase_display.set_update_time(0.10)
+        self.postfilter_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.postfilter_phase_display.set_y_label('Phase', 'radians')
+
+        self.postfilter_phase_display.enable_tags(False)
+        self.postfilter_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.postfilter_phase_display.enable_autoscale(False)
+        self.postfilter_phase_display.enable_grid(True)
+        self.postfilter_phase_display.enable_axis_labels(True)
+        self.postfilter_phase_display.enable_control_panel(False)
+        self.postfilter_phase_display.enable_stem_plot(False)
+
+
+        labels = ['POST-CFO A RX2 vs A RX1', 'POST-CFO B RX2 vs A RX1', 'POST-CFO B RX1 vs A RX1', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(3):
+            if len(labels[i]) == 0:
+                self.postfilter_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.postfilter_phase_display.set_line_label(i, labels[i])
+            self.postfilter_phase_display.set_line_width(i, widths[i])
+            self.postfilter_phase_display.set_line_color(i, colors[i])
+            self.postfilter_phase_display.set_line_style(i, styles[i])
+            self.postfilter_phase_display.set_line_marker(i, markers[i])
+            self.postfilter_phase_display.set_line_alpha(i, alphas[i])
+
+        self._postfilter_phase_display_win = sip.wrapinstance(self.postfilter_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._postfilter_phase_display_win, 2, 0, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.post_cfo_fft_display = qtgui.freq_sink_c(
+            8192, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            proc_rate, #bw
+            "POST-CFO filtered pilot spectra (8192-bin FFT)", #name
+            4,
+            None # parent
+        )
+        self.post_cfo_fft_display.set_update_time(0.20)
+        self.post_cfo_fft_display.set_y_axis((-140), 10)
+        self.post_cfo_fft_display.set_y_label('Relative Gain', 'dB')
+        self.post_cfo_fft_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.post_cfo_fft_display.enable_autoscale(False)
+        self.post_cfo_fft_display.enable_grid(True)
+        self.post_cfo_fft_display.set_fft_average(0.2)
+        self.post_cfo_fft_display.enable_axis_labels(True)
+        self.post_cfo_fft_display.enable_control_panel(False)
+        self.post_cfo_fft_display.set_fft_window_normalized(False)
+
+
+
+        labels = ['A RX1 / element 0', 'A RX2 / element 1', 'B RX2 / element 2', 'B RX1 / element 3', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(4):
+            if len(labels[i]) == 0:
+                self.post_cfo_fft_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.post_cfo_fft_display.set_line_label(i, labels[i])
+            self.post_cfo_fft_display.set_line_width(i, widths[i])
+            self.post_cfo_fft_display.set_line_color(i, colors[i])
+            self.post_cfo_fft_display.set_line_alpha(i, alphas[i])
+
+        self._post_cfo_fft_display_win = sip.wrapinstance(self.post_cfo_fft_display.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._post_cfo_fft_display_win)
         self.pilot_filter_3 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
         self.pilot_filter_2 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
         self.pilot_filter_1 = filter.freq_xlating_fir_filter_ccc(pilot_decim, firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition), pilot_offset, samp_rate)
@@ -126,8 +360,9 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             config_filename=calibration_file,
             min_coherence=0.90,
             start_tag_key='cfo_locked')
+        self.ota_calibration.set_min_output_buffer(65536)
         self.music_uca = doa.MUSIC_uca(norm_radius, num_targets, num_elements, pspectrum_len, element0_bearing, element_bearing_step)
-        self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 262144)
+        self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 1048576)
         self.libresdr_b.set_len_tag_key('packet_len')
         self.libresdr_b.set_frequency(center_freq)
         self.libresdr_b.set_samplerate(samp_rate)
@@ -141,7 +376,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.libresdr_b.set_rfdc(True)
         self.libresdr_b.set_bbdc(True)
         self.libresdr_b.set_filter_params('Auto', '', 0, 0)
-        self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 262144)
+        self.libresdr_a = iio.fmcomms2_source_fc32('ip:192.168.4.1', [True, True, True, True], 1048576)
         self.libresdr_a.set_len_tag_key('packet_len')
         self.libresdr_a.set_frequency(center_freq)
         self.libresdr_a.set_samplerate(samp_rate)
@@ -156,6 +391,114 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.libresdr_a.set_bbdc(True)
         self.libresdr_a.set_filter_params('Auto', '', 0, 0)
         self.covariance = doa.autocorrelate(num_elements, snapshot_size, overlap_size, 0)
+        self.corrected_phase_estimator = doa.phase_offset_est(num_elements, (calibration_skip + calibration_samples))
+        self.corrected_phase_display = qtgui.time_sink_f(
+            1024, #size
+            proc_rate, #samp_rate
+            "Corrected relative phase (instantaneous)", #name
+            3, #number of inputs
+            None # parent
+        )
+        self.corrected_phase_display.set_update_time(0.10)
+        self.corrected_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.corrected_phase_display.set_y_label('Phase', 'radians')
+
+        self.corrected_phase_display.enable_tags(False)
+        self.corrected_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.corrected_phase_display.enable_autoscale(False)
+        self.corrected_phase_display.enable_grid(True)
+        self.corrected_phase_display.enable_axis_labels(True)
+        self.corrected_phase_display.enable_control_panel(False)
+        self.corrected_phase_display.enable_stem_plot(False)
+
+
+        labels = ['Corrected ch1/ch0', 'Corrected ch2/ch0', 'Corrected ch3/ch0', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(3):
+            if len(labels[i]) == 0:
+                self.corrected_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.corrected_phase_display.set_line_label(i, labels[i])
+            self.corrected_phase_display.set_line_width(i, widths[i])
+            self.corrected_phase_display.set_line_color(i, colors[i])
+            self.corrected_phase_display.set_line_style(i, styles[i])
+            self.corrected_phase_display.set_line_marker(i, markers[i])
+            self.corrected_phase_display.set_line_alpha(i, alphas[i])
+
+        self._corrected_phase_display_win = sip.wrapinstance(self.corrected_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._corrected_phase_display_win, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.corrected_channels = qtgui.time_sink_c(
+            1024, #size
+            proc_rate, #samp_rate
+            "Calibrated UCA channels", #name
+            4, #number of inputs
+            None # parent
+        )
+        self.corrected_channels.set_update_time(0.10)
+        self.corrected_channels.set_y_axis(-1, 1)
+
+        self.corrected_channels.set_y_label('Amplitude', "")
+
+        self.corrected_channels.enable_tags(True)
+        self.corrected_channels.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.corrected_channels.enable_autoscale(True)
+        self.corrected_channels.enable_grid(True)
+        self.corrected_channels.enable_axis_labels(True)
+        self.corrected_channels.enable_control_panel(False)
+        self.corrected_channels.enable_stem_plot(False)
+
+
+        labels = ['Element 0', 'Element 1', 'Element 2', 'Element 3', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(8):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.corrected_channels.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.corrected_channels.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.corrected_channels.set_line_label(i, labels[i])
+            self.corrected_channels.set_line_width(i, widths[i])
+            self.corrected_channels.set_line_color(i, colors[i])
+            self.corrected_channels.set_line_style(i, styles[i])
+            self.corrected_channels.set_line_marker(i, markers[i])
+            self.corrected_channels.set_line_alpha(i, alphas[i])
+
+        self._corrected_channels_win = sip.wrapinstance(self.corrected_channels.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._corrected_channels_win, 0, 1, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.cfo_correction = doa.cross_sdr_cfo_corrector(
             samp_rate=samp_rate,
             pilot_offset_hz=pilot_offset,
@@ -168,7 +511,63 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             retry_delay_samples=cfo_retry_delay_samples,
             agreement_tolerance_hz=cfo_agreement_tolerance_hz,
             max_abs_cfo_hz=cfo_max_abs_hz,
-            min_coherence=cfo_min_coherence)
+            min_coherence=cfo_min_coherence,
+            tracking_window_samples=16384,
+            tracking_phase_gain=0.25,
+            phase_jump_threshold_rad=1.0)
+        self.bravo_internal_phase_estimator = doa.phase_offset_est(2, (calibration_skip * pilot_decim))
+        self.bravo_internal_phase_display = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "Bravo internal pre-filter phase: RX1 vs RX2", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.bravo_internal_phase_display.set_update_time(0.10)
+        self.bravo_internal_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.bravo_internal_phase_display.set_y_label('Phase', 'radians')
+
+        self.bravo_internal_phase_display.enable_tags(False)
+        self.bravo_internal_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.bravo_internal_phase_display.enable_autoscale(False)
+        self.bravo_internal_phase_display.enable_grid(True)
+        self.bravo_internal_phase_display.enable_axis_labels(True)
+        self.bravo_internal_phase_display.enable_control_panel(False)
+        self.bravo_internal_phase_display.enable_stem_plot(False)
+
+
+        labels = ['arg(B RX1 * conj(B RX2))', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.bravo_internal_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.bravo_internal_phase_display.set_line_label(i, labels[i])
+            self.bravo_internal_phase_display.set_line_width(i, widths[i])
+            self.bravo_internal_phase_display.set_line_color(i, colors[i])
+            self.bravo_internal_phase_display.set_line_style(i, styles[i])
+            self.bravo_internal_phase_display.set_line_marker(i, markers[i])
+            self.bravo_internal_phase_display.set_line_alpha(i, alphas[i])
+
+        self._bravo_internal_phase_display_win = sip.wrapinstance(self.bravo_internal_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._bravo_internal_phase_display_win, 4, 1, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.bearing_streams = blocks.vector_to_streams(gr.sizeof_float*1, num_targets)
         self.bearing_display = qtgui.number_sink(
             gr.sizeof_float,
@@ -207,33 +606,126 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.alpha_internal_phase_estimator = doa.phase_offset_est(2, (calibration_skip * pilot_decim))
+        self.alpha_internal_phase_display = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "Alpha internal pre-filter phase: RX1 vs RX2", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.alpha_internal_phase_display.set_update_time(0.10)
+        self.alpha_internal_phase_display.set_y_axis(-3.2, 3.2)
+
+        self.alpha_internal_phase_display.set_y_label('Phase', 'radians')
+
+        self.alpha_internal_phase_display.enable_tags(False)
+        self.alpha_internal_phase_display.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.alpha_internal_phase_display.enable_autoscale(False)
+        self.alpha_internal_phase_display.enable_grid(True)
+        self.alpha_internal_phase_display.enable_axis_labels(True)
+        self.alpha_internal_phase_display.enable_control_panel(False)
+        self.alpha_internal_phase_display.enable_stem_plot(False)
+
+
+        labels = ['arg(A RX1 * conj(A RX2))', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.alpha_internal_phase_display.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.alpha_internal_phase_display.set_line_label(i, labels[i])
+            self.alpha_internal_phase_display.set_line_width(i, widths[i])
+            self.alpha_internal_phase_display.set_line_color(i, colors[i])
+            self.alpha_internal_phase_display.set_line_style(i, styles[i])
+            self.alpha_internal_phase_display.set_line_marker(i, markers[i])
+            self.alpha_internal_phase_display.set_line_alpha(i, alphas[i])
+
+        self._alpha_internal_phase_display_win = sip.wrapinstance(self.alpha_internal_phase_display.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._alpha_internal_phase_display_win, 4, 0, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.connect((self.alpha_internal_phase_estimator, 0), (self.alpha_internal_phase_display, 0))
         self.connect((self.bearing_streams, 0), (self.bearing_display, 0))
         self.connect((self.bearing_streams, 0), (self.qtgui_compass_0, 0))
+        self.connect((self.bravo_internal_phase_estimator, 0), (self.bravo_internal_phase_display, 0))
         self.connect((self.cfo_correction, 0), (self.pilot_filter_0, 0))
         self.connect((self.cfo_correction, 1), (self.pilot_filter_1, 0))
         self.connect((self.cfo_correction, 2), (self.pilot_filter_2, 0))
         self.connect((self.cfo_correction, 3), (self.pilot_filter_3, 0))
+        self.connect((self.corrected_phase_estimator, 2), (self.corrected_phase_display, 2))
+        self.connect((self.corrected_phase_estimator, 0), (self.corrected_phase_display, 0))
+        self.connect((self.corrected_phase_estimator, 1), (self.corrected_phase_display, 1))
         self.connect((self.covariance, 0), (self.music_uca, 0))
-        self.connect((self.libresdr_a, 1), (self.cfo_correction, 1))
+        self.connect((self.libresdr_a, 1), (self.alpha_internal_phase_estimator, 1))
+        self.connect((self.libresdr_a, 0), (self.alpha_internal_phase_estimator, 0))
         self.connect((self.libresdr_a, 0), (self.cfo_correction, 0))
+        self.connect((self.libresdr_a, 1), (self.cfo_correction, 1))
+        self.connect((self.libresdr_a, 0), (self.prefilter_phase_estimator, 0))
+        self.connect((self.libresdr_a, 1), (self.prefilter_phase_estimator, 1))
+        self.connect((self.libresdr_a, 0), (self.raw_fft_display, 0))
+        self.connect((self.libresdr_a, 1), (self.raw_fft_display, 1))
+        self.connect((self.libresdr_b, 0), (self.bravo_internal_phase_estimator, 0))
+        self.connect((self.libresdr_b, 1), (self.bravo_internal_phase_estimator, 1))
         self.connect((self.libresdr_b, 0), (self.cfo_correction, 3))
         self.connect((self.libresdr_b, 1), (self.cfo_correction, 2))
+        self.connect((self.libresdr_b, 0), (self.prefilter_phase_estimator, 3))
+        self.connect((self.libresdr_b, 1), (self.prefilter_phase_estimator, 2))
+        self.connect((self.libresdr_b, 1), (self.raw_fft_display, 2))
+        self.connect((self.libresdr_b, 0), (self.raw_fft_display, 3))
         self.connect((self.music_uca, 0), (self.peak_finder, 0))
+        self.connect((self.music_uca, 0), (self.spectrum_display, 0))
+        self.connect((self.ota_calibration, 0), (self.corrected_channels, 0))
+        self.connect((self.ota_calibration, 1), (self.corrected_channels, 1))
+        self.connect((self.ota_calibration, 2), (self.corrected_channels, 2))
+        self.connect((self.ota_calibration, 3), (self.corrected_channels, 3))
+        self.connect((self.ota_calibration, 1), (self.corrected_phase_estimator, 1))
+        self.connect((self.ota_calibration, 2), (self.corrected_phase_estimator, 2))
+        self.connect((self.ota_calibration, 0), (self.corrected_phase_estimator, 0))
+        self.connect((self.ota_calibration, 3), (self.corrected_phase_estimator, 3))
         self.connect((self.ota_calibration, 0), (self.covariance, 0))
+        self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
-        self.connect((self.ota_calibration, 3), (self.covariance, 3))
         self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
+        self.connect((self.pilot_filter_0, 0), (self.post_cfo_fft_display, 0))
+        self.connect((self.pilot_filter_0, 0), (self.postfilter_phase_estimator, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
+        self.connect((self.pilot_filter_1, 0), (self.post_cfo_fft_display, 1))
+        self.connect((self.pilot_filter_1, 0), (self.postfilter_phase_estimator, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))
+        self.connect((self.pilot_filter_2, 0), (self.post_cfo_fft_display, 2))
+        self.connect((self.pilot_filter_2, 0), (self.postfilter_phase_estimator, 2))
         self.connect((self.pilot_filter_3, 0), (self.ota_calibration, 3))
+        self.connect((self.pilot_filter_3, 0), (self.post_cfo_fft_display, 3))
+        self.connect((self.pilot_filter_3, 0), (self.postfilter_phase_estimator, 3))
+        self.connect((self.postfilter_phase_estimator, 1), (self.postfilter_phase_display, 1))
+        self.connect((self.postfilter_phase_estimator, 2), (self.postfilter_phase_display, 2))
+        self.connect((self.postfilter_phase_estimator, 0), (self.postfilter_phase_display, 0))
+        self.connect((self.prefilter_phase_estimator, 1), (self.prefilter_phase_display, 1))
+        self.connect((self.prefilter_phase_estimator, 2), (self.prefilter_phase_display, 2))
+        self.connect((self.prefilter_phase_estimator, 0), (self.prefilter_phase_display, 0))
 
 
     def closeEvent(self, event):
@@ -269,14 +761,18 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_proc_rate(self.samp_rate / self.pilot_decim)
         self.set_cfo_settling_samples(int(5 * self.samp_rate))
+        self.set_proc_rate(self.samp_rate / self.pilot_decim)
+        self.alpha_internal_phase_display.set_samp_rate(self.samp_rate)
+        self.bravo_internal_phase_display.set_samp_rate(self.samp_rate)
         self.libresdr_a.set_samplerate(self.samp_rate)
         self.libresdr_b.set_samplerate(self.samp_rate)
         self.pilot_filter_0.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_1.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_2.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
         self.pilot_filter_3.set_taps(firdes.low_pass(1.0, self.samp_rate, self.pilot_passband, self.pilot_transition))
+        self.prefilter_phase_display.set_samp_rate(self.samp_rate)
+        self.raw_fft_display.set_frequency_range(0, self.samp_rate)
 
     def get_pilot_rf(self):
         return self.pilot_rf
@@ -326,12 +822,17 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
 
     def set_pspectrum_len(self, pspectrum_len):
         self.pspectrum_len = pspectrum_len
+        self.spectrum_display.set_x_axis(0, (360.0/self.pspectrum_len))
 
     def get_proc_rate(self):
         return self.proc_rate
 
     def set_proc_rate(self, proc_rate):
         self.proc_rate = proc_rate
+        self.corrected_channels.set_samp_rate(self.proc_rate)
+        self.corrected_phase_display.set_samp_rate(self.proc_rate)
+        self.post_cfo_fft_display.set_frequency_range(0, self.proc_rate)
+        self.postfilter_phase_display.set_samp_rate(self.proc_rate)
 
     def get_pilot_transition(self):
         return self.pilot_transition

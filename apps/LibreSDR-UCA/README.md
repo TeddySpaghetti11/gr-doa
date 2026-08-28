@@ -38,8 +38,8 @@ pilot_rf = center_freq + pilot_offset
 norm_radius = array_radius * pilot_rf / 299792458.0
 ```
 
-With the current defaults (`center_freq = 920.9 MHz`, `pilot_offset = +50 kHz`),
-the processed RF is `920.95 MHz` and `norm_radius` is about `0.3532653`.
+With the current defaults (`center_freq = 700 MHz`, `pilot_offset = +50 kHz`),
+the processed RF is `700.05 MHz` and `norm_radius` is about `0.2685307`.
 
 Note that `162.63 mm` equals exactly half a wavelength at about `921.70 MHz`.
 The present test frequency is therefore extremely close to half-wavelength
@@ -64,9 +64,9 @@ proc_rate        = 262.5 kS/s
 After translation the desired pilot is at DC, receiver DC is at `-50 kHz`, and
 the pilot image is around `-100 kHz`, so the narrow low-pass rejects both.
 
-The B210 transmitter flowgraph uses the same `920.9 MHz` centre and `+50 kHz`
-tone by default. Keep those values matched to the receiver variables if you
-retune.
+The B210 transmitter flowgraph uses the same `700 MHz` centre, `+50 kHz` tone,
+and `40 dB` TX gain by default. Keep the centre and offset matched to the
+receiver variables if you retune.
 
 ## Automatic cross-SDR CFO correction
 
@@ -79,21 +79,25 @@ RX1/Alpha RX1. This prevents the other strong tones visible in the raw spectrum
 from biasing the OTA-pilot estimate. Both estimates must pass the configured
 magnitude and phase-coherence checks and agree within `10 Hz`.
 
-Accepted estimates are averaged once. One phase-continuous complex rotator with
-the opposite frequency is then applied identically to both Bravo channels, so
-Bravo's internal channel coherence is preserved. The rotator begins with zero
-phase and therefore leaves all constant phase offsets for the existing OTA phase
-calibration.
+Accepted estimates are averaged. One phase-continuous complex rotator with the
+opposite frequency is then applied identically to both Bravo channels, so Bravo's
+internal channel coherence is preserved. The rotator begins with zero phase and
+the tracker captures the resulting non-zero Alpha-vs-Bravo pilot phase at lock.
+It holds that arbitrary phase instead of driving it to zero, leaving propagation
+and hardware phase for the existing OTA phase calibration.
 
 Defaults at `2.1 MS/s` are five seconds of startup settling, a `2**18`-sample
 estimation window, maximum `20 kHz` absolute CFO, and minimum `0.90` pilot-fit
 coherence. The accepted coarse estimate is applied provisionally to both Bravo
 channels. After another `2**16` settling samples, the block measures both
 post-correction residual slopes over another `2**18` samples. It refines the
-one common correction up to three times and freezes only when the averaged
-residual is at most `1 Hz`. The final measured residual is included in the
-frozen correction even when already inside that bound. Phase remains continuous
-when the correction frequency is refined.
+one common correction up to three times and declares lock only when the averaged
+residual is at most `1 Hz`. The final measured residual is included even when
+already inside that bound. Once locked, the pilot remains active and the block
+continues fitting `16,384`-sample tracking windows. Each window updates the
+common correction frequency; a low-gain phase servo removes accumulated drift
+relative to the captured lock-time phase without removing that fixed phase.
+Phase remains continuous whenever the correction frequency changes.
 
 To avoid blocking the GNU Radio scheduler at multi-MS/s input rates, each CFO
 fit retains the complete configured time window but uses a phase-unambiguous
@@ -109,9 +113,12 @@ optimization.
 
 A rejected coarse or residual window prints finite/non-zero sample counts,
 waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
-until the post-correction residual passes every check. The downstream phase
-calibration waits for that tag before counting its own skip or calibration
-samples.
+until the post-correction residual passes every check. During tracking, a pilot
+phase jump, loss of coherence, or disagreement between the two Bravo estimates
+emits `cfo_unlocked` and starts reacquisition without resetting the common
+rotator phase. A successful reacquisition emits another `cfo_locked`. The
+downstream phase calibration discards its old coefficients on `cfo_unlocked`
+and restarts its skip/calibration interval on the new lock tag.
 
 ## AD9361 settings
 

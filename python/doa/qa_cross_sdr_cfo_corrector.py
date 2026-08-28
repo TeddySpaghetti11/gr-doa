@@ -517,6 +517,280 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             corrector.accepted_cfo_hz(), pilot_cfo_hz, places=2
         )
 
+    def test_slowly_drifting_cfo_after_initial_lock_is_tracked(self):
+        sample_rate = 100000.0
+        estimation_samples = 2048
+        tracking_samples = 1024
+        lock_offset = 2 * estimation_samples
+        sample_count = lock_offset + 24 * tracking_samples
+        cfo = numpy.full(sample_count, 60.0, dtype=numpy.float64)
+        cfo[lock_offset:] = numpy.linspace(
+            60.0, 66.0, sample_count - lock_offset
+        )
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.1,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=tracking_samples,
+            tracking_phase_gain=0.25,
+            phase_jump_threshold_rad=1.5,
+        )
+
+        outputs, _ = _run_block(corrector, inputs, max_noutput_items=173)
+        self.assertTrue(corrector.locked())
+        self.assertEqual(corrector.discontinuity_count(), 0)
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), 66.0, delta=0.8)
+        final = slice(sample_count - 4 * tracking_samples, sample_count)
+        relative_phase = numpy.unwrap(numpy.angle(
+            outputs[2][final] * numpy.conj(outputs[0][final])
+        ))
+        slope_hz = numpy.polyfit(
+            numpy.arange(relative_phase.size), relative_phase, 1
+        )[0] * sample_rate / (2.0 * numpy.pi)
+        self.assertAlmostEqual(slope_hz, 0.0, delta=0.8)
+
+    def test_bravo_internal_phase_is_preserved_during_continuous_tracking(self):
+        sample_rate = 100000.0
+        estimation_samples = 1024
+        tracking_samples = 512
+        sample_count = 2 * estimation_samples + 12 * tracking_samples
+        cfo = numpy.linspace(80.0, 83.0, sample_count)
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=1.0,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=1.5,
+        )
+
+        outputs, _ = _run_block(corrector, inputs, max_noutput_items=89)
+        correction_start = estimation_samples
+        correction2 = outputs[2][correction_start:] / inputs[2][correction_start:]
+        correction3 = outputs[3][correction_start:] / inputs[3][correction_start:]
+        numpy.testing.assert_allclose(correction2, correction3, atol=2e-6, rtol=2e-6)
+        input_internal = inputs[3] * numpy.conj(inputs[2])
+        output_internal = outputs[3] * numpy.conj(outputs[2])
+        numpy.testing.assert_allclose(
+            output_internal[correction_start:],
+            input_internal[correction_start:],
+            atol=3e-6,
+            rtol=3e-6,
+        )
+
+    def test_tracking_updates_are_phase_continuous_across_chunk_boundaries(self):
+        sample_rate = 100000.0
+        estimation_samples = 1024
+        tracking_samples = 256
+        sample_count = 2 * estimation_samples + 16 * tracking_samples
+        cfo = numpy.full(sample_count, 95.0)
+        cfo[2 * estimation_samples:] = 98.0
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.05,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=1.5,
+        )
+
+        outputs, _ = _run_block(corrector, inputs, max_noutput_items=73)
+        correction_start = estimation_samples
+        correction = outputs[2][correction_start:] / inputs[2][correction_start:]
+        phase_steps = numpy.angle(correction[1:] * numpy.conj(correction[:-1]))
+        # A frequency update changes the next increment, never the accumulated
+        # rotator phase. No scheduler or tracking boundary can create a phase step.
+        self.assertLess(numpy.max(numpy.abs(phase_steps)), 0.02)
+        self.assertTrue(numpy.all(numpy.isfinite(phase_steps)))
+
+    def test_continuous_tracker_preserves_fixed_nonzero_phase(self):
+        sample_rate = 100000.0
+        estimation_samples = 2048
+        tracking_samples = 512
+        lock_offset = 2 * estimation_samples
+        sample_count = lock_offset + 16 * tracking_samples
+        inputs = _pilot_channels(
+            sample_rate, sample_count, 71.0,
+            phases=(0.2, -0.1, 1.35, -2.0),
+        )
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.05,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=1.5,
+        )
+
+        outputs, _ = _run_block(corrector, inputs, max_noutput_items=101)
+        phase = numpy.angle(outputs[2] * numpy.conj(outputs[0]))
+        captured = numpy.angle(numpy.mean(numpy.exp(
+            1j * phase[lock_offset:lock_offset + tracking_samples]
+        )))
+        final = numpy.angle(numpy.mean(numpy.exp(
+            1j * phase[-tracking_samples:]
+        )))
+        self.assertGreater(abs(captured), 0.25)
+        self.assertAlmostEqual(
+            numpy.angle(numpy.exp(1j * (final - captured))), 0.0, delta=0.05
+        )
+
+    def test_abrupt_phase_discontinuity_emits_unlock_and_relocks(self):
+        sample_rate = 100000.0
+        estimation_samples = 1024
+        tracking_samples = 256
+        lock_offset = 2 * estimation_samples
+        jump_offset = lock_offset + 3 * tracking_samples + 51
+        sample_count = jump_offset + 4 * estimation_samples
+        inputs = _pilot_channels(sample_rate, sample_count, 55.0)
+        jump = numpy.complex64(numpy.exp(1j * 1.4))
+        inputs[2][jump_offset:] *= jump
+        inputs[3][jump_offset:] *= jump
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=1.0,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.95,
+            tracking_window_samples=tracking_samples,
+            tracking_phase_gain=0.25,
+            phase_jump_threshold_rad=0.6,
+        )
+
+        outputs, sinks = _run_block(corrector, inputs, max_noutput_items=79)
+        self.assertTrue(corrector.locked())
+        self.assertEqual(corrector.discontinuity_count(), 1)
+        self.assertEqual(corrector.relock_count(), 1)
+        lock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ]
+        unlock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        ]
+        self.assertEqual(len(lock_tags), 2)
+        self.assertEqual(len(unlock_tags), 1)
+        self.assertLess(lock_tags[0].offset, unlock_tags[0].offset)
+        self.assertLess(unlock_tags[0].offset, lock_tags[1].offset)
+        numpy.testing.assert_array_equal(outputs[0], inputs[0])
+        numpy.testing.assert_array_equal(outputs[1], inputs[1])
+        internal_error = numpy.max(numpy.abs(
+            outputs[3][estimation_samples:] * numpy.conj(outputs[2][estimation_samples:])
+            - inputs[3][estimation_samples:] * numpy.conj(inputs[2][estimation_samples:])
+        ))
+        self.assertLess(internal_error, 5e-6)
+
+    def test_tracker_relock_restarts_downstream_ota_calibration(self):
+        sample_rate = 100000.0
+        estimation_samples = 1024
+        tracking_samples = 256
+        calibration_samples = 128
+        initial_lock = 2 * estimation_samples
+        jump_offset = initial_lock + 4 * tracking_samples + 37
+        sample_count = jump_offset + 4 * estimation_samples
+        inputs = _pilot_channels(sample_rate, sample_count, 44.0)
+        common_jump = numpy.complex64(numpy.exp(1j * 1.3))
+        inputs[2][jump_offset:] *= common_jump
+        inputs[3][jump_offset:] *= common_jump
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=0,
+            residual_tolerance_hz=1.0,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.95,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=0.6,
+        )
+        calibration = doa.uca_pilot_calibration(
+            num_inputs=4,
+            norm_radius=0.1,
+            pilot_angle=0.0,
+            element0_angle=0.0,
+            element_angle_step=90.0,
+            skip_samples=0,
+            calibration_samples=calibration_samples,
+            config_filename="",
+            min_coherence=0.90,
+            start_tag_key="cfo_locked",
+        )
+
+        flowgraph = gr.top_block()
+        sources = [blocks.vector_source_c(channel, False) for channel in inputs]
+        sinks = [blocks.vector_sink_c() for _ in inputs]
+        for channel in range(4):
+            flowgraph.connect(sources[channel], (corrector, channel))
+            flowgraph.connect((corrector, channel), (calibration, channel))
+            flowgraph.connect((calibration, channel), sinks[channel])
+        flowgraph.run(max_noutput_items=83)
+
+        self.assertTrue(corrector.locked())
+        self.assertEqual(corrector.relock_count(), 1)
+        self.assertTrue(calibration.calibrated())
+        sink_tags = sinks[0].tags()
+        unlock_offset = next(
+            tag.offset for tag in sink_tags
+            if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        )
+        # GNU Radio's default all-to-all propagation repeats the same tag from
+        # each of the four calibration inputs on every output; offsets identify
+        # the two distinct lock events.
+        lock_offsets = sorted(set(
+            tag.offset for tag in sink_tags
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ))
+        self.assertEqual(len(lock_offsets), 2)
+        output = numpy.asarray(sinks[0].data(), dtype=numpy.complex64)
+        numpy.testing.assert_array_equal(
+            output[unlock_offset:lock_offsets[1] + calibration_samples],
+            numpy.zeros(
+                lock_offsets[1] + calibration_samples - unlock_offset,
+                dtype=numpy.complex64,
+            ),
+        )
+        self.assertGreater(
+            numpy.max(numpy.abs(output[lock_offsets[1] + calibration_samples:])),
+            0.1,
+        )
+
 
 if __name__ == "__main__":
     gr_unittest.run(qa_cross_sdr_cfo_corrector)

@@ -82,12 +82,121 @@ blocks:
   id: variable
   parameters:
     comment: LibreSDR and B210 RF centre frequency
-    value: int(920.9e6)
+    value: int(700e6)
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [16, 16]
+    rotation: 0
+    state: enabled
+- name: cfo_agreement_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum accepted disagreement between ch2/ch0 and ch3/ch0
+    value: '10.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_estimation_samples
+  id: variable
+  parameters:
+    comment: Raw OTA pilot samples in each Bravo-vs-Alpha CFO window
+    value: 2**18
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_max_abs_hz
+  id: variable
+  parameters:
+    comment: Reject implausibly large Bravo-minus-Alpha CFO estimates
+    value: '20000.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_max_refinement_rounds
+  id: variable
+  parameters:
+    comment: Maximum closed-loop residual correction attempts before rejecting and
+      retrying
+    value: '3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [720, 232]
+    rotation: 0
+    state: enabled
+- name: cfo_min_coherence
+  id: variable
+  parameters:
+    comment: Minimum narrow-pilot coherence for coarse and residual CFO estimates
+    value: '0.90'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [880, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_residual_tolerance_hz
+  id: variable
+  parameters:
+    comment: Maximum averaged post-correction residual CFO allowed before cfo_locked
+    value: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 232]
+    rotation: 0
+    state: enabled
+- name: cfo_retry_delay_samples
+  id: variable
+  parameters:
+    comment: Raw samples to pass before retrying a rejected CFO window
+    value: 2**20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_settling_samples
+  id: variable
+  parameters:
+    comment: Five-second IIO/RF/PLL settling before cross-SDR CFO estimation
+    value: int(5 * samp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 176]
+    rotation: 0
+    state: enabled
+- name: cfo_validation_settling_samples
+  id: variable
+  parameters:
+    comment: Corrected raw samples to settle before each residual validation window
+    value: 2**16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 232]
     rotation: 0
     state: enabled
 - name: element0_bearing
@@ -154,7 +263,7 @@ blocks:
   id: variable
   parameters:
     comment: Covariance snapshot overlap
-    value: 2**14
+    value: '0'
   states:
     bus_sink: false
     bus_source: false
@@ -171,7 +280,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [144, 96]
+    coordinate: [160, 96.0]
     rotation: 0
     state: enabled
 - name: pilot_decim
@@ -294,114 +403,6 @@ blocks:
     coordinate: [144, 16]
     rotation: 0
     state: enabled
-- name: cfo_settling_samples
-  id: variable
-  parameters:
-    comment: Five-second IIO/RF/PLL settling before cross-SDR CFO estimation
-    value: int(5 * samp_rate)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [16, 176]
-    rotation: 0
-    state: enabled
-- name: cfo_estimation_samples
-  id: variable
-  parameters:
-    comment: Raw OTA pilot samples in each Bravo-vs-Alpha CFO window
-    value: 2**18
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [176, 176]
-    rotation: 0
-    state: enabled
-- name: cfo_validation_settling_samples
-  id: variable
-  parameters:
-    comment: Corrected raw samples to settle before each residual validation window
-    value: 2**16
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [176, 232]
-    rotation: 0
-    state: enabled
-- name: cfo_residual_tolerance_hz
-  id: variable
-  parameters:
-    comment: Maximum averaged post-correction residual CFO allowed before cfo_locked
-    value: '1.0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [528, 232]
-    rotation: 0
-    state: enabled
-- name: cfo_max_refinement_rounds
-  id: variable
-  parameters:
-    comment: Maximum closed-loop residual correction attempts before rejecting and retrying
-    value: '3'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [720, 232]
-    rotation: 0
-    state: enabled
-- name: cfo_retry_delay_samples
-  id: variable
-  parameters:
-    comment: Raw samples to pass before retrying a rejected CFO window
-    value: 2**20
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 176]
-    rotation: 0
-    state: enabled
-- name: cfo_agreement_tolerance_hz
-  id: variable
-  parameters:
-    comment: Maximum accepted disagreement between ch2/ch0 and ch3/ch0
-    value: '10.0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [528, 176]
-    rotation: 0
-    state: enabled
-- name: cfo_max_abs_hz
-  id: variable
-  parameters:
-    comment: Reject implausibly large Bravo-minus-Alpha CFO estimates
-    value: '20000.0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [720, 176]
-    rotation: 0
-    state: enabled
-- name: cfo_min_coherence
-  id: variable
-  parameters:
-    comment: Minimum narrow-pilot coherence for coarse and residual CFO estimates
-    value: '0.90'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [880, 176]
-    rotation: 0
-    state: enabled
 - name: snapshot_size
   id: variable
   parameters:
@@ -412,6 +413,121 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [784, 96]
+    rotation: 0
+    state: enabled
+- name: alpha_internal_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Same-device Alpha RX phase before filtering.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 4,0,1,1
+    label1: arg(A RX1 * conj(A RX2))
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Alpha internal pre-filter phase: RX1 vs RX2"'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 920]
+    rotation: 0
+    state: enabled
+- name: alpha_internal_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Alpha-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is
+      RX2.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 920]
     rotation: 0
     state: enabled
 - name: bearing_display
@@ -494,6 +610,150 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1600, 400]
+    rotation: 0
+    state: enabled
+- name: bravo_internal_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Same-device Bravo RX phase before filtering. Input 0 is B RX1 and input
+      1 is B RX2, independent of the UCA permutation.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 4,1,1,1
+    label1: arg(B RX1 * conj(B RX2))
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Bravo internal pre-filter phase: RX1 vs RX2"'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 920]
+    rotation: 0
+    state: enabled
+- name: bravo_internal_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Bravo-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is
+      RX2.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 920]
+    rotation: 0
+    state: enabled
+- name: cfo_correction
+  id: doa_cross_sdr_cfo_corrector
+  parameters:
+    affinity: ''
+    agreement_tolerance_hz: cfo_agreement_tolerance_hz
+    alias: ''
+    comment: 'Fixed order: ch0 Alpha RX1, ch1 Alpha RX2, ch2 Bravo RX2, ch3 Bravo
+      RX1. Alpha is untouched; one common rotator corrects both Bravo channels.'
+    estimation_samples: cfo_estimation_samples
+    max_abs_cfo_hz: cfo_max_abs_hz
+    max_refinement_rounds: cfo_max_refinement_rounds
+    maxoutbuf: '0'
+    min_coherence: cfo_min_coherence
+    minoutbuf: '0'
+    pilot_bandwidth_hz: pilot_passband
+    pilot_offset_hz: pilot_offset
+    residual_tolerance_hz: cfo_residual_tolerance_hz
+    retry_delay_samples: cfo_retry_delay_samples
+    samp_rate: samp_rate
+    settling_samples: cfo_settling_samples
+    validation_settling_samples: cfo_validation_settling_samples
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 456]
     rotation: 0
     state: enabled
 - name: corrected_channels
@@ -592,7 +852,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 640]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: corrected_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -689,7 +949,7 @@ blocks:
     bus_structure: null
     coordinate: [1392, 680]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: corrected_phase_estimator
   id: doa_phase_offset_est
   parameters:
@@ -706,7 +966,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 568]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: covariance
   id: doa_autocorrelate
   parameters:
@@ -733,7 +993,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '262144'
+    buffer_size: '1048576'
     comment: Element 0 = RX1 bottom-right; element 1 = RX2 bottom-left.
     filter: ''
     filter_source: '''Auto'''
@@ -769,7 +1029,7 @@ blocks:
     alias: ''
     bandwidth: rf_bandwidth
     bbdc: 'True'
-    buffer_size: '262144'
+    buffer_size: '1048576'
     comment: 'Outputs are permuted below: RX2 top-left = element 2; RX1 top-right
       = element 3.'
     filter: ''
@@ -797,33 +1057,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [48, 520]
-    rotation: 0
-    state: enabled
-- name: cfo_correction
-  id: doa_cross_sdr_cfo_corrector
-  parameters:
-    affinity: ''
-    agreement_tolerance_hz: cfo_agreement_tolerance_hz
-    alias: ''
-    comment: 'Fixed order: ch0 Alpha RX1, ch1 Alpha RX2, ch2 Bravo RX2, ch3 Bravo RX1. Alpha is untouched; one common rotator corrects both Bravo channels.'
-    estimation_samples: cfo_estimation_samples
-    pilot_offset_hz: pilot_offset
-    pilot_bandwidth_hz: pilot_passband
-    validation_settling_samples: cfo_validation_settling_samples
-    residual_tolerance_hz: cfo_residual_tolerance_hz
-    max_refinement_rounds: cfo_max_refinement_rounds
-    max_abs_cfo_hz: cfo_max_abs_hz
-    maxoutbuf: '0'
-    min_coherence: cfo_min_coherence
-    minoutbuf: '0'
-    retry_delay_samples: cfo_retry_delay_samples
-    samp_rate: samp_rate
-    settling_samples: cfo_settling_samples
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [288, 456]
     rotation: 0
     state: enabled
 - name: music_uca
@@ -859,8 +1092,8 @@ blocks:
     element0_angle: element0_bearing
     element_angle_step: element_bearing_step
     maxoutbuf: '0'
-    minoutbuf: '0'
     min_coherence: '0.90'
+    minoutbuf: '65536'
     norm_radius: norm_radius
     num_inputs: num_elements
     pilot_angle: pilot_bearing
@@ -989,6 +1222,318 @@ blocks:
     coordinate: [312, 656]
     rotation: 0
     state: enabled
+- name: post_cfo_fft_display
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '0.2'
+    axislabels: 'True'
+    bw: proc_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: CFO-corrected streams after the existing translating/decimating pilot
+      filters. All four pilot peaks should coincide after CFO lock.
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '8192'
+    freqhalf: 'True'
+    grid: 'True'
+    gui_hint: ''
+    label: Relative Gain
+    label1: A RX1 / element 0
+    label10: ''''''
+    label2: A RX2 / element 1
+    label3: B RX2 / element 2
+    label4: B RX1 / element 3
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"POST-CFO filtered pilot spectra (8192-bin FFT)"'
+    nconnections: '4'
+    norm_window: 'False'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.20'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: window.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 240]
+    rotation: 0
+    state: enabled
+- name: postfilter_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: This diagnostic is after the common CFO correction and four identical
+      translating/decimating FIR filters, but before constant phase calibration.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 2,0,1,1
+    label1: POST-CFO A RX2 vs A RX1
+    label10: Signal 10
+    label2: POST-CFO B RX2 vs A RX1
+    label3: POST-CFO B RX1 vs A RX1
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"POST-CFO relative phase (before phase calibration)"'
+    nconnections: '3'
+    size: '1024'
+    srate: proc_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 680]
+    rotation: 0
+    state: enabled
+- name: postfilter_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: POST-CFO Ettus arg(x0*conj(xi)) diagnostic before constant phase calibration.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 568]
+    rotation: 0
+    state: enabled
+- name: prefilter_phase_display
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: Connected directly to IIO outputs before every FIR, calibration, or correction
+      block. Physical order is A RX1, A RX2, B RX2, B RX1.
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 3,0,1,2
+    label1: TRUE PRE-FILTER A RX2 vs A RX1
+    label10: Signal 10
+    label2: TRUE PRE-FILTER B RX2 vs A RX1
+    label3: TRUE PRE-FILTER B RX1 vs A RX1
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"TRUE PRE-FILTER relative phase (direct IIO)"'
+    nconnections: '3'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Phase
+    ymax: '3.2'
+    ymin: '-3.2'
+    yunit: radians
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 792]
+    rotation: 0
+    state: enabled
+- name: prefilter_phase_estimator
+  id: doa_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: TRUE pre-filter Ettus arg(x0*conj(xi)) diagnostic in physical order.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n_skip_ahead: calibration_skip * pilot_decim
+    num_inputs: num_elements
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 792]
+    rotation: 0
+    state: enabled
 - name: qtgui_compass_0
   id: qtgui_compass
   parameters:
@@ -1096,547 +1641,7 @@ blocks:
     bus_structure: null
     coordinate: [568, 240]
     rotation: 0
-    state: disabled
-- name: post_cfo_fft_display
-  id: qtgui_freq_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    average: '0.2'
-    axislabels: 'True'
-    bw: proc_rate
-    color1: '"blue"'
-    color10: '"dark blue"'
-    color2: '"red"'
-    color3: '"green"'
-    color4: '"black"'
-    color5: '"cyan"'
-    color6: '"magenta"'
-    color7: '"yellow"'
-    color8: '"dark red"'
-    color9: '"dark green"'
-    comment: CFO-corrected streams after the existing translating/decimating pilot filters. All four pilot peaks should coincide after CFO lock.
-    ctrlpanel: 'False'
-    fc: '0'
-    fftsize: '8192'
-    freqhalf: 'True'
-    grid: 'True'
-    gui_hint: ''
-    label: Relative Gain
-    label1: A RX1 / element 0
-    label10: ''''''
-    label2: A RX2 / element 1
-    label3: B RX2 / element 2
-    label4: B RX1 / element 3
-    label5: ''''''
-    label6: ''''''
-    label7: ''''''
-    label8: ''''''
-    label9: ''''''
-    legend: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    name: '"POST-CFO filtered pilot spectra (8192-bin FFT)"'
-    nconnections: '4'
-    norm_window: 'False'
-    showports: 'False'
-    tr_chan: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_tag: '""'
-    type: complex
-    units: dB
-    update_time: '0.20'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    wintype: window.WIN_BLACKMAN_hARRIS
-    ymax: '10'
-    ymin: '-140'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [824, 240]
-    rotation: 0
-    state: disabled
-- name: postfilter_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: black
-    color5: cyan
-    color6: magenta
-    color7: yellow
-    color8: dark red
-    color9: dark green
-    comment: This diagnostic is after the common CFO correction and four identical
-      translating/decimating FIR filters, but before constant phase calibration.
-    ctrlpanel: 'False'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 2,0,1,1
-    label1: POST-CFO A RX2 vs A RX1
-    label10: Signal 10
-    label2: POST-CFO B RX2 vs A RX1
-    label3: POST-CFO B RX1 vs A RX1
-    label4: Signal 4
-    label5: Signal 5
-    label6: Signal 6
-    label7: Signal 7
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '-1'
-    marker10: '-1'
-    marker2: '-1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '"POST-CFO relative phase (before phase calibration)"'
-    nconnections: '3'
-    size: '1024'
-    srate: proc_rate
-    stemplot: 'False'
-    style1: '1'
-    style10: '1'
-    style2: '1'
-    style3: '1'
-    style4: '1'
-    style5: '1'
-    style6: '1'
-    style7: '1'
-    style8: '1'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: float
-    update_time: '0.10'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1168, 680]
-    rotation: 0
-    state: disabled
-- name: postfilter_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: POST-CFO Ettus arg(x0*conj(xi)) diagnostic before constant phase calibration.
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n_skip_ahead: calibration_skip
-    num_inputs: num_elements
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [584, 568]
-    rotation: 0
-    state: disabled
-- name: prefilter_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: black
-    color5: cyan
-    color6: magenta
-    color7: yellow
-    color8: dark red
-    color9: dark green
-    comment: Connected directly to IIO outputs before every FIR, calibration, or
-      correction block. Physical order is A RX1, A RX2, B RX2, B RX1.
-    ctrlpanel: 'False'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 3,0,1,2
-    label1: TRUE PRE-FILTER A RX2 vs A RX1
-    label10: Signal 10
-    label2: TRUE PRE-FILTER B RX2 vs A RX1
-    label3: TRUE PRE-FILTER B RX1 vs A RX1
-    label4: Signal 4
-    label5: Signal 5
-    label6: Signal 6
-    label7: Signal 7
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '-1'
-    marker10: '-1'
-    marker2: '-1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '"TRUE PRE-FILTER relative phase (direct IIO)"'
-    nconnections: '3'
-    size: '1024'
-    srate: samp_rate
-    stemplot: 'False'
-    style1: '1'
-    style10: '1'
-    style2: '1'
-    style3: '1'
-    style4: '1'
-    style5: '1'
-    style6: '1'
-    style7: '1'
-    style8: '1'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: float
-    update_time: '0.10'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [848, 792]
-    rotation: 0
-    state: disabled
-- name: prefilter_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: TRUE pre-filter Ettus arg(x0*conj(xi)) diagnostic in physical order.
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n_skip_ahead: calibration_skip * pilot_decim
-    num_inputs: num_elements
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [584, 792]
-    rotation: 0
-    state: disabled
-- name: alpha_internal_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: black
-    color5: cyan
-    color6: magenta
-    color7: yellow
-    color8: dark red
-    color9: dark green
-    comment: Same-device Alpha RX phase before filtering.
-    ctrlpanel: 'False'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 4,0,1,1
-    label1: 'arg(A RX1 * conj(A RX2))'
-    label10: Signal 10
-    label2: Signal 2
-    label3: Signal 3
-    label4: Signal 4
-    label5: Signal 5
-    label6: Signal 6
-    label7: Signal 7
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '-1'
-    marker10: '-1'
-    marker2: '-1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '"Alpha internal pre-filter phase: RX1 vs RX2"'
-    nconnections: '1'
-    size: '1024'
-    srate: samp_rate
-    stemplot: 'False'
-    style1: '1'
-    style10: '1'
-    style2: '1'
-    style3: '1'
-    style4: '1'
-    style5: '1'
-    style6: '1'
-    style7: '1'
-    style8: '1'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: float
-    update_time: '0.10'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [848, 920]
-    rotation: 0
-    state: disabled
-- name: alpha_internal_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Alpha-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is RX2.
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n_skip_ahead: calibration_skip * pilot_decim
-    num_inputs: '2'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [584, 920]
-    rotation: 0
-    state: disabled
-- name: bravo_internal_phase_display
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: black
-    color5: cyan
-    color6: magenta
-    color7: yellow
-    color8: dark red
-    color9: dark green
-    comment: Same-device Bravo RX phase before filtering. Input 0 is B RX1 and input
-      1 is B RX2, independent of the UCA permutation.
-    ctrlpanel: 'False'
-    entags: 'False'
-    grid: 'True'
-    gui_hint: 4,1,1,1
-    label1: 'arg(B RX1 * conj(B RX2))'
-    label10: Signal 10
-    label2: Signal 2
-    label3: Signal 3
-    label4: Signal 4
-    label5: Signal 5
-    label6: Signal 6
-    label7: Signal 7
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '-1'
-    marker10: '-1'
-    marker2: '-1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '"Bravo internal pre-filter phase: RX1 vs RX2"'
-    nconnections: '1'
-    size: '1024'
-    srate: samp_rate
-    stemplot: 'False'
-    style1: '1'
-    style10: '1'
-    style2: '1'
-    style3: '1'
-    style4: '1'
-    style5: '1'
-    style6: '1'
-    style7: '1'
-    style8: '1'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: float
-    update_time: '0.10'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Phase
-    ymax: '3.2'
-    ymin: '-3.2'
-    yunit: radians
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1168, 920]
-    rotation: 0
-    state: disabled
-- name: bravo_internal_phase_estimator
-  id: doa_phase_offset_est
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: Bravo-only direct IIO phase diagnostic; input 0 is RX1 and input 1 is RX2.
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n_skip_ahead: calibration_skip * pilot_decim
-    num_inputs: '2'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [960, 920]
-    rotation: 0
-    state: disabled
+    state: enabled
 - name: spectrum_display
   id: qtgui_vector_sink_f
   parameters:
@@ -1703,42 +1708,42 @@ blocks:
     y_axis_label: '"Normalized pseudo-spectrum (dB)"'
     y_units: '"dB"'
     ymax: '0'
-    ymin: '-40'
+    ymin: '-7'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [1392, 544]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [alpha_internal_phase_estimator, '0', alpha_internal_phase_display, '0']
 - [bearing_streams, '0', bearing_display, '0']
 - [bearing_streams, '0', qtgui_compass_0, '0']
 - [bravo_internal_phase_estimator, '0', bravo_internal_phase_display, '0']
-- [corrected_phase_estimator, '0', corrected_phase_display, '0']
-- [corrected_phase_estimator, '1', corrected_phase_display, '1']
-- [corrected_phase_estimator, '2', corrected_phase_display, '2']
 - [cfo_correction, '0', pilot_filter_0, '0']
 - [cfo_correction, '1', pilot_filter_1, '0']
 - [cfo_correction, '2', pilot_filter_2, '0']
 - [cfo_correction, '3', pilot_filter_3, '0']
+- [corrected_phase_estimator, '0', corrected_phase_display, '0']
+- [corrected_phase_estimator, '1', corrected_phase_display, '1']
+- [corrected_phase_estimator, '2', corrected_phase_display, '2']
 - [covariance, '0', music_uca, '0']
-- [libresdr_a, '0', cfo_correction, '0']
 - [libresdr_a, '0', alpha_internal_phase_estimator, '0']
+- [libresdr_a, '0', cfo_correction, '0']
 - [libresdr_a, '0', prefilter_phase_estimator, '0']
 - [libresdr_a, '0', raw_fft_display, '0']
-- [libresdr_a, '1', cfo_correction, '1']
 - [libresdr_a, '1', alpha_internal_phase_estimator, '1']
+- [libresdr_a, '1', cfo_correction, '1']
 - [libresdr_a, '1', prefilter_phase_estimator, '1']
 - [libresdr_a, '1', raw_fft_display, '1']
-- [libresdr_b, '0', cfo_correction, '3']
 - [libresdr_b, '0', bravo_internal_phase_estimator, '0']
+- [libresdr_b, '0', cfo_correction, '3']
 - [libresdr_b, '0', prefilter_phase_estimator, '3']
 - [libresdr_b, '0', raw_fft_display, '3']
-- [libresdr_b, '1', cfo_correction, '2']
 - [libresdr_b, '1', bravo_internal_phase_estimator, '1']
+- [libresdr_b, '1', cfo_correction, '2']
 - [libresdr_b, '1', prefilter_phase_estimator, '2']
 - [libresdr_b, '1', raw_fft_display, '2']
 - [music_uca, '0', peak_finder, '0']

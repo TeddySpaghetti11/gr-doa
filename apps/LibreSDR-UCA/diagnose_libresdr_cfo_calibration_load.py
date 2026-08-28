@@ -38,7 +38,7 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         # Variables
         ##################################################
         self.pilot_offset = pilot_offset = 50e3
-        self.center_freq = center_freq = int(920.9e6)
+        self.center_freq = center_freq = int(700e6)
         self.samp_rate = samp_rate = int(2.1e6)
         self.pilot_rf = pilot_rf = center_freq + pilot_offset
         self.array_radius = array_radius = 0.16263 / (2**0.5)
@@ -125,7 +125,10 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             retry_delay_samples=cfo_retry_delay_samples,
             agreement_tolerance_hz=cfo_agreement_tolerance_hz,
             max_abs_cfo_hz=cfo_max_abs_hz,
-            min_coherence=cfo_min_coherence)
+            min_coherence=cfo_min_coherence,
+            tracking_window_samples=16384,
+            tracking_phase_gain=0.25,
+            phase_jump_threshold_rad=1.0)
         self.calibrated_sink = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.bravo_rx2_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
         self.bravo_rx1_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))

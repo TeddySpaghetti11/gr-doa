@@ -64,7 +64,8 @@ class uca_pilot_calibration(gr.sync_block):
         self.pilot_angle = float(pilot_angle)
         self.element0_angle = float(element0_angle)
         self.element_angle_step = float(element_angle_step)
-        self.skip_remaining = int(skip_samples)
+        self._configured_skip_samples = int(skip_samples)
+        self.skip_remaining = self._configured_skip_samples
         self.calibration_samples = int(calibration_samples)
         self.config_filename = str(config_filename)
         self.min_coherence = float(min_coherence)
@@ -233,8 +234,8 @@ class uca_pilot_calibration(gr.sync_block):
                 f"coherence={coherences[channel]:.4f}"
             )
         print(
-            "UCA calibration complete. Coefficients are frozen; the pilot may now "
-            "be switched off without stopping this flowgraph."
+            "UCA calibration complete. Coefficients are frozen; keep the pilot "
+            "transmitting for continuous cross-SDR tracking."
         )
         self._write_config(coefficients)
 
@@ -255,38 +256,33 @@ class uca_pilot_calibration(gr.sync_block):
                 )
                 config_file.write(f"{phase_radians:.12g}\n")
 
-    def work(self, input_items, output_items):
-        item_count = min(len(items) for items in input_items)
-        for output in output_items:
-            output[:item_count] = 0.0
+    def _reset_calibration(self, armed):
+        """Discard frozen/partial phase state after a tracker unlock or relock."""
+        with self._lock:
+            self.skip_remaining = self._configured_skip_samples
+            self._samples_accumulated = 0
+            self._cross_sum.fill(0.0)
+            self._power_sum.fill(0.0)
+            self._coefficients.fill(1.0)
+            self._coherences.fill(0.0)
+            self._state = "collecting"
+            self._failure_reason = ""
+            self._armed = bool(armed)
 
-        cursor = 0
+    def _process_segment(self, input_items, output_items, start, stop):
+        """Process a tag-free half-open input range."""
+        cursor = start
         if not self._armed:
-            absolute_start = self.nitems_read(0)
-            tags = self.get_tags_in_range(
-                0,
-                absolute_start,
-                absolute_start + item_count,
-                pmt.intern(self.start_tag_key),
-            )
-            if not tags:
-                return item_count
-            first_tag = min(tags, key=lambda tag: tag.offset)
-            cursor = int(first_tag.offset - absolute_start)
-            self._armed = True
-            print(
-                f"UCA calibration: received '{self.start_tag_key}' at input "
-                f"sample {first_tag.offset}; post-lock settling begins"
-            )
+            return stop
 
         if self.skip_remaining:
-            skipped = min(self.skip_remaining, item_count - cursor)
+            skipped = min(self.skip_remaining, stop - cursor)
             self.skip_remaining -= skipped
             cursor += skipped
 
-        if self.status() == "collecting" and cursor < item_count:
+        if self.status() == "collecting" and cursor < stop:
             needed = self.calibration_samples - self._samples_accumulated
-            used = min(needed, item_count - cursor)
+            used = min(needed, stop - cursor)
             reference = input_items[0][cursor:cursor + used].astype(
                 numpy.complex128, copy=False
             )
@@ -311,16 +307,60 @@ class uca_pilot_calibration(gr.sync_block):
                 self._finish_calibration()
 
         state = self.status()
-        if state == "calibrated" and cursor < item_count:
+        if state == "calibrated" and cursor < stop:
             for channel in range(self.num_inputs):
-                output_items[channel][cursor:item_count] = (
-                    input_items[channel][cursor:item_count]
+                output_items[channel][cursor:stop] = (
+                    input_items[channel][cursor:stop]
                     * self._coefficients[channel]
                 )
-        elif state == "failed" and cursor < item_count:
+        elif state == "failed" and cursor < stop:
             for channel in range(self.num_inputs):
-                output_items[channel][cursor:item_count] = input_items[channel][
-                    cursor:item_count
+                output_items[channel][cursor:stop] = input_items[channel][
+                    cursor:stop
                 ]
+        return stop
+
+    def work(self, input_items, output_items):
+        item_count = min(len(items) for items in input_items)
+        for output in output_items:
+            output[:item_count] = 0.0
+
+        if not self.start_tag_key:
+            self._process_segment(input_items, output_items, 0, item_count)
+            return item_count
+
+        absolute_start = self.nitems_read(0)
+        absolute_stop = absolute_start + item_count
+        control_tags = []
+        event_keys = [(self.start_tag_key, "lock")]
+        if self.start_tag_key == "cfo_locked":
+            event_keys.append(("cfo_unlocked", "unlock"))
+        for key, event_type in event_keys:
+            for tag in self.get_tags_in_range(
+                    0, absolute_start, absolute_stop, pmt.intern(key)):
+                control_tags.append((int(tag.offset), event_type))
+        control_tags.sort(key=lambda event: event[0])
+
+        cursor = 0
+        for absolute_offset, event_type in control_tags:
+            event_cursor = max(cursor, absolute_offset - absolute_start)
+            self._process_segment(
+                input_items, output_items, cursor, event_cursor
+            )
+            cursor = event_cursor
+            if event_type == "unlock":
+                self._reset_calibration(armed=False)
+                print(
+                    f"UCA calibration: received 'cfo_unlocked' at input sample "
+                    f"{absolute_offset}; frozen phase correction discarded"
+                )
+            else:
+                self._reset_calibration(armed=True)
+                print(
+                    f"UCA calibration: received '{self.start_tag_key}' at input "
+                    f"sample {absolute_offset}; post-lock settling begins"
+                )
+
+        self._process_segment(input_items, output_items, cursor, item_count)
 
         return item_count

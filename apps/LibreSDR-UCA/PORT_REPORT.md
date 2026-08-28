@@ -52,8 +52,7 @@ upstream, and their locally generated Python artifacts were removed:
 - `apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/estimate_constant_phase_offsets_and_save.grc`
 - `apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/view_op_with_corrected_phase_offsets.grc`
 
-The user's uncommitted B210 transmitter setting, including 89 dB TX gain, was
-preserved. The task did not lower or otherwise tune gains.
+The B210 calibration transmitter is configured for 40 dB TX gain.
 
 ## Reverted deviations
 

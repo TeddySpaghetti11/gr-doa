@@ -7,10 +7,12 @@
 # GNU Radio Python Flow Graph
 # Title: B210 OTA Calibration Tone
 # Author: Ettus Research; LibreSDR UCA configuration
-# GNU Radio version: 3.10.12.0
+# Copyright: None
+# Description: 50 kHz complex pilot kept away from receiver DC for narrow translated filtering.
+# GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
-from PyQt5 import Qt
 from gnuradio import qtgui
+from PyQt5 import Qt
 def struct(data): return type('Struct', (object,), data)()
 from gnuradio import analog
 from gnuradio import uhd
@@ -25,6 +27,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+
+
 
 
 class run_DoA_transmitter(gr.top_block, Qt.QWidget):
@@ -64,11 +68,31 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.input_variables = input_variables = struct({
+
             'ToneFreq': 50e3,
+
             'SampleRate': 1e6,
-            'CenterFreq': 920.9e6,
+
+            'CenterFreq': 700e6,
+
             'TxAddr': "serial=310C4AE",
-            'Gain': 89,
+
+            'Gain': 40,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         })
 
         ##################################################
@@ -87,37 +111,44 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0.set_clock_source('internal', 0)
         self.uhd_usrp_sink_0.set_samp_rate(input_variables.SampleRate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec(0))
+
         self.uhd_usrp_sink_0.set_center_freq(input_variables.CenterFreq, 0)
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
         self.uhd_usrp_sink_0.set_gain(input_variables.Gain, 0)
-
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
-            1024,
-            input_variables.SampleRate,
-            "Calibration pilot baseband",
-            1,
-            None
+            1024, #size
+            input_variables.SampleRate, #samp_rate
+            "Calibration pilot baseband", #name
+            1, #number of inputs
+            None # parent
         )
         self.qtgui_time_sink_x_0.set_update_time(0.10)
         self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
         self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
         self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(
-            qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
         self.qtgui_time_sink_x_0.enable_autoscale(True)
         self.qtgui_time_sink_x_0.enable_grid(False)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(False)
         self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
+
         labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1] * 10
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
         colors = ['blue', 'red', 'green', 'black', 'cyan',
             'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0] * 10
-        styles = [1] * 10
-        markers = [-1] * 10
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
 
         for i in range(2):
             if len(labels[i]) == 0:
@@ -133,17 +164,10 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
             self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
             self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
 
-        self._qtgui_time_sink_x_0_win = sip.wrapinstance(
-            self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.analog_sig_source_x_0 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.ToneFreq, 1, 0, 0)
 
-        self.analog_sig_source_x_0 = analog.sig_source_c(
-            input_variables.SampleRate,
-            analog.GR_SIN_WAVE,
-            input_variables.ToneFreq,
-            1,
-            0,
-            0)
 
         ##################################################
         # Connections
@@ -151,11 +175,13 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
         self.connect((self.analog_sig_source_x_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.uhd_usrp_sink_0, 0))
 
+
     def closeEvent(self, event):
         self.settings = Qt.QSettings("gnuradio/flowgraphs", "run_DoA_transmitter")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
+
         event.accept()
 
     def get_input_variables(self):
@@ -165,16 +191,23 @@ class run_DoA_transmitter(gr.top_block, Qt.QWidget):
         self.input_variables = input_variables
 
 
+
+
 def main(top_block_cls=run_DoA_transmitter, options=None):
+
     qapp = Qt.QApplication(sys.argv)
+
     tb = top_block_cls()
+
     tb.start()
     tb.flowgraph_started.set()
+
     tb.show()
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+
         Qt.QApplication.quit()
 
     signal.signal(signal.SIGINT, sig_handler)
@@ -183,8 +216,8 @@ def main(top_block_cls=run_DoA_transmitter, options=None):
     timer = Qt.QTimer()
     timer.start(500)
     timer.timeout.connect(lambda: None)
-    qapp.exec_()
 
+    qapp.exec_()
 
 if __name__ == '__main__':
     main()

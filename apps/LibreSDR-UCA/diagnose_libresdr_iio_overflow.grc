@@ -34,7 +34,7 @@ blocks:
   id: variable
   parameters:
     comment: Match the live UCA receiver centre frequency
-    value: int(920.9e6)
+    value: int(700e6)
   states:
     bus_sink: false
     bus_source: false

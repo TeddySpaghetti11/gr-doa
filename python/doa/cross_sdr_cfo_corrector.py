@@ -14,17 +14,21 @@ from gnuradio import gr
 
 
 class cross_sdr_cfo_corrector(gr.sync_block):
-    """Freeze one Bravo-vs-Alpha CFO correction from an OTA pilot.
+    """Continuously track Bravo-vs-Alpha frequency drift from an OTA pilot.
 
     Inputs and outputs use the LibreSDR array order: ch0 Alpha RX1 reference,
     ch1 Alpha RX2, ch2 Bravo RX2, and ch3 Bravo RX1. Both Alpha channels pass
     through bit-for-bit. Both Bravo channels pass through unchanged during the
     coarse estimate. A common provisional correction is then applied while its
-    post-correction residual is measured and refined. No lock tag is emitted
-    until the residual passes. Exactly one rotator is always shared by Bravo.
+    post-correction residual is measured and refined. After lock, short pilot
+    windows keep updating the common correction frequency and gently return the
+    pilot phase to its captured lock-time value. The captured value is not zero,
+    so fixed propagation and hardware phase remains for downstream calibration.
+    Exactly one phase-continuous rotator is always shared by both Bravo inputs.
     """
 
     _LOCK_TAG = "cfo_locked"
+    _UNLOCK_TAG = "cfo_unlocked"
 
     def __init__(self,
                  samp_rate=2.8e6,
@@ -38,7 +42,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  retry_delay_samples=1048576,
                  agreement_tolerance_hz=10.0,
                  max_abs_cfo_hz=20000.0,
-                 min_coherence=0.90):
+                 min_coherence=0.90,
+                 tracking_window_samples=16384,
+                 tracking_phase_gain=0.25,
+                 phase_jump_threshold_rad=1.0):
         if samp_rate <= 0.0:
             raise ValueError("Sample rate must be positive")
         if pilot_bandwidth_hz <= 0.0:
@@ -63,6 +70,12 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             raise ValueError("Maximum CFO must be between zero and Nyquist")
         if min_coherence < 0.0 or min_coherence > 1.0:
             raise ValueError("Minimum coherence must be in [0, 1]")
+        if tracking_window_samples < 64:
+            raise ValueError("Tracking window must contain at least 64 samples")
+        if tracking_phase_gain < 0.0 or tracking_phase_gain > 1.0:
+            raise ValueError("Tracking phase gain must be in [0, 1]")
+        if phase_jump_threshold_rad <= 0.0 or phase_jump_threshold_rad > numpy.pi:
+            raise ValueError("Phase-jump threshold must be in (0, pi]")
 
         gr.sync_block.__init__(
             self,
@@ -84,6 +97,9 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self.agreement_tolerance_hz = float(agreement_tolerance_hz)
         self.max_abs_cfo_hz = float(max_abs_cfo_hz)
         self.min_coherence = float(min_coherence)
+        self.tracking_window_samples = int(tracking_window_samples)
+        self.tracking_phase_gain = float(tracking_phase_gain)
+        self.phase_jump_threshold_rad = float(phase_jump_threshold_rad)
 
         self._relative_samples = [[], []]
         self._samples_accumulated = 0
@@ -99,10 +115,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._estimating_residual = False
         self._refinement_round = 0
         self._locked = False
+        self._reacquiring = False
+        self._phase_references = None
+        self._last_tracked_phase = None
+        self._relock_count = 0
+        self._discontinuity_count = 0
         self._failed = False
         self._rejection_count = 0
         self._last_failure_reason = ""
         self._lock_tag_pending = False
+        self._unlock_tag_pending = False
         self._lock = threading.Lock()
 
         # Estimate from the configured OTA pilot only. The earlier full-band
@@ -146,9 +168,15 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             f"{self.validation_settling_samples} settling samples, up to "
             f"{self.max_refinement_rounds} refinement rounds"
         )
+        print(
+            "Cross-SDR CFO continuous tracking: "
+            f"{self.tracking_window_samples} samples/window, phase gain "
+            f"{self.tracking_phase_gain:.3f}, discontinuity threshold "
+            f"{self.phase_jump_threshold_rad:.3f} rad"
+        )
 
     def locked(self):
-        """Return True once the common correction has been accepted and frozen."""
+        """Return True while the continuous pilot tracker is in lock."""
         with self._lock:
             return self._locked
 
@@ -171,6 +199,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         """Return the number of rejected estimation windows."""
         with self._lock:
             return self._rejection_count
+
+    def relock_count(self):
+        """Return the number of successful locks after the initial lock."""
+        with self._lock:
+            return self._relock_count
+
+    def discontinuity_count(self):
+        """Return the number of phase discontinuities that caused reacquisition."""
+        with self._lock:
+            return self._discontinuity_count
 
     def last_failure_reason(self):
         """Return the most recent rejection diagnostic."""
@@ -206,7 +244,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         )
         valid = finite & (magnitudes > amplitude_floor)
         valid_count = int(numpy.count_nonzero(valid))
-        minimum_valid = max(64, relative_samples.size // 2)
+        # Tracking windows may intentionally decimate to only a few dozen fit
+        # points; 16 phase-continuous points still provide a well-conditioned
+        # slope while retaining the half-window corruption guard.
+        minimum_valid = max(16, relative_samples.size // 2)
         if valid_count < minimum_valid:
             raise ValueError(
                 f"only {valid_count}/{relative_samples.size} relative pilot "
@@ -251,13 +292,30 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
         slope = numerator / denominator
         residual_sum = 0.0j
+        residual_angles = []
         for sample_index, phase in fit_segments:
             fitted = numpy.mean(phase) + slope * (
                 sample_index - numpy.mean(sample_index)
             )
-            residual_sum += numpy.sum(numpy.exp(1j * (phase - fitted)))
+            residual = numpy.angle(numpy.exp(1j * (phase - fitted)))
+            residual_angles.append(residual)
+            residual_sum += numpy.sum(numpy.exp(1j * residual))
         coherence = float(abs(residual_sum) / used_count)
         estimate_hz = float(slope * fit_sample_rate / (2.0 * numpy.pi))
+
+        # The fitted endpoint phase is used as the non-zero phase reference for
+        # the tracking loop. The robust residual span flags phase steps that a
+        # single straight-line CFO fit can otherwise partially absorb.
+        last_index, last_phase = fit_segments[-1]
+        endpoint_phase = float(numpy.angle(numpy.exp(1j * (
+            numpy.mean(last_phase)
+            + slope * (last_index[-1] - numpy.mean(last_index))
+        ))))
+        residual_angles = numpy.concatenate(residual_angles)
+        residual_span = float(
+            numpy.percentile(residual_angles, 95.0)
+            - numpy.percentile(residual_angles, 5.0)
+        )
         return (
             estimate_hz,
             coherence,
@@ -266,6 +324,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             int(relative_samples.size),
             raw_sample_count,
             fit_stride,
+            endpoint_phase,
+            residual_span,
         )
 
     def _reset_pilot_filters(self):
@@ -338,6 +398,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         fit_counts = []
         raw_counts = []
         fit_strides = []
+        endpoint_phases = []
+        residual_spans = []
         try:
             for chunks in self._relative_samples:
                 relative = numpy.concatenate(chunks)
@@ -349,6 +411,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                     fit_count,
                     raw_count,
                     fit_stride,
+                    endpoint_phase,
+                    residual_span,
                 ) = self._fit_cfo(relative)
                 estimates.append(estimate)
                 coherences.append(coherence)
@@ -357,6 +421,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 fit_counts.append(fit_count)
                 raw_counts.append(raw_count)
                 fit_strides.append(fit_stride)
+                endpoint_phases.append(endpoint_phase)
+                residual_spans.append(residual_span)
         except ValueError as error:
             self._reject(str(error))
             return
@@ -416,7 +482,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
         accepted = 0.5 * (estimates[0] + estimates[1])
         if estimating_residual:
-            self._finish_residual_validation(accepted)
+            self._finish_residual_validation(accepted, endpoint_phases)
         else:
             self._start_provisional_correction(accepted)
 
@@ -450,7 +516,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             f"{self.validation_settling_samples} samples"
         )
 
-    def _finish_residual_validation(self, residual_hz):
+    def _finish_residual_validation(self, residual_hz, endpoint_phases):
         print(
             f"Cross-SDR CFO residual round {self._refinement_round} accepted "
             f"average: {residual_hz:+.6f} Hz"
@@ -459,25 +525,32 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             with self._lock:
                 # The tolerance is an acceptance bound, not a reason to leave
                 # a known residual unapplied. Fold the final measured residual
-                # into the frozen total while retaining instantaneous phase.
+                # into the tracked total while retaining instantaneous phase.
                 self._accepted_cfo_hz += residual_hz
                 self._set_correction_frequency(
                     self._accepted_cfo_hz, reset_phase=False
                 )
                 self._locked = True
+                was_reacquiring = self._reacquiring
+                self._reacquiring = False
+                self._phase_references = tuple(endpoint_phases)
+                self._last_tracked_phase = tuple(endpoint_phases)
                 self._failed = False
                 self._lock_tag_pending = True
+                if was_reacquiring:
+                    self._relock_count += 1
                 accepted = self._accepted_cfo_hz
                 correction_step = self._correction_step
+            self._samples_accumulated = 0
             print(f"Cross-SDR CFO final accepted CFO: {accepted:+.6f} Hz")
             print(
-                f"Cross-SDR CFO frozen correction: {-accepted:+.6f} Hz, "
+                f"Cross-SDR CFO tracked correction: {-accepted:+.6f} Hz, "
                 f"phase step {correction_step:+.12g} rad/sample, identically "
                 "on ch2 and ch3"
             )
             print(
-                "Cross-SDR CFO lock established after post-correction residual "
-                "validation. Downstream constant phase calibration may now begin."
+                "Cross-SDR CFO lock established; continuous pilot tracking is "
+                "active. Downstream constant phase calibration may now begin."
             )
             return
 
@@ -511,8 +584,121 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             f"after {self.validation_settling_samples} samples"
         )
 
+    @staticmethod
+    def _wrapped_phase(value):
+        return float(numpy.angle(numpy.exp(1j * value)))
+
+    def _finish_tracking(self):
+        """Update frequency from one locked pilot window without zeroing phase."""
+        estimates = []
+        coherences = []
+        endpoint_phases = []
+        residual_spans = []
+        try:
+            for chunks in self._relative_samples:
+                relative = numpy.concatenate(chunks)
+                fit = self._fit_cfo(relative)
+                estimates.append(fit[0])
+                coherences.append(fit[1])
+                endpoint_phases.append(fit[7])
+                residual_spans.append(fit[8])
+        except ValueError as error:
+            self._start_reacquire(f"tracking pilot invalid: {error}")
+            return
+        finally:
+            self._relative_samples = [[], []]
+            self._samples_accumulated = 0
+
+        disagreement = abs(estimates[0] - estimates[1])
+        quality_failures = []
+        for channel, (estimate, coherence) in enumerate(
+                zip(estimates, coherences), start=2):
+            if not numpy.isfinite(estimate) or abs(estimate) > self.max_abs_cfo_hz:
+                quality_failures.append(
+                    f"ch{channel}/ch0 residual {estimate:+.6f} Hz is invalid"
+                )
+            if not numpy.isfinite(coherence) or coherence < self.min_coherence:
+                quality_failures.append(
+                    f"ch{channel}/ch0 coherence {coherence:.6f} is below "
+                    f"{self.min_coherence:.6f}"
+                )
+        if disagreement > self.agreement_tolerance_hz:
+            quality_failures.append(
+                f"the two tracking estimates disagree by {disagreement:.6f} Hz"
+            )
+        if quality_failures:
+            self._start_reacquire("; ".join(quality_failures))
+            return
+
+        phase_errors = [
+            self._wrapped_phase(phase - reference)
+            for phase, reference in zip(endpoint_phases, self._phase_references)
+        ]
+        common_phase_error = float(numpy.angle(numpy.mean(numpy.exp(
+            1j * numpy.asarray(phase_errors)
+        ))))
+        differential_error = abs(self._wrapped_phase(
+            phase_errors[0] - phase_errors[1]
+        ))
+        jump_metric = max(
+            abs(phase_errors[0]),
+            abs(phase_errors[1]),
+            differential_error,
+            residual_spans[0],
+            residual_spans[1],
+        )
+        if jump_metric > self.phase_jump_threshold_rad:
+            self._start_reacquire(
+                "pilot phase discontinuity: metric "
+                f"{jump_metric:.6f} rad exceeds "
+                f"{self.phase_jump_threshold_rad:.6f} rad"
+            )
+            return
+
+        residual_hz = 0.5 * (estimates[0] + estimates[1])
+        phase_servo_hz = (
+            self.tracking_phase_gain
+            * common_phase_error
+            * self.samp_rate
+            / (2.0 * numpy.pi * self.tracking_window_samples)
+        )
+        with self._lock:
+            self._accepted_cfo_hz += residual_hz + phase_servo_hz
+            accepted = self._accepted_cfo_hz
+            self._set_correction_frequency(accepted, reset_phase=False)
+            self._estimates_hz = tuple(estimates)
+            self._coherences = tuple(coherences)
+            self._last_tracked_phase = tuple(endpoint_phases)
+
+    def _start_reacquire(self, reason):
+        """Drop lock, retain the common rotator, and validate it again."""
+        with self._lock:
+            if not self._locked:
+                return
+            self._locked = False
+            self._reacquiring = True
+            self._phase_references = None
+            self._estimating_residual = True
+            self._refinement_round = 1
+            self._failed = False
+            self._last_failure_reason = reason
+            self._discontinuity_count += 1
+            self._unlock_tag_pending = True
+        self._samples_accumulated = 0
+        self._relative_samples = [[], []]
+        self.settling_remaining = self.validation_settling_samples
+        self._reset_pilot_filters()
+        print(f"Cross-SDR CFO LOCK LOST: {reason}")
+        print(
+            "Cross-SDR CFO: common correction remains phase-continuous while "
+            "the pilot is reacquired; downstream calibration is disarmed"
+        )
+
     def _reject(self, reason):
         with self._lock:
+            self._locked = False
+            self._reacquiring = False
+            self._phase_references = None
             self._failed = True
             self._rejection_count += 1
             rejection_count = self._rejection_count
@@ -541,6 +727,14 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         for port in range(4):
             self.add_item_tag(port, absolute_offset, key, value)
         self._lock_tag_pending = False
+
+    def _emit_unlock_tags(self, relative_offset):
+        absolute_offset = self.nitems_written(0) + int(relative_offset)
+        value = pmt.intern(self._last_failure_reason)
+        key = pmt.intern(self._UNLOCK_TAG)
+        for port in range(4):
+            self.add_item_tag(port, absolute_offset, key, value)
+        self._unlock_tag_pending = False
 
     def _apply_correction(self, input_items, output_items, start, stop):
         count = stop - start
@@ -580,21 +774,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
     def work(self, input_items, output_items):
         item_count = min(len(items) for items in input_items)
 
-        if self._locked:
-            # Alpha is copied once. Bravo is written directly by the cached
-            # common rotator instead of first being copied and then overwritten.
-            output_items[0][:item_count] = input_items[0][:item_count]
-            output_items[1][:item_count] = input_items[1][:item_count]
-            if self._lock_tag_pending:
-                self._emit_lock_tags(0)
-            self._apply_correction(input_items, output_items, 0, item_count)
-            return item_count
-
         for channel in range(4):
             output_items[channel][:item_count] = input_items[channel][:item_count]
 
         cursor = 0
-        while cursor < item_count and not self._locked:
+        while cursor < item_count:
+            if self._unlock_tag_pending:
+                self._emit_unlock_tags(cursor)
+            if self._lock_tag_pending:
+                self._emit_lock_tags(cursor)
+
             if self.settling_remaining:
                 remaining_before = self.settling_remaining
                 skipped = min(self.settling_remaining, item_count - cursor)
@@ -632,7 +821,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                     print(f"Cross-SDR CFO: starting estimation attempt {attempt}")
                 continue
 
-            needed = self.estimation_samples - self._samples_accumulated
+            window_samples = (
+                self.tracking_window_samples if self._locked
+                else self.estimation_samples
+            )
+            needed = window_samples - self._samples_accumulated
             used = min(needed, item_count - cursor)
             if self._correction_active:
                 self._apply_correction(
@@ -649,13 +842,13 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 self._relative_samples[relative_index].append(relative.copy())
             self._samples_accumulated += used
             cursor += used
-            if self._samples_accumulated == self.estimation_samples:
-                self._finish_estimation()
+            if self._samples_accumulated == window_samples:
+                if self._locked:
+                    self._finish_tracking()
+                else:
+                    self._finish_estimation()
 
-        if self._locked and cursor < item_count:
-            self._emit_lock_tags(cursor)
-            self._apply_correction(input_items, output_items, cursor, item_count)
-        # If the window ends exactly at a scheduler boundary, the lock tag and
-        # first corrected sample are both deferred to the next work call.
+        # Tags produced exactly at a scheduler boundary are emitted on the first
+        # sample of the next call, matching GNU Radio's stream-tag convention.
 
         return item_count
