@@ -85,7 +85,8 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             config_filename=calibration_file,
             min_coherence=0.90,
             start_tag_key='cfo_locked',
-            separate_data_inputs=False)
+            separate_data_inputs=False,
+            retry_on_failure=True)
         self.libresdr_b = iio.fmcomms2_source_fc32('ip:192.168.5.1', [True, True, True, True], 262144)
         self.libresdr_b.set_len_tag_key('packet_len')
         self.libresdr_b.set_frequency(center_freq)
@@ -129,7 +130,8 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             min_coherence=cfo_min_coherence,
             tracking_window_samples=16384,
             tracking_phase_gain=0.25,
-            phase_jump_threshold_rad=2.0)
+            phase_jump_threshold_rad=2.0,
+            tracking_bad_window_grace=1)
         self.calibrated_sink = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.bravo_rx2_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
         self.bravo_rx1_head = blocks.head(gr.sizeof_gr_complex*1, (int(test_seconds * samp_rate)))
@@ -152,10 +154,10 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.connect((self.libresdr_a, 1), (self.alpha_rx2_head, 0))
         self.connect((self.libresdr_b, 0), (self.bravo_rx1_head, 0))
         self.connect((self.libresdr_b, 1), (self.bravo_rx2_head, 0))
-        self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
-        self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
         self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
+        self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
         self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
+        self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))

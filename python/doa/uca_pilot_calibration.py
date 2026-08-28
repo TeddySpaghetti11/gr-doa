@@ -19,8 +19,9 @@ class uca_pilot_calibration(gr.sync_block):
     The block deliberately emits zeros while skipping and calibrating. Once the
     requested pilot samples have been accumulated, it applies fixed phase
     coefficients and passes all channels through. If any channel fails the
-    coherence threshold, it enters an explicit failed state and bypasses all
-    inputs with unity coefficients instead of freezing an untrustworthy phase.
+    coherence threshold, it either enters an explicit unity/bypass failed state
+    or, when configured for live operation, discards the window and retries
+    while keeping output muted. It never freezes an untrustworthy phase.
     Keeping this block and the two IIO sources alive avoids invalidating a valid
     calibration by reopening or retuning either AD9361.
 
@@ -43,7 +44,8 @@ class uca_pilot_calibration(gr.sync_block):
                  config_filename="",
                  min_coherence=0.90,
                  start_tag_key="",
-                 separate_data_inputs=False):
+                 separate_data_inputs=False,
+                 retry_on_failure=False):
         if num_inputs < 2:
             raise ValueError("UCA pilot calibration requires at least two inputs")
         if norm_radius <= 0.0:
@@ -77,6 +79,7 @@ class uca_pilot_calibration(gr.sync_block):
         self.config_filename = str(config_filename)
         self.min_coherence = float(min_coherence)
         self.start_tag_key = str(start_tag_key)
+        self.retry_on_failure = bool(retry_on_failure)
         self._armed = not bool(self.start_tag_key)
 
         self._samples_accumulated = 0
@@ -149,16 +152,31 @@ class uca_pilot_calibration(gr.sync_block):
                 self.num_inputs, dtype=numpy.complex64
             )
             self._coherences = coherences.copy()
-            self._state = "failed"
             self._failure_reason = reason
+            if self.retry_on_failure:
+                self.skip_remaining = self._configured_skip_samples
+                self._samples_accumulated = 0
+                self._cross_sum.fill(0.0)
+                self._power_sum.fill(0.0)
+                self._state = "collecting"
+            else:
+                self._state = "failed"
 
         print("=" * 72)
         print(f"UCA CALIBRATION FAILED: {reason}")
-        print(
-            "No phase coefficients were frozen or written. The calibration "
-            "block is now in UNITY/BYPASS mode so downstream diagnostics keep "
-            "receiving uncalibrated samples. Do not trust the MUSIC bearing."
-        )
+        if self.retry_on_failure:
+            print(
+                "No phase coefficients were frozen or written. This window "
+                "was discarded; automatic skip/calibration retry is active "
+                "and output remains muted until a coherent window succeeds."
+            )
+        else:
+            print(
+                "No phase coefficients were frozen or written. The calibration "
+                "block is now in UNITY/BYPASS mode so downstream diagnostics "
+                "keep receiving uncalibrated samples. Do not trust the MUSIC "
+                "bearing."
+            )
         print("=" * 72)
 
     def _finish_calibration(self):

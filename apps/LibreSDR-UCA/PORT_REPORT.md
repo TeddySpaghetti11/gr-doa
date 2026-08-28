@@ -187,10 +187,12 @@ lost coherence, producing an observed Bravo-minus-Alpha CFO alternation near
 correction-loop oscillation; a deterministic replay at the hardware settings
 remains locked.
 
-The corrector now detects that transition, emits `cfo_unlocked`, retains the
-phase-continuous common Bravo rotator, and reacquires with short tracking
-windows. Initial hardware acquisition, retries, and downstream OTA calibration
-were shortened to fit inside Alpha's stable intervals.
+The corrector now distinguishes that coherent common frequency-state transition
+from a phase-only stream discontinuity. It tolerates one mixed low-coherence
+tracking window, retains the phase-continuous common Bravo rotator and existing
+lock, then follows the new common slope while preserving the original non-zero
+phase reference. Phase-only jumps, differential jumps, and persistent bad
+windows still emit `cfo_unlocked` and take the short reacquisition path.
 
 On 2026-08-28 the dual-channel B210 graph was run on the attached B210 over USB
 2: UHD accepted both TX channels at `40 dB`, and a 15-second run produced no
@@ -198,10 +200,19 @@ On 2026-08-28 the dual-channel B210 graph was run on the attached B210 over USB
 established CFO lock and repeatedly completed OTA calibration with coherence
 between roughly `0.97` and `0.99`. The same previously isolated Alpha frequency
 state transitions then caused repeated unlock/reacquire cycles without printed
-IIO `O` overruns. The dual-signal wiring is operational, but a trustworthy
-continuously updating hardware bearing still depends on eliminating those Alpha
-input discontinuities; the software correctly refuses to present target data as
-calibrated while that lock is invalid.
+IIO `O` overruns; those cycles are the failure reproduced and corrected by the
+new recurring-transition regression. The dual-signal wiring is operational.
+
+A follow-up headless hardware run against the newly built module observed the
+same repeated state changes of approximately `+/-2.84` to `+/-3.07 kHz` for
+20 seconds with no
+`Cross-SDR CFO LOCK LOST` event. One initial OTA calibration window overlapped a
+transition and was rejected; automatic calibration retry then succeeded with
+non-reference coherences `0.9894`, `0.9402`, and `0.9385` while CFO tracking
+continued through later state changes. A real live-GUI bearing walk-around is
+still required to quantify short bearing transients during each correction
+update and the room's multipath error. Any actual `O` overrun remains a hard
+invalidation of that run and must still force reacquisition.
 
 ## Test summary
 

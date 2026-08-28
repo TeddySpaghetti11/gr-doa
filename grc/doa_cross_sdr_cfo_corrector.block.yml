@@ -20,7 +20,8 @@ templates:
         min_coherence=${min_coherence},
         tracking_window_samples=${tracking_window_samples},
         tracking_phase_gain=${tracking_phase_gain},
-        phase_jump_threshold_rad=${phase_jump_threshold_rad})
+        phase_jump_threshold_rad=${phase_jump_threshold_rad},
+        tracking_bad_window_grace=${tracking_bad_window_grace})
 
 parameters:
 - id: samp_rate
@@ -83,6 +84,10 @@ parameters:
   label: Reacquire Phase-Jump Threshold (rad)
   dtype: float
   default: 2.0
+- id: tracking_bad_window_grace
+  label: Invalid Tracking Windows Before Reacquire
+  dtype: int
+  default: 1
 
 asserts:
 - ${ samp_rate > 0.0 }
@@ -100,6 +105,7 @@ asserts:
 - ${ tracking_window_samples >= 64 }
 - ${ tracking_phase_gain >= 0.0 and tracking_phase_gain <= 1.0 }
 - ${ phase_jump_threshold_rad > 0.0 and phase_jump_threshold_rad <= 3.141592653589793 }
+- ${ tracking_bad_window_grace >= 0 }
 
 inputs:
 - label: array
@@ -136,9 +142,14 @@ documentation: |-
   using the tracked correction. A downstream UCA OTA Pilot Calibration block can
   require that tag so it never estimates phase from uncorrected, provisional, or
   rejected data. Constant phase offsets are intentionally retained for that
-  downstream phase calibration. A phase jump, loss of coherence, or disagreement
-  emits cfo_unlocked and starts a phase-continuous reacquisition. Every successful
-  reacquisition emits a new cfo_locked tag so downstream calibration can restart.
+  downstream phase calibration. One invalid tracking window is tolerated so a
+  mixed window at a coherent SDR frequency-state transition does not repeatedly
+  disarm calibration. A following coherent common phase slope updates the shared
+  correction without moving the captured phase reference or emitting an unlock
+  tag. A common phase jump without a matching slope change, a differential phase
+  jump, or persistent loss of coherence/disagreement emits cfo_unlocked and starts
+  a phase-continuous reacquisition. Every successful reacquisition emits a new
+  cfo_locked tag so downstream calibration can restart.
 
   Rejected windows do not stop the flowgraph or emit cfo_locked. The block waits
   retry_delay_samples, prints detailed finite/non-zero sample statistics, and

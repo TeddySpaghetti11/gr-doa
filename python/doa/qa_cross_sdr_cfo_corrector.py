@@ -714,7 +714,7 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         ))
         self.assertLess(internal_error, 5e-6)
 
-    def test_abrupt_cfo_step_reacquires_with_short_tracking_windows(self):
+    def test_abrupt_common_cfo_step_retains_lock_and_phase_reference(self):
         sample_rate = 100000.0
         estimation_samples = 4096
         tracking_samples = 512
@@ -742,22 +742,71 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
 
         _, sinks = _run_block(corrector, inputs, max_noutput_items=83)
         self.assertTrue(corrector.locked())
-        self.assertEqual(corrector.discontinuity_count(), 1)
-        self.assertEqual(corrector.relock_count(), 1)
+        self.assertEqual(corrector.discontinuity_count(), 0)
+        self.assertEqual(corrector.relock_count(), 0)
         self.assertAlmostEqual(corrector.accepted_cfo_hz(), 310.0, delta=1.0)
         lock_offsets = [
             tag.offset for tag in sinks[0].tags()
             if pmt.symbol_to_string(tag.key) == "cfo_locked"
         ]
-        unlock_offset = next(
+        unlock_offsets = [
             tag.offset for tag in sinks[0].tags()
             if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        ]
+        self.assertEqual(len(lock_offsets), 1)
+        self.assertEqual(unlock_offsets, [])
+
+    def test_recurring_common_cfo_state_changes_do_not_cycle_lock(self):
+        sample_rate = 100000.0
+        estimation_samples = 4096
+        tracking_samples = 512
+        validation_settling = 2048
+        lock_offset = 2 * estimation_samples + validation_settling
+        first_transition = lock_offset + 3 * tracking_samples + 79
+        transition_spacing = 5 * tracking_samples
+        transition_values = (310.0, -140.0, 310.0, 60.0)
+        sample_count = (
+            first_transition
+            + len(transition_values) * transition_spacing
+            + 6 * tracking_samples
         )
-        self.assertEqual(len(lock_offsets), 2)
-        self.assertLessEqual(
-            lock_offsets[1] - unlock_offset,
-            2 * validation_settling + 2 * tracking_samples,
+        cfo = numpy.full(sample_count, 60.0, dtype=numpy.float64)
+        for index, value in enumerate(transition_values):
+            offset = first_transition + index * transition_spacing
+            cfo[offset:] = value
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=validation_settling,
+            residual_tolerance_hz=1.0,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.95,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=2.0,
         )
+
+        outputs, sinks = _run_block(corrector, inputs, max_noutput_items=83)
+        self.assertTrue(corrector.locked())
+        self.assertEqual(corrector.discontinuity_count(), 0)
+        self.assertEqual(corrector.relock_count(), 0)
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), 60.0, delta=2.0)
+        lock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ]
+        unlock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        ]
+        self.assertEqual(len(lock_tags), 1)
+        self.assertEqual(unlock_tags, [])
+        numpy.testing.assert_array_equal(outputs[0], inputs[0])
+        numpy.testing.assert_array_equal(outputs[1], inputs[1])
 
     def test_tracker_relock_restarts_downstream_ota_calibration(self):
         sample_rate = 100000.0

@@ -16,7 +16,8 @@ templates:
         config_filename=${config_filename},
         min_coherence=${min_coherence},
         start_tag_key=${start_tag_key},
-        separate_data_inputs=${separate_data_inputs})
+        separate_data_inputs=${separate_data_inputs},
+        retry_on_failure=${retry_on_failure})
 
 parameters:
 - id: num_inputs
@@ -61,6 +62,10 @@ parameters:
   default: "''"
 - id: separate_data_inputs
   label: Separate Target Inputs
+  dtype: bool
+  default: 'False'
+- id: retry_on_failure
+  label: Retry Failed Calibration Window
   dtype: bool
   default: 'False'
 
@@ -111,6 +116,10 @@ documentation: |-
   If any non-reference channel is below min_coherence (0.90 by default), the
   block prints an explicit CALIBRATION FAILED state, does not save coefficients,
   and switches to unity/bypass output so invalid phase estimates are never frozen.
+  With Retry Failed Calibration Window enabled, it instead discards the failed
+  window, repeats the configured skip interval, and keeps output muted until a
+  coherent calibration window succeeds. This is useful when a continuously
+  locked tracker may cross a brief frequency-state transition during collection.
 
   Keep both IIO sources and this flowgraph running after calibration. Reopening
   or retuning either LibreSDR can invalidate the corrections. When a log filename

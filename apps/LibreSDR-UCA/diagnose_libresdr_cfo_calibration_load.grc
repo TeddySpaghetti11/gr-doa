@@ -294,6 +294,7 @@ blocks:
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
+    tracking_bad_window_grace: '1'
     tracking_phase_gain: '0.25'
     tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
@@ -330,6 +331,7 @@ blocks:
     norm_radius: norm_radius
     num_inputs: num_elements
     pilot_angle: pilot_bearing
+    retry_on_failure: 'True'
     separate_data_inputs: 'False'
     skip_samples: calibration_skip
     start_tag_key: '''cfo_locked'''

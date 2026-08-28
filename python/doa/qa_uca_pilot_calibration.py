@@ -230,6 +230,50 @@ class qa_uca_pilot_calibration(gr_unittest.TestCase):
             self.assertTrue(calibration.calibration_failed())
             self.assertFalse(os.path.exists(config_filename))
 
+    def test_failed_window_can_retry_until_coherent_calibration_succeeds(self):
+        sample_count = 512
+        tone = numpy.exp(1j * 0.031 * numpy.arange(sample_count)).astype(
+            numpy.complex64
+        )
+        bad_inputs = [tone, tone, tone, numpy.zeros_like(tone)]
+        calibration = doa.uca_pilot_calibration(
+            num_inputs=4,
+            norm_radius=0.25,
+            pilot_angle=0.0,
+            element0_angle=0.0,
+            element_angle_step=90.0,
+            skip_samples=0,
+            calibration_samples=sample_count,
+            config_filename="",
+            retry_on_failure=True,
+        )
+        outputs = [
+            numpy.empty(sample_count, dtype=numpy.complex64)
+            for _ in range(4)
+        ]
+
+        calibration.work(bad_inputs, outputs)
+        self.assertFalse(calibration.calibrated())
+        self.assertFalse(calibration.calibration_failed())
+        self.assertEqual(calibration.status(), "collecting")
+        self.assertIn("channel 3", calibration.failure_reason())
+        for output in outputs:
+            numpy.testing.assert_array_equal(
+                output,
+                numpy.zeros(sample_count, dtype=numpy.complex64),
+            )
+
+        coherent_inputs = [tone.copy() for _ in range(4)]
+        calibration.work(coherent_inputs, outputs)
+        self.assertTrue(calibration.calibrated())
+        self.assertFalse(calibration.calibration_failed())
+        numpy.testing.assert_allclose(
+            calibration.coherences(),
+            numpy.ones(4),
+            rtol=0.0,
+            atol=1e-6,
+        )
+
     def test_saved_phases_match_ettus_phase_correct_format(self):
         num_elements = 4
         sample_count = 256

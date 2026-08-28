@@ -140,9 +140,19 @@ optimization.
 
 A rejected coarse or residual window prints finite/non-zero sample counts,
 waits `2**16` samples, and retries automatically. No `cfo_locked` tag is emitted
-until the post-correction residual passes every check. During tracking, a pilot
-phase jump, loss of coherence, or disagreement between the two Bravo estimates
-emits `cfo_unlocked` and starts reacquisition without resetting the common
+until the post-correction residual passes every check. During tracking, one
+low-coherence transition window is tolerated while the existing common rotator
+and lock remain active. If the following coherent window shows the same new
+phase slope on both Bravo comparisons, that common frequency-state change is
+accepted without moving the captured phase reference and without emitting
+`cfo_unlocked`. This prevents a recurring coherent SDR frequency transition
+from repeatedly zeroing and recalibrating the downstream direction finder.
+
+Discontinuity detection is based on phase continuity between adjacent windows,
+not merely on the temporary distance from the fixed lock-time phase while its
+servo is recovering. A common phase jump without a matching slope change, a
+differential phase jump, or more than one consecutive invalid tracking window
+still emits `cfo_unlocked` and starts reacquisition without resetting the common
 rotator phase. A successful reacquisition emits another `cfo_locked`. The
 downstream phase calibration discards its old coefficients on `cfo_unlocked`
 and restarts its skip/calibration interval on the new lock tag.
@@ -221,11 +231,12 @@ for each channel relative to channel 0. `gamma` is between 0 and 1. A clean
 stationary pilot should be close to 1. Calibration now **fails** if any
 non-reference channel is below `0.90`; values around `0.98-1.00` are preferable.
 
-On failure the console prints `UCA CALIBRATION FAILED`, no coefficient file is
-written, and the block switches to unity/bypass output. This keeps downstream
-plots alive with explicitly uncalibrated samples and prevents an invalid phase
-estimate from being frozen or described as successful. Do not trust the MUSIC
-bearing until the flowgraph is restarted and all channels pass calibration.
+On failure the console prints `UCA CALIBRATION FAILED` and no coefficient file
+is written. The live and load-diagnostic graphs enable automatic retry: the bad
+window is discarded, output remains muted, and the block repeats its skip and
+calibration interval until a coherent window succeeds. Other callers retain the
+default explicit unity/bypass failure mode. Do not trust the MUSIC bearing until
+the live console prints `UCA calibration complete`.
 
 If the same-radio channel is highly coherent but channels from the other
 LibreSDR are not, investigate inter-device timing/coherence before interpreting
@@ -284,9 +295,12 @@ threshold.
    repeated `U` underflow characters.
 5. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
 6. Verify the raw FFT contains both the `+50 kHz` pilot and `+150 kHz` target.
-7. The console must print `Cross-SDR CFO lock established`. A rejection now
-   retries automatically; repeated rejection or `O` overruns means the stream or
-   pilot must be fixed before calibration can begin.
+7. The console must print `Cross-SDR CFO lock established`. During a radio
+   frequency-state change, `tracking transition window rejected` followed by
+   `frequency-state transition accepted without dropping lock` is expected.
+   It must not be followed by recurring `Cross-SDR CFO LOCK LOST` messages while
+   both transmit signals remain on. Repeated rejection or `O` overruns means the
+   stream or pilot must be fixed before calibration can begin.
 8. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
 9. The raw FFT may show the original radio-specific shift; verify all four peaks
    coincide in `POST-CFO filtered pilot spectra`.
@@ -344,9 +358,11 @@ python3 -u apps/LibreSDR-UCA/diagnose_libresdr_cfo_calibration_load.py \
 - no `O` and `UCA calibration complete`: CFO/calibration processing is
   sustainable, so the downstream MUSIC/diagnostic workload causes the live
   graph overruns;
-- any `O`, or calibration failure after a valid CFO lock: the load or blocking
-  operation is already present in the CFO/filter/calibration path and must be
-  optimized before restoring MUSIC;
+- any `O`: the load or blocking operation is already present in the
+  CFO/filter/calibration path and must be optimized before restoring MUSIC;
+- a calibration failure followed by a successful automatic retry is acceptable;
+  repeated failures without `UCA calibration complete` mean the pilot is not
+  coherent enough for direction finding;
 - repeated CFO rejection without `O`: investigate pilot stability/content
   rather than host throughput.
 
