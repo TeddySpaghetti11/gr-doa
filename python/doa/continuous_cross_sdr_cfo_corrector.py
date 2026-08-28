@@ -304,11 +304,13 @@ class continuous_cross_sdr_cfo_corrector(_initial_corrector):
                 "on the next output sample; residual tracking remains active."
             )
 
-    def _track_output_segment(self, output_items, start, stop):
+    def _correct_and_track(self, input_items, output_items, start, stop):
+        """Interleave correction and tracking so frequency updates take effect immediately."""
         cursor = start
         while cursor < stop:
             if self._tracking_warmup_remaining:
                 used = min(self._tracking_warmup_remaining, stop - cursor)
+                self._apply_correction(input_items, output_items, cursor, cursor + used)
                 self._filter_tracking_segment(output_items, cursor, cursor + used)
                 self._tracking_warmup_remaining -= used
                 cursor += used
@@ -316,6 +318,11 @@ class continuous_cross_sdr_cfo_corrector(_initial_corrector):
 
             needed = self.tracking_window_samples - self._tracking_samples_accumulated
             used = min(needed, stop - cursor)
+
+            # Correct only this segment. If it completes a tracking window,
+            # _finish_tracking_window() can update the frequency before the next
+            # segment in this same scheduler call is generated.
+            self._apply_correction(input_items, output_items, cursor, cursor + used)
             pilots = self._filter_tracking_segment(output_items, cursor, cursor + used)
             reference = pilots[0]
             for index, bravo in enumerate(pilots[1:]):
@@ -347,6 +354,5 @@ class continuous_cross_sdr_cfo_corrector(_initial_corrector):
         if ready and self._lock_tag_pending:
             super()._emit_lock_tags(0)
 
-        self._apply_correction(input_items, output_items, 0, item_count)
-        self._track_output_segment(output_items, 0, item_count)
+        self._correct_and_track(input_items, output_items, 0, item_count)
         return item_count
