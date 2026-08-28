@@ -73,7 +73,12 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         sample_rate = 100000.0
         estimation_samples = 2048
         tracking_window = 2048
-        acquisition_end = 2 * estimation_samples
+        # Leave enough constant-CFO input for coarse acquisition plus both
+        # possible residual-refinement windows.  The CFO change must begin only
+        # after the parent corrector has actually had an opportunity to lock;
+        # otherwise this is an acquisition-rejection test, not a post-lock
+        # continuous-tracking test.
+        acquisition_end = 4 * estimation_samples
         sample_count = acquisition_end + 5 * tracking_window + 2000
 
         # Acquisition sees +100 Hz and would have frozen there in the old block.
@@ -135,6 +140,67 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         ]
         self.assertEqual(len(lock_tags), 1)
         self.assertGreater(lock_tags[0].offset, acquisition_end)
+
+    def test_large_common_frequency_state_change_keeps_qualified_lock(self):
+        sample_rate = 100000.0
+        window = 2048
+        acquisition_end = 4 * window
+        transition_at = acquisition_end + 4 * window
+        sample_count = transition_at + 5 * window
+
+        # This mirrors the piecewise-stable 50--100 Hz state changes observed
+        # with the Lesha firmware. Once qualified, a coherent common slope
+        # change is trackable frequency drift, not a phase discontinuity.
+        cfo = numpy.full(sample_count, 180.0, dtype=numpy.float64)
+        cfo[:transition_at] = 100.0
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+
+        corrector = doa.continuous_cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=window,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.05,
+            max_refinement_rounds=2,
+            retry_delay_samples=10000,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=window,
+            tracking_warmup_samples=0,
+            tracking_lock_tolerance_hz=0.03,
+            tracking_agreement_tolerance_hz=0.05,
+            # Deliberately below the later +80 Hz state change. This limit
+            # qualifies initial lock; it must not disable the base tracker's
+            # coherent post-lock frequency-state handling.
+            tracking_max_residual_hz=5.0,
+            tracking_gain=1.0,
+            tracking_lock_windows=2,
+            tracking_min_coherence=0.99,
+            tracking_log_every=100,
+        )
+
+        outputs, sinks = _run_block(corrector, inputs)
+
+        self.assertTrue(corrector.locked())
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), 180.0, places=1)
+        self.assertEqual(corrector.discontinuity_count(), 0)
+        self.assertEqual(corrector.relock_count(), 0)
+        numpy.testing.assert_array_equal(outputs[0], inputs[0])
+        numpy.testing.assert_array_equal(outputs[1], inputs[1])
+
+        lock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ]
+        unlock_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        ]
+        self.assertEqual(len(lock_tags), 1)
+        self.assertEqual(len(unlock_tags), 0)
 
 
 if __name__ == "__main__":
