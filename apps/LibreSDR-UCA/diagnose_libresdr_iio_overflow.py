@@ -25,6 +25,12 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 
 
+def snipfcn_pps_sync_after_start(self):
+    doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
+
+
+def snippets_main_after_start(tb):
+    snipfcn_pps_sync_after_start(tb)
 
 
 class diagnose_libresdr_iio_overflow(gr.top_block):
@@ -158,7 +164,7 @@ def main(top_block_cls=diagnose_libresdr_iio_overflow, options=None):
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
-
+    snippets_main_after_start(tb)
     tb.wait()
 
 

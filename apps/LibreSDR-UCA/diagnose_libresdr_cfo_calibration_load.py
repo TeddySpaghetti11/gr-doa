@@ -27,6 +27,12 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 
 
+def snipfcn_pps_sync_after_start(self):
+    doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
+
+
+def snippets_main_after_start(tb):
+    snipfcn_pps_sync_after_start(tb)
 
 
 class diagnose_libresdr_cfo_calibration_load(gr.top_block):
@@ -159,9 +165,9 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
         self.connect((self.libresdr_b, 0), (self.bravo_rx1_head, 0))
         self.connect((self.libresdr_b, 1), (self.bravo_rx2_head, 0))
         self.connect((self.ota_calibration, 2), (self.calibrated_sink, 2))
-        self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
-        self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
         self.connect((self.ota_calibration, 0), (self.calibrated_sink, 0))
+        self.connect((self.ota_calibration, 1), (self.calibrated_sink, 1))
+        self.connect((self.ota_calibration, 3), (self.calibrated_sink, 3))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
         self.connect((self.pilot_filter_1, 0), (self.ota_calibration, 1))
         self.connect((self.pilot_filter_2, 0), (self.ota_calibration, 2))
@@ -389,7 +395,7 @@ def main(top_block_cls=diagnose_libresdr_cfo_calibration_load, options=None):
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
-
+    snippets_main_after_start(tb)
     tb.wait()
 
 

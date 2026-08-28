@@ -31,6 +31,7 @@ gr_python_install(FILES __init__.py
     power_detection.py
     cross_sdr_cfo_corrector.py
     continuous_cross_sdr_cfo_corrector.py
+    libresdr_pps_sync.py
     uca_pilot_calibration.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/doa)
 
 ########################################################################
@@ -53,6 +54,7 @@ GR_ADD_TEST(qa_MUSIC_lin_array ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/
 GR_ADD_TEST(qa_MUSIC_uca ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_MUSIC_uca.py)
 GR_ADD_TEST(qa_cross_sdr_cfo_corrector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_cross_sdr_cfo_corrector.py)
 GR_ADD_TEST(qa_continuous_cross_sdr_cfo_corrector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_continuous_cross_sdr_cfo_corrector.py)
+GR_ADD_TEST(qa_libresdr_pps_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_libresdr_pps_sync.py)
 GR_ADD_TEST(qa_uca_pilot_calibration ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_uca_pilot_calibration.py)
 GR_ADD_TEST(qa_find_local_max ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_find_local_max.py)
 GR_ADD_TEST(qa_rootMUSIC_linear_array ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_rootMUSIC_linear_array.py)

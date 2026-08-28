@@ -90,6 +90,19 @@ blocks:
     coordinate: [560, 16]
     rotation: 0
     state: enabled
+- name: pps_sync_after_start
+  id: snippet
+  parameters:
+    code: doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
+    priority: '0'
+    section: main_after_start
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 176]
+    rotation: 0
+    state: enabled
 - name: libresdr_a
   id: iio_fmcomms2_source
   parameters:

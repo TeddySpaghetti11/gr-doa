@@ -3,8 +3,8 @@ options:
     alias: ''
     author: gr-doa LibreSDR research port
     catch_exceptions: 'True'
-    comment: Four-channel LibreSDR UCA MUSIC with a fixed calibration beacon and
-      a separate movable target.
+    comment: Four-channel LibreSDR UCA MUSIC with a fixed calibration beacon and a
+      separate movable target.
     copyright: null
     description: Continuously tracked +50 kHz calibration pilot and independently
       filtered +150 kHz target for live direction finding.
@@ -236,18 +236,6 @@ blocks:
     coordinate: [1424, 16]
     rotation: 0
     state: enabled
-- name: target_norm_radius
-  id: variable
-  parameters:
-    comment: UCA radius in wavelengths at the target RF, used by MUSIC
-    value: array_radius * target_rf / 299792458.0
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1424, 64]
-    rotation: 0
-    state: enabled
 - name: num_elements
   id: variable
   parameters:
@@ -288,7 +276,7 @@ blocks:
   id: variable
   parameters:
     comment: Source bearing from array centre towards the B210 pilot
-    value: '0'
+    value: '180'
   states:
     bus_sink: false
     bus_source: false
@@ -354,30 +342,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [912, 16]
-    rotation: 0
-    state: enabled
-- name: target_offset
-  id: variable
-  parameters:
-    comment: Movable B210 TX/RX1 target offset from centre frequency
-    value: 150e3
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [528, 64]
-    rotation: 0
-    state: enabled
-- name: target_rf
-  id: variable
-  parameters:
-    comment: Actual RF of the direction-finding target
-    value: center_freq + target_offset
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1296, 64]
     rotation: 0
     state: enabled
 - name: proc_rate
@@ -450,6 +414,55 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [784, 96]
+    rotation: 0
+    state: enabled
+- name: target_norm_radius
+  id: variable
+  parameters:
+    comment: UCA radius in wavelengths at the target RF, used by MUSIC
+    value: array_radius * target_rf / 299792458.0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1424, 64]
+    rotation: 0
+    state: enabled
+- name: target_offset
+  id: variable
+  parameters:
+    comment: Movable B210 TX/RX1 target offset from centre frequency
+    value: 150e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 64]
+    rotation: 0
+    state: enabled
+- name: target_rf
+  id: variable
+  parameters:
+    comment: Actual RF of the direction-finding target
+    value: center_freq + target_offset
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 64]
+    rotation: 0
+    state: enabled
+- name: pps_sync_after_start
+  id: snippet
+  parameters:
+    code: doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
+    priority: '0'
+    section: main_after_start
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 288]
     rotation: 0
     state: enabled
 - name: alpha_internal_phase_display
@@ -781,13 +794,17 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
-    phase_jump_threshold_rad: '2.0'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
-    tracking_bad_window_grace: '1'
-    tracking_phase_gain: '0.25'
+    tracking_agreement_tolerance_hz: '0.25'
+    tracking_gain: '1.0'
+    tracking_lock_tolerance_hz: '0.05'
+    tracking_lock_windows: '2'
+    tracking_max_residual_hz: '20.0'
+    tracking_min_coherence: '0.9'
+    tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
   states:
@@ -1015,7 +1032,8 @@ blocks:
     affinity: ''
     alias: ''
     avg_method: Forward
-    comment: Target-only forward covariance; the calibration pilot does not enter MUSIC.
+    comment: Target-only forward covariance; the calibration pilot does not enter
+      MUSIC.
     inputs: num_elements
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1264,86 +1282,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [312, 656]
-    rotation: 0
-    state: enabled
-- name: target_filter_0
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    center_freq: target_offset
-    comment: Element 0 movable-target selector
-    decim: pilot_decim
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [544, 728]
-    rotation: 0
-    state: enabled
-- name: target_filter_1
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    center_freq: target_offset
-    comment: Element 1 movable-target selector
-    decim: pilot_decim
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [544, 792]
-    rotation: 0
-    state: enabled
-- name: target_filter_2
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    center_freq: target_offset
-    comment: Element 2 movable-target selector (LibreSDR B RX2)
-    decim: pilot_decim
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [800, 728]
-    rotation: 0
-    state: enabled
-- name: target_filter_3
-  id: freq_xlating_fir_filter_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    center_freq: target_offset
-    comment: Element 3 movable-target selector (LibreSDR B RX1)
-    decim: pilot_decim
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_rate: samp_rate
-    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
-    type: ccc
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [800, 792]
     rotation: 0
     state: enabled
 - name: post_cfo_fft_display
@@ -1838,6 +1776,86 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1392, 544]
+    rotation: 0
+    state: enabled
+- name: target_filter_0
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 0 movable-target selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [544, 728]
+    rotation: 0
+    state: enabled
+- name: target_filter_1
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 1 movable-target selector
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [544, 792]
+    rotation: 0
+    state: enabled
+- name: target_filter_2
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 2 movable-target selector (LibreSDR B RX2)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 728]
+    rotation: 0
+    state: enabled
+- name: target_filter_3
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: target_offset
+    comment: Element 3 movable-target selector (LibreSDR B RX1)
+    decim: pilot_decim
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, pilot_passband, pilot_transition)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 792]
     rotation: 0
     state: enabled
 

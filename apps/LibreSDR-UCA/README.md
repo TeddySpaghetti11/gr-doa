@@ -27,6 +27,30 @@ a_m(theta) = exp(+j 2 pi rho cos(theta - beta_m))
 
 where `rho = r/lambda`.
 
+## Shared 10 MHz and 1 PPS synchronization
+
+Feed the same distribution-amplifier 10 MHz and 1 PPS outputs to both
+LibreSDRs. The 10 MHz reference aligns their clock frequencies; it does not by
+itself command the two FPGA receive paths to begin on a common timing edge.
+
+The Lesha firmware exposes ADI's external synchronizer as
+`cf-ad9361-lpc.sync_start_enable`. The live receiver and both load diagnostics
+automatically arm that control on `192.168.4.1` and `192.168.5.1` immediately
+after their IIO streams start. Both calls are issued concurrently, and startup
+stops with an explicit error if the receivers do not observe a PPS edge within
+2.5 seconds. A working connection prints:
+
+```text
+LibreSDR PPS SYNC CONFIRMED: every receiver observed the external edge; startup settling may proceed
+```
+
+The existing five-second CFO settling interval follows this event, so samples
+disturbed by the startup synchronization edge are not used for calibration.
+Seeing `sync_start_enable=disarm` while the graph is stopped is normal: the
+attribute automatically returns to `disarm` after a successfully armed PPS
+edge. Merely connecting the PPS cable without arming this control does not
+activate synchronization.
+
 ## Frequency-derived normalized radius
 
 The normalized radius is no longer hard-coded. The flowgraph calculates a pilot
@@ -251,7 +275,7 @@ plots are intended to reveal ramps, discontinuities, and where they first occur.
 ```sh
 cmake -S . -B build
 cmake --build build -j$(nproc)
-ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)' --output-on-failure
+ctest --test-dir build -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|continuous_cross_sdr_cfo_corrector|libresdr_pps_sync|uca_pilot_calibration)' --output-on-failure
 sudo cmake --install build
 sudo ldconfig
 ```
@@ -295,23 +319,26 @@ threshold.
    repeated `U` underflow characters.
 5. Start `run_MUSIC_uca_live_cal.grc` (or the generated Python equivalent).
 6. Verify the raw FFT contains both the `+50 kHz` pilot and `+150 kHz` target.
-7. The console must print `Cross-SDR CFO lock established`. During a radio
+7. The receiver must first print `LibreSDR PPS SYNC CONFIRMED`. A PPS timeout
+   means the direction result must not be used; check both distribution outputs,
+   cables, and input signal levels.
+8. The console must print `Cross-SDR CFO lock established`. During a radio
    frequency-state change, `tracking transition window rejected` followed by
    `frequency-state transition accepted without dropping lock` is expected.
    It must not be followed by recurring `Cross-SDR CFO LOCK LOST` messages while
    both transmit signals remain on. Repeated rejection or `O` overruns means the
    stream or pilot must be fixed before calibration can begin.
-8. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
-9. The raw FFT may show the original radio-specific shift; verify all four peaks
+9. Compare TRUE pre-filter, POST-CFO, Alpha-internal, and Bravo-internal phase.
+10. The raw FFT may show the original radio-specific shift; verify all four peaks
    coincide in `POST-CFO filtered pilot spectra`.
-10. Wait for `UCA calibration complete` and inspect all three coherence values. If
+11. Wait for `UCA calibration complete` and inspect all three coherence values. If
    `UCA CALIBRATION FAILED` appears, treat the output as uncalibrated bypass data.
-11. Keep RF A fixed. Move only the RF B antenna around the receive array. The
+12. Keep RF A fixed. Move only the RF B antenna around the receive array. The
     compass and peak bearing should follow RF B after the covariance-window
     update delay; they should not remain pinned to `pilot_bearing`.
-12. Test several off-axis positions and avoid judging the system from only the
+13. Test several off-axis positions and avoid judging the system from only the
     symmetric `0/90/180/270` axes or a strong indoor reflection.
-13. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
+14. Do not retune, restart, or power-cycle either LibreSDR without recalibrating.
 
 A stream of `O` characters is an IIO receive overrun, not a 10 MHz lock report.
 It means samples were lost because the host/network/GUI did not drain one or
