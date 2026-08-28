@@ -452,19 +452,6 @@ blocks:
     coordinate: [1296, 64]
     rotation: 0
     state: enabled
-- name: pps_sync_after_start
-  id: snippet
-  parameters:
-    code: doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
-    priority: '0'
-    section: main_after_start
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [16, 288]
-    rotation: 0
-    state: enabled
 - name: alpha_internal_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -794,6 +781,7 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
+    post_lock_tracking_window_samples: '4096'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
@@ -804,7 +792,6 @@ blocks:
     tracking_lock_windows: '2'
     tracking_max_residual_hz: '80.0'
     tracking_min_coherence: '0.9'
-    post_lock_tracking_window_samples: '4096'
     tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
@@ -1480,6 +1467,21 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [584, 568]
+    rotation: 0
+    state: enabled
+- name: pps_sync_after_start
+  id: snippet
+  parameters:
+    alias: ''
+    code: doa.arm_libresdr_pps_sync(('ip:192.168.4.1', 'ip:192.168.5.1'))
+    comment: ''
+    priority: '0'
+    section: main_after_start
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 288]
     rotation: 0
     state: enabled
 - name: prefilter_phase_display

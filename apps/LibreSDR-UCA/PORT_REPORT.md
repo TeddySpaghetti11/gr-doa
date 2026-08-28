@@ -232,6 +232,13 @@ multipath, antenna-pattern error, and short bearing transients. Any actual `O`
 overrun remains a hard invalidation of that run and must still force
 reacquisition.
 
+A follow-up check at the locally edited 902 MHz setting found no usable pilot:
+all acquisition attempts had noise-like coherence around 0.00--0.03. The
+software correctly refused to lock. The committed TX, receiver, and diagnostic
+therefore remain consistently set to the hardware-validated 700 MHz centre
+frequency; changing frequency requires changing all three together and first
+confirming that the RF path and antennas deliver both tones there.
+
 ## Test summary
 
 ```text

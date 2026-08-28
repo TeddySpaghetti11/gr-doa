@@ -5,8 +5,8 @@ options:
     catch_exceptions: 'True'
     comment: Dual-channel B210 source for LibreSDR UCA calibration and direction finding.
     copyright: null
-    description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends
-      the movable +150 kHz direction-finding target. Both use 40 dB gain.
+    description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends the
+      movable +150 kHz direction-finding target. Both use 40 dB gain.
     gen_linking: dynamic
     generate_options: no_gui
     generator_class_name: PythonNoGuiGenerator
@@ -15,10 +15,9 @@ options:
     id: run_DoA_transmitter
     max_nouts: '0'
     output_language: python
-    qt_qss_theme: ''
     realtime_scheduling: ''
-    run: 'True'
     run_command: '{python} -u {filename}'
+    run_options: prompt
     thread_safe_setters: ''
     title: B210 Dual-Channel Calibration and Target TX
   states:
@@ -33,8 +32,8 @@ blocks:
 - name: input_variables
   id: variable_struct
   parameters:
-    comment: TX/RX0 is the stationary calibration antenna; TX/RX1 is the movable
-      target antenna. Offsets must match the receiver pilot_offset and target_offset.
+    comment: TX/RX0 is the stationary calibration antenna; TX/RX1 is the movable target
+      antenna. Offsets must match the receiver pilot_offset and target_offset.
     field0: PilotToneFreq
     field1: SampleRate
     field10: ''
