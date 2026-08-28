@@ -173,26 +173,34 @@ The corrected software passes:
 
 The GRC file compiles successfully with GNU Radio Companion Compiler 3.10.12.
 
-Live checks of `ip:192.168.4.1` and `ip:192.168.5.1` both timed out from the test
-environment. There are no live captures or timestamp logs in the repository.
-Consequently, there is no direct evidence here that cross-LibreSDR phase is
-unstable. The first unverified point is the four live streams entering
-calibration: physical cable order, sample correspondence, and phase stability.
+Live source-only acquisition from both LibreSDRs completed without an IIO `O`
+overrun at 1 MS/s and again at 625 kS/s. A separate pre-correction pilot probe at
+525 kS/s isolated a periodic frequency discontinuity to Alpha: Bravo remained
+near `+690 Hz` relative to the transmitted pilot, while Alpha alternated between
+approximately `-880 Hz` and `+2195 Hz` every 524,288 samples. Transition windows
+lost coherence, producing an observed Bravo-minus-Alpha CFO alternation near
+`+1570 Hz` and `-1503 Hz`. This is real input-stream behavior rather than a
+correction-loop oscillation; a deterministic replay at the hardware settings
+remains locked.
 
-On the next hardware run, compare the block's printed ch1/ch0, ch2/ch0, and
-ch3/ch0 measured phases with their predicted geometric phases. The new raw and
-corrected phase panels continue plotting those relationships after calibration;
-drift or jumps concentrated in ch2/ch0 and ch3/ch0 isolate the fault to the
-cross-LibreSDR boundary.
+The corrector now detects that transition, emits `cfo_unlocked`, retains the
+phase-continuous common Bravo rotator, and reacquires with short tracking
+windows. Initial hardware acquisition, retries, and downstream OTA calibration
+were shortened to fit inside Alpha's stable intervals. The final connected-radio
+rerun could not be completed because Alpha stopped responding at
+`192.168.4.1`, while Bravo remained reachable; the B210 also reported a transient
+USB disconnect. Fast recovery is covered by synthetic CFO-step and phase-jump
+regressions, but the final duty cycle and MUSIC bearing accuracy still require a
+complete overrun-free hardware run after Alpha is restored.
 
 ## Test summary
 
 ```text
-cmake --build build-fix -j2
+cmake --build build-work -j2
   PASS
 
-ctest --test-dir build-fix -R 'qa_(MUSIC_uca|uca_pilot_calibration)'
-  2/2 test programs passed (4 test cases total)
+ctest --test-dir build-work -R 'qa_(MUSIC_uca|cross_sdr_cfo_corrector|uca_pilot_calibration)'
+  3/3 test programs passed
 
 grcc -o /tmp apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc
   PASS

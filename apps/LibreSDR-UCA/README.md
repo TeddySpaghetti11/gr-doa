@@ -58,7 +58,7 @@ pilot_offset     = 50 kHz
 pilot_decim      = 8
 pilot_passband   = 10 kHz
 pilot_transition = 10 kHz
-proc_rate        = 262.5 kS/s
+proc_rate        = 65.625 kS/s
 ```
 
 After translation the desired pilot is at DC, receiver DC is at `-50 kHz`, and
@@ -86,11 +86,11 @@ the tracker captures the resulting non-zero Alpha-vs-Bravo pilot phase at lock.
 It holds that arbitrary phase instead of driving it to zero, leaving propagation
 and hardware phase for the existing OTA phase calibration.
 
-Defaults at `2.1 MS/s` are five seconds of startup settling, a `2**18`-sample
+Defaults at `525 kS/s` are five seconds of startup settling, a `2**16`-sample
 estimation window, maximum `20 kHz` absolute CFO, and minimum `0.90` pilot-fit
 coherence. The accepted coarse estimate is applied provisionally to both Bravo
-channels. After another `2**16` settling samples, the block measures both
-post-correction residual slopes over another `2**18` samples. It refines the
+channels. After another `2**12` settling samples, the block measures both
+post-correction residual slopes over another `2**16` samples. It refines the
 one common correction up to three times and declares lock only when the averaged
 residual is at most `1 Hz`. The final measured residual is included even when
 already inside that bound. Once locked, the pilot remains active and the block
@@ -112,13 +112,20 @@ window. Samples passed to the graph outputs are unaffected by this estimator-onl
 optimization.
 
 A rejected coarse or residual window prints finite/non-zero sample counts,
-waits `2**20` samples, and retries automatically. No `cfo_locked` tag is emitted
+waits `2**16` samples, and retries automatically. No `cfo_locked` tag is emitted
 until the post-correction residual passes every check. During tracking, a pilot
 phase jump, loss of coherence, or disagreement between the two Bravo estimates
 emits `cfo_unlocked` and starts reacquisition without resetting the common
 rotator phase. A successful reacquisition emits another `cfo_locked`. The
 downstream phase calibration discards its old coefficients on `cfo_unlocked`
 and restarts its skip/calibration interval on the new lock tag.
+
+Reacquisition uses the `16,384`-sample tracking window and only the final 4,096
+samples of filter warm-up, rather than repeating the long startup acquisition.
+This lets the graph recover from a stream slip or receiver frequency step while
+the retained common rotator remains phase-continuous. The live graph uses 4,096
+post-lock settling samples and 16,384 calibration samples so phase calibration
+finishes inside a stable interval.
 
 ## AD9361 settings
 
@@ -141,10 +148,10 @@ can be localized without changing the receiver architecture:
 
 1. **TRUE pre-filter relative phase** is connected directly to the IIO source
    outputs in physical order `A RX1, A RX2, B RX2, B RX1` and runs at
-   `samp_rate` (`2.1 MS/s`).
+   `samp_rate` (`525 kS/s`).
 2. **POST-CFO relative phase** is after the common CFO rotator and four identical
    translating/decimating FIR filters, but before constant phase calibration. It
-   runs at `proc_rate` (`262.5 kS/s`) and should be flat after CFO lock.
+   runs at `proc_rate` (`65.625 kS/s`) and should be flat after CFO lock.
 3. **Alpha internal** and **Bravo internal** plots compare RX1 with RX2 inside
    each LibreSDR before filtering. A flat same-radio trace with moving
    inter-radio traces isolates the problem to coherence between the devices.
@@ -160,7 +167,7 @@ short inspection; the POST-CFO relative-phase display is the preferred check
 that the corrected cross-SDR phase is flat.
 
 The raw four-channel FFT remains connected before the CFO block and all filters in physical UCA
-order. It uses 8,192 bins (about `256.3 Hz/bin` at `2.1 MS/s`) and explicit
+order. It uses 8,192 bins (about `64.1 Hz/bin` at `525 kS/s`) and explicit
 channel labels so a small frequency difference between the two radios can be
 seen directly. This raw display is expected to retain the original Alpha/Bravo
 separation. A second 8,192-bin
@@ -214,16 +221,25 @@ sudo ldconfig
 The UCA tests now exercise the real `225, 135, 45, 315 deg` stream order and the
 source-bearing steering convention.
 
-After installation, start the B210 `+50 kHz` pilot using its existing gain
-setting, then run the checked-in Python equivalent:
+After installation, first run the headless B210 `+50 kHz` pilot flowgraph. It is
+fixed at `40 dB` TX gain:
+
+```sh
+python3 apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.py
+```
+
+Leave it running, then start the checked-in receiver Python equivalent:
 
 ```sh
 python3 apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.py
 ```
 
-Alternatively, open `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc` in GNU Radio
-Companion and run it there. The Python and GRC versions use the same channel
-order, diagnostics, and calibration threshold.
+Alternatively, open and run
+`apps/Narrowband-Flowgraphs/phase_offset_measurement_correction/run_DoA_transmitter.grc`
+first, then open and run `apps/LibreSDR-UCA/run_MUSIC_uca_live_cal.grc`. The
+transmitter is intentionally headless, so success is a running console without
+`U` underflows; it does not open a plot window. The Python and GRC versions use
+the same channel order, diagnostics, and calibration threshold.
 
 ## Test procedure
 
@@ -255,7 +271,7 @@ rate and restart until the run is overrun-free.
 
 Use `diagnose_libresdr_iio_overflow.grc` before changing CFO or calibration
 thresholds when the live graph prints `O`. It uses the same two IIO addresses,
-two channels per radio, `2.1 MS/s` sample rate, and `262144`-sample IIO buffers,
+two channels per radio, `525 kS/s` sample rate, and `262144`-sample IIO buffers,
 but contains no CFO, calibration, MUSIC, or GUI blocks. Four Head blocks feed a
 rate probe and Null Sink, so the test prints the measured Alpha RX1 stream rate
 every two seconds and stops automatically after 20 seconds.
@@ -264,7 +280,7 @@ every two seconds and stops automatically after 20 seconds.
 2. Open `diagnose_libresdr_iio_overflow.grc` in GNU Radio Companion.
 3. Generate and run it without changing the wiring.
 4. Confirm that the periodic `Alpha RX1 source-only rate` messages are close to
-   `2.1e6` samples/second, then check the complete 20-second console output:
+   `525e3` samples/second, then check the complete 20-second console output:
    - no `O`: raw four-channel acquisition is sustainable; the added processing
      in the live graph is causing the overruns;
    - any `O`: the failure already exists in the IIO/device/transport path and

@@ -45,7 +45,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  min_coherence=0.90,
                  tracking_window_samples=16384,
                  tracking_phase_gain=0.25,
-                 phase_jump_threshold_rad=1.0):
+                 phase_jump_threshold_rad=2.0):
         if samp_rate <= 0.0:
             raise ValueError("Sample rate must be positive")
         if pilot_bandwidth_hz <= 0.0:
@@ -572,7 +572,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             refinement_round = self._refinement_round
             correction_step = self._correction_step
         self._samples_accumulated = 0
-        self.settling_remaining = self.validation_settling_samples
+        self.settling_remaining = self._next_validation_settling_samples()
         self._reset_pilot_filters()
         print(
             f"Cross-SDR CFO refinement: total estimate {accepted:+.6f} Hz; "
@@ -587,6 +587,21 @@ class cross_sdr_cfo_corrector(gr.sync_block):
     @staticmethod
     def _wrapped_phase(value):
         return float(numpy.angle(numpy.exp(1j * value)))
+
+    def _next_validation_settling_samples(self):
+        """Use a short filter warm-up while recovering from a stream slip.
+
+        A full initial validation window is useful after applying a coarse CFO
+        estimate. During reacquisition the existing correction remains active,
+        so waiting that long can miss the next stable hardware interval. The
+        pilot IIR only needs its bounded warm-up tail before another short fit.
+        """
+        if self._reacquiring:
+            return min(
+                self.validation_settling_samples,
+                self._pilot_filter_warmup_samples,
+            )
+        return self.validation_settling_samples
 
     def _finish_tracking(self):
         """Update frequency from one locked pilot window without zeroing phase."""
@@ -686,7 +701,7 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._unlock_tag_pending = True
         self._samples_accumulated = 0
         self._relative_samples = [[], []]
-        self.settling_remaining = self.validation_settling_samples
+        self.settling_remaining = self._next_validation_settling_samples()
         self._reset_pilot_filters()
         print(f"Cross-SDR CFO LOCK LOST: {reason}")
         print(
@@ -821,8 +836,13 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                     print(f"Cross-SDR CFO: starting estimation attempt {attempt}")
                 continue
 
+            # Reacquisition retains the already phase-continuous common
+            # correction. Short tracking windows can therefore measure and
+            # validate a post-slip residual without repeating the long initial
+            # coarse-estimation window.
             window_samples = (
-                self.tracking_window_samples if self._locked
+                self.tracking_window_samples
+                if self._locked or self._reacquiring
                 else self.estimation_samples
             )
             needed = window_samples - self._samples_accumulated

@@ -40,7 +40,7 @@ blocks:
   id: variable
   parameters:
     comment: Reduced rate proven sustainable by the source-only test
-    value: int(2.1e6)
+    value: int(525e3)
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 16], rotation: 0, state: enabled}
 - name: rf_bandwidth
   id: variable
@@ -130,13 +130,13 @@ blocks:
   id: variable
   parameters:
     comment: Filtered samples skipped after CFO lock
-    value: 2**14
+    value: 2**12
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [560, 96], rotation: 0, state: enabled}
 - name: calibration_samples
   id: variable
   parameters:
     comment: Filtered pilot samples used for phase/coherence averaging
-    value: 2**16
+    value: 2**14
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [696, 96], rotation: 0, state: enabled}
 - name: calibration_file
   id: variable
@@ -154,13 +154,13 @@ blocks:
   id: variable
   parameters:
     comment: Raw OTA pilot samples per CFO window
-    value: 2**18
+    value: 2**16
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [152, 176], rotation: 0, state: enabled}
 - name: cfo_retry_delay_samples
   id: variable
   parameters:
     comment: Raw samples passed before retrying a rejected estimate
-    value: 2**20
+    value: 2**16
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [288, 176], rotation: 0, state: enabled}
 - name: cfo_agreement_tolerance_hz
   id: variable
@@ -184,7 +184,7 @@ blocks:
   id: variable
   parameters:
     comment: Corrected samples settled before residual validation
-    value: 2**16
+    value: 2**12
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [832, 176], rotation: 0, state: enabled}
 - name: cfo_residual_tolerance_hz
   id: variable
@@ -289,10 +289,13 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
+    phase_jump_threshold_rad: '2.0'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
+    tracking_phase_gain: '0.25'
+    tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [520, 448], rotation: 0, state: enabled}
 - name: pilot_filter_0

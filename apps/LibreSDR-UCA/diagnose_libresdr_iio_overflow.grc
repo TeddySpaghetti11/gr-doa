@@ -46,7 +46,7 @@ blocks:
   id: variable
   parameters:
     comment: Same reduced sample rate used for the live diagnostic run
-    value: int(2.1e6)
+    value: int(525e3)
   states:
     bus_sink: false
     bus_source: false

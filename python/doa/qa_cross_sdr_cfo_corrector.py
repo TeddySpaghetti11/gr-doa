@@ -714,6 +714,51 @@ class qa_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         ))
         self.assertLess(internal_error, 5e-6)
 
+    def test_abrupt_cfo_step_reacquires_with_short_tracking_windows(self):
+        sample_rate = 100000.0
+        estimation_samples = 4096
+        tracking_samples = 512
+        validation_settling = 2048
+        lock_offset = 2 * estimation_samples + validation_settling
+        step_offset = lock_offset + 3 * tracking_samples + 79
+        sample_count = step_offset + 12 * tracking_samples
+        cfo = numpy.full(sample_count, 60.0, dtype=numpy.float64)
+        cfo[step_offset:] = 310.0
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+        corrector = doa.cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=estimation_samples,
+            validation_settling_samples=validation_settling,
+            residual_tolerance_hz=1.0,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.95,
+            tracking_window_samples=tracking_samples,
+            phase_jump_threshold_rad=0.6,
+        )
+
+        _, sinks = _run_block(corrector, inputs, max_noutput_items=83)
+        self.assertTrue(corrector.locked())
+        self.assertEqual(corrector.discontinuity_count(), 1)
+        self.assertEqual(corrector.relock_count(), 1)
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), 310.0, delta=1.0)
+        lock_offsets = [
+            tag.offset for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_locked"
+        ]
+        unlock_offset = next(
+            tag.offset for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
+        )
+        self.assertEqual(len(lock_offsets), 2)
+        self.assertLessEqual(
+            lock_offsets[1] - unlock_offset,
+            2 * validation_settling + 2 * tracking_samples,
+        )
+
     def test_tracker_relock_restarts_downstream_ota_calibration(self):
         sample_rate = 100000.0
         estimation_samples = 1024

@@ -58,7 +58,7 @@ blocks:
   id: variable
   parameters:
     comment: Filtered pilot samples used for complex averaging/coherence
-    value: 2**16
+    value: 2**14
   states:
     bus_sink: false
     bus_source: false
@@ -70,7 +70,7 @@ blocks:
   id: variable
   parameters:
     comment: Filtered samples skipped before calibration
-    value: 2**14
+    value: 2**12
   states:
     bus_sink: false
     bus_source: false
@@ -106,7 +106,7 @@ blocks:
   id: variable
   parameters:
     comment: Raw OTA pilot samples in each Bravo-vs-Alpha CFO window
-    value: 2**18
+    value: 2**16
   states:
     bus_sink: false
     bus_source: false
@@ -167,7 +167,7 @@ blocks:
   id: variable
   parameters:
     comment: Raw samples to pass before retrying a rejected CFO window
-    value: 2**20
+    value: 2**16
   states:
     bus_sink: false
     bus_source: false
@@ -191,7 +191,7 @@ blocks:
   id: variable
   parameters:
     comment: Corrected raw samples to settle before each residual validation window
-    value: 2**16
+    value: 2**12
   states:
     bus_sink: false
     bus_source: false
@@ -395,7 +395,7 @@ blocks:
   id: variable
   parameters:
     comment: LibreSDR complex sample rate
-    value: int(2.1e6)
+    value: int(525e3)
   states:
     bus_sink: false
     bus_source: false
@@ -744,10 +744,13 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
+    phase_jump_threshold_rad: '2.0'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
+    tracking_phase_gain: '0.25'
+    tracking_window_samples: '16384'
     validation_settling_samples: cfo_validation_settling_samples
   states:
     bus_sink: false

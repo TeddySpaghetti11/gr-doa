@@ -82,7 +82,7 @@ parameters:
 - id: phase_jump_threshold_rad
   label: Reacquire Phase-Jump Threshold (rad)
   dtype: float
-  default: 1.0
+  default: 2.0
 
 asserts:
 - ${ samp_rate > 0.0 }
