@@ -1,0 +1,98 @@
+id: doa_cross_sdr_pilot_phase_corrector
+label: Cross-SDR Direct Pilot Phase Corrector
+category: '[doa]'
+
+templates:
+  imports: from gnuradio import doa
+  make: |-
+    doa.cross_sdr_pilot_phase_corrector(
+        settling_samples=${settling_samples},
+        acquisition_samples=${acquisition_samples},
+        min_coherence=${min_coherence},
+        max_differential_phase_rad=${max_differential_phase_rad},
+        min_valid_fraction=${min_valid_fraction},
+        max_alignment_lag=${max_alignment_lag},
+        phase_smoothing_samples=${phase_smoothing_samples})
+
+parameters:
+- id: settling_samples
+  label: Startup Settling Samples
+  dtype: int
+  default: 327680
+- id: acquisition_samples
+  label: Reference Acquisition Samples
+  dtype: int
+  default: 8192
+- id: min_coherence
+  label: Acquisition Minimum Coherence
+  dtype: float
+  default: 0.95
+- id: max_differential_phase_rad
+  label: Bravo Agreement Limit (rad)
+  dtype: float
+  default: 0.35
+- id: min_valid_fraction
+  label: Minimum Valid Fraction per Work Call
+  dtype: float
+  default: 0.90
+- id: max_alignment_lag
+  label: Maximum Stream Alignment Lag
+  dtype: int
+  default: 256
+- id: phase_smoothing_samples
+  label: Pilot Phase Smoothing Samples
+  dtype: int
+  default: 64
+
+asserts:
+- ${ settling_samples >= 0 }
+- ${ acquisition_samples >= 64 }
+- ${ min_coherence >= 0.0 and min_coherence <= 1.0 }
+- ${ max_differential_phase_rad > 0.0 and max_differential_phase_rad <= 3.141592653589793 }
+- ${ min_valid_fraction > 0.0 and min_valid_fraction <= 1.0 }
+- ${ max_alignment_lag >= 0 }
+- ${ phase_smoothing_samples >= 1 }
+
+inputs:
+- label: pilot
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+- label: target
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+
+outputs:
+- label: corrected pilot
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+- label: corrected target
+  domain: stream
+  dtype: complex
+  multiplicity: 4
+
+documentation: |-
+  Directly removes common Alpha-versus-Bravo phase motion from the filtered
+  pilot and target streams. Inputs and outputs use physical array order:
+  Alpha RX1, Alpha RX2, Bravo RX2, Bravo RX1.
+
+  After settling, the block cross-correlates the calibration beacon's amplitude
+  marker to align the two boards within the configured lag range, then captures
+  one fixed reference phasor independently from each Bravo pilot channel. It
+  then compares both pilot channels with
+  their own references on every processed sample, averages only their common
+  motion, and applies the conjugate correction identically to both Bravo pilot
+  and target channels. Static propagation and hardware phase at acquisition is
+  deliberately preserved for downstream UCA OTA calibration.
+
+  This block operates after the pilot and target translating filters, at
+  262.5 kS/s in the LibreSDR live graph. It avoids fitting short phase
+  discontinuities as CFO states
+  and avoids the full-rate Python filtering load of the legacy windowed CFO
+  corrector. It emits cfo_locked for compatibility with UCA OTA Pilot
+  Calibration, plus cfo_tracking_degraded/recovered if the two independent
+  Bravo pilot observations stop agreeing.
+
+file_format: 1

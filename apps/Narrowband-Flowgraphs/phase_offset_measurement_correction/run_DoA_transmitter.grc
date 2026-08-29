@@ -5,8 +5,9 @@ options:
     catch_exceptions: 'True'
     comment: Dual-channel B210 source for LibreSDR UCA calibration and direction finding.
     copyright: null
-    description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends the
-      movable +150 kHz direction-finding target. Both use 40 dB gain.
+    description: TX/RX0 sends the fixed +140 kHz calibration pilot; TX/RX1 sends the
+      movable +150 kHz direction-finding target. The fixed beacon is transmitted
+      15 dB below the target to prevent stop-band leakage into the target selector.
     gen_linking: dynamic
     generate_options: no_gui
     generator_class_name: PythonNoGuiGenerator
@@ -54,7 +55,7 @@ blocks:
     field7: ''
     field8: ''
     field9: ''
-    value0: 50e3
+    value0: 140e3
     value1: 1e6
     value10: '0'
     value11: '0'
@@ -125,6 +126,169 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [328, 216]
+    rotation: 0
+    state: enabled
+- name: pilot_am_marker
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '0.25'
+    comment: First component of the amplitude signature used by the receiver to measure inter-board
+      stream item lag before phase calibration.
+    freq: '997'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '1.0'
+    phase: '0'
+    samp_rate: input_variables.SampleRate
+    showports: 'False'
+    type: float
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 56]
+    rotation: 0
+    state: disabled
+- name: pilot_am_marker_2
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '0.20'
+    comment: Incommensurate second component makes the lag-correlation peak unique.
+    freq: '1613'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0.0'
+    phase: '0.37'
+    samp_rate: input_variables.SampleRate
+    showports: 'False'
+    type: float
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 8]
+    rotation: 0
+    state: disabled
+- name: pilot_marker_add
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 40]
+    rotation: 0
+    state: disabled
+- name: pilot_marker_complex
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 56]
+    rotation: 0
+    state: enabled
+- name: pilot_marker_multiply
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 120]
+    rotation: 0
+    state: enabled
+- name: pilot_pn_source
+  id: digital_glfsr_source_x
+  parameters:
+    degree: '7'
+    mask: '0'
+    repeat: 'True'
+    seed: '1'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 8]
+    rotation: 0
+    state: enabled
+- name: pilot_pn_repeat
+  id: blocks_repeat
+  parameters:
+    affinity: ''
+    alias: ''
+    interp: '1000'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 8]
+    rotation: 0
+    state: enabled
+- name: pilot_pn_scale
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    const: '0.4'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mode: scalar
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 8]
+    rotation: 0
+    state: enabled
+- name: pilot_pn_offset
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    const: '1.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 8]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -337,7 +501,7 @@ blocks:
     comment: ''
     dev_addr: input_variables.TxAddr
     dev_args: '""'
-    gain0: input_variables.Gain
+    gain0: input_variables.Gain - 15
     gain1: input_variables.Gain
     gain10: '0'
     gain11: '0'
@@ -503,8 +667,16 @@ blocks:
     state: enabled
 
 connections:
-- [analog_sig_source_x_0, '0', uhd_usrp_sink_0, '0']
+- [analog_sig_source_x_0, '0', pilot_marker_multiply, '0']
 - [analog_sig_source_x_1, '0', uhd_usrp_sink_0, '1']
+- [pilot_am_marker, '0', pilot_marker_add, '0']
+- [pilot_am_marker_2, '0', pilot_marker_add, '1']
+- [pilot_pn_source, '0', pilot_pn_repeat, '0']
+- [pilot_pn_repeat, '0', pilot_pn_scale, '0']
+- [pilot_pn_scale, '0', pilot_pn_offset, '0']
+- [pilot_pn_offset, '0', pilot_marker_complex, '0']
+- [pilot_marker_complex, '0', pilot_marker_multiply, '1']
+- [pilot_marker_multiply, '0', uhd_usrp_sink_0, '0']
 
 metadata:
   file_format: 1

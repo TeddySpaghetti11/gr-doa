@@ -8,11 +8,13 @@
 # Title: B210 Dual-Channel Calibration and Target TX
 # Author: Ettus Research; LibreSDR UCA configuration
 # Copyright: None
-# Description: TX/RX0 sends the fixed +50 kHz calibration pilot; TX/RX1 sends the movable +150 kHz direction-finding target. Both use 40 dB gain.
+# Description: TX/RX0 sends the fixed +140 kHz calibration pilot; TX/RX1 sends the movable +150 kHz direction-finding target. The fixed beacon is transmitted 15 dB below the target to prevent stop-band leakage into the target selector.
 # GNU Radio version: v3.11.0.0git-1103-g14d6a758
 
 def struct(data): return type('Struct', (object,), data)()
 from gnuradio import analog
+from gnuradio import blocks
+from gnuradio import digital
 from gnuradio import uhd
 import time
 import threading
@@ -38,7 +40,7 @@ class run_DoA_transmitter(gr.top_block):
         ##################################################
         self.input_variables = input_variables = struct({
 
-            'PilotToneFreq': 50e3,
+            'PilotToneFreq': 140e3,
 
             'SampleRate': 1e6,
 
@@ -84,11 +86,17 @@ class run_DoA_transmitter(gr.top_block):
 
         self.uhd_usrp_sink_0.set_center_freq(input_variables.CenterFreq, 0)
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
-        self.uhd_usrp_sink_0.set_gain(input_variables.Gain, 0)
+        self.uhd_usrp_sink_0.set_gain(input_variables.Gain - 15, 0)
 
         self.uhd_usrp_sink_0.set_center_freq(input_variables.CenterFreq, 1)
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 1)
         self.uhd_usrp_sink_0.set_gain(input_variables.Gain, 1)
+        self.pilot_pn_source = digital.glfsr_source_f(7, True, 0, 1)
+        self.pilot_pn_scale = blocks.multiply_const_ff(0.4, 1)
+        self.pilot_pn_repeat = blocks.repeat(gr.sizeof_float*1, 1000)
+        self.pilot_pn_offset = blocks.add_const_ff(1.0)
+        self.pilot_marker_multiply = blocks.multiply_vcc(1)
+        self.pilot_marker_complex = blocks.float_to_complex(1)
         self.analog_sig_source_x_1 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.TargetToneFreq, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(input_variables.SampleRate, analog.GR_SIN_WAVE, input_variables.PilotToneFreq, 1, 0, 0)
 
@@ -96,8 +104,14 @@ class run_DoA_transmitter(gr.top_block):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_sig_source_x_0, 0), (self.uhd_usrp_sink_0, 0))
+        self.connect((self.analog_sig_source_x_0, 0), (self.pilot_marker_multiply, 0))
         self.connect((self.analog_sig_source_x_1, 0), (self.uhd_usrp_sink_0, 1))
+        self.connect((self.pilot_marker_complex, 0), (self.pilot_marker_multiply, 1))
+        self.connect((self.pilot_marker_multiply, 0), (self.uhd_usrp_sink_0, 0))
+        self.connect((self.pilot_pn_offset, 0), (self.pilot_marker_complex, 0))
+        self.connect((self.pilot_pn_repeat, 0), (self.pilot_pn_scale, 0))
+        self.connect((self.pilot_pn_scale, 0), (self.pilot_pn_offset, 0))
+        self.connect((self.pilot_pn_source, 0), (self.pilot_pn_repeat, 0))
 
 
     def get_input_variables(self):
