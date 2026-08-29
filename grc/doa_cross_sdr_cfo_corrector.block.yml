@@ -105,7 +105,7 @@ parameters:
 - id: tracking_max_residual_hz
   label: Maximum Trackable Residual CFO (Hz)
   dtype: float
-  default: 80.0
+  default: 150.0
 - id: tracking_gain
   label: Tracking Phase Update Gain
   dtype: float
@@ -125,7 +125,7 @@ parameters:
 - id: transition_confirm_windows
   label: Coherent Windows to Confirm Transition
   dtype: int
-  default: 2
+  default: 1
 - id: tracking_bad_window_grace
   label: Consecutive Bad-Window Grace
   dtype: int

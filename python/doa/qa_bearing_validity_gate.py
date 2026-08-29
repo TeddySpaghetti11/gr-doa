@@ -43,7 +43,7 @@ def _state_tag(offset, key):
 
 
 class qa_bearing_validity_gate(gr_unittest.TestCase):
-    def test_invalid_intervals_are_nan(self):
+    def test_invalid_intervals_hold_last_valid_value(self):
         values = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0]
         source = blocks.vector_source_f(
             values,
@@ -58,12 +58,12 @@ class qa_bearing_validity_gate(gr_unittest.TestCase):
         flowgraph.run()
 
         observed = numpy.asarray(sink.data(), dtype=numpy.float32)
-        self.assertTrue(numpy.isnan(observed[0]))
-        numpy.testing.assert_allclose(observed[1:3], [20.0, 30.0])
-        self.assertTrue(numpy.all(numpy.isnan(observed[3:5])))
-        self.assertEqual(observed[5], 60.0)
+        numpy.testing.assert_allclose(
+            observed,
+            [0.0, 20.0, 30.0, 30.0, 30.0, 60.0],
+        )
 
-    def test_invalid_covariance_is_blank_through_music_chain(self):
+    def test_invalid_covariance_holds_bearing_through_music_chain(self):
         snapshot_size = 64
         snapshot_count = 3
         sample_count = snapshot_size * snapshot_count
@@ -111,9 +111,9 @@ class qa_bearing_validity_gate(gr_unittest.TestCase):
 
         observed = numpy.asarray(sink.data(), dtype=numpy.float32)
         self.assertEqual(observed.size, snapshot_count)
-        self.assertTrue(numpy.isnan(observed[0]))
+        self.assertEqual(observed[0], 0.0)
         self.assertAlmostEqual(observed[1], bearing_deg, delta=1.0)
-        self.assertTrue(numpy.isnan(observed[2]))
+        self.assertEqual(observed[2], observed[1])
 
 
 if __name__ == "__main__":

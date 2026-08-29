@@ -44,7 +44,7 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  tracking_warmup_samples=4096,
                  tracking_lock_tolerance_hz=0.15,
                  tracking_agreement_tolerance_hz=1.0,
-                 tracking_max_residual_hz=80.0,
+                 tracking_max_residual_hz=150.0,
                  tracking_gain=1.0,
                  tracking_lock_windows=2,
                  tracking_min_coherence=None,
@@ -52,7 +52,7 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  tracking_frequency_gain=0.25,
                  transition_frequency_gain=1.0,
                  transition_threshold_hz=5.0,
-                 transition_confirm_windows=2,
+                 transition_confirm_windows=1,
                  tracking_bad_window_grace=3):
         if tracking_warmup_samples < 0:
             raise ValueError("Tracking warm-up must be non-negative")

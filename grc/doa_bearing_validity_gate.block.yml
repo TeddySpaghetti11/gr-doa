@@ -34,7 +34,8 @@ asserts:
 
 documentation: |-
   Passes bearing vectors only when the latest boolean validity tag is true.
-  Invalid outputs are NaN so number and compass sinks cannot present a
-  plausible-looking bearing while calibration or tracking is invalid.
+  Invalid intervals hold the most recent valid bearing (or zero before the
+  first valid result). This keeps GNU Radio 3.11 number and compass sinks finite
+  while the propagated doa_valid tag remains false.
 
 file_format: 1

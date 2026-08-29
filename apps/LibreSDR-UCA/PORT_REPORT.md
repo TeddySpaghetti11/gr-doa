@@ -43,8 +43,9 @@ calibration. The MUSIC subspace implementation remains unchanged.
   and distinguish calibration-preserving soft recovery from hard phase-epoch
   loss.
 - `lib/autocorrelate_impl.cc` and `python/doa/bearing_validity_gate.py`: require
-  a completely valid calibrated snapshot and replace invalid directions with
-  an explicit `NaN` marker.
+  a completely valid calibrated snapshot and hold the most recent valid
+  direction during invalid intervals. A finite hold is necessary because GNU
+  Radio 3.11's compass crashes on `NaN` input.
 - `grc/doa_uca_pilot_calibration.block.yml`, `README.md`, and
   `apps/LibreSDR-UCA/README.md`: corrected the calibration contract and recorded
   equations, ordering, and limitations.
@@ -210,10 +211,11 @@ Acquisition and post-lock quality limits are separate. Residual slope,
 two-channel agreement, and coherence are checked before a post-lock estimate
 can update the Bravo rotator. The live settings allow 1 Hz disagreement and
 three bad windows, damp ordinary residual updates with a 0.25 frequency gain,
-and require two coherent, same-direction observations before treating an
-uninterrupted residual above 5 Hz as a real frequency-state transition. This
-prevents a single phase-step-contaminated fit from being misclassified as a
-lasting 5--60 Hz frequency state.
+and apply a coherent common residual above 5 Hz immediately. Post-lock windows
+are 2,048 samples and the live ceiling is 150 Hz. The attached GUI run showed
+92 mutually agreeing accepted transitions plus persistent 107--127 Hz states;
+the earlier confirmation delay and 80 Hz ceiling therefore gated the display
+too often and triggered avoidable long recovery cycles.
 
 A rejected tracking interval now emits `cfo_tracking_degraded`, which gates
 covariance and bearings while preserving the common rotator, original phase
@@ -241,10 +243,12 @@ checked: 41 of 54 accepted updates exceeded the configured 20 Hz limit, with a
 maximum of 236.457 Hz. Moving the qualification into the base tracker fixed
 that ordering bug. A strict 20 Hz run then correctly rejected the recurrent
 Lesha frequency states, but was too restrictive to acquire a stable operating
-period. The deployed limit is therefore 80 Hz: it accepts the observed normal
-40--60 Hz states while rejecting the separate 100--236 Hz events.
+period. That validation used an 80 Hz limit: it accepted the then-observed
+40--60 Hz states while rejecting 100--236 Hz events. The later live-GUI log
+demonstrated that coherent 107--127 Hz states also recur normally, so the active
+limit is now 150 Hz; values above that still take the recovery path.
 
-The final 80 Hz run produced no IIO `O` overruns. It qualified one continuous
+The final 80 Hz validation run produced no IIO `O` overruns. It qualified one continuous
 lock, completed OTA calibration once with channel coherences `0.9995`, `0.9995`,
 and `0.9994`, and had no lock loss after calibration for the remainder of the
 run. There were four reacquisitions before final calibration, including one

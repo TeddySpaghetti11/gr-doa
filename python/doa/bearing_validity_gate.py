@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Replace invalid direction estimates with an explicit NaN marker."""
+"""Hold the most recent valid bearing while direction data is gated."""
 
 # Copyright 2026
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -16,8 +16,9 @@ class bearing_validity_gate(gr.sync_block):
     """Pass bearing vectors only when the covariance carries a valid tag.
 
     The validity-aware covariance block emits one boolean tag per covariance
-    matrix. Invalid estimates are represented as NaN rather than a plausible
-    compass bearing, so GUI sinks cannot silently display stale-looking data.
+    matrix. GNU Radio 3.11's compass cannot render NaN, so invalid intervals
+    hold the most recent valid vector (or zero before the first valid result)
+    while the propagated validity tag remains false.
     """
 
     def __init__(self, vector_length=1, validity_tag_key="doa_valid"):
@@ -29,6 +30,7 @@ class bearing_validity_gate(gr.sync_block):
         self.vector_length = int(vector_length)
         self.validity_tag_key = str(validity_tag_key)
         self._valid = False
+        self._last_valid = numpy.zeros(self.vector_length, dtype=numpy.float32)
         self._lock = threading.Lock()
 
         gr.sync_block.__init__(
@@ -62,13 +64,22 @@ class bearing_validity_gate(gr.sync_block):
             valid = self._valid
             for tag in tags:
                 event_cursor = max(cursor, int(tag.offset) - absolute_start)
-                if not valid:
-                    destination[cursor:event_cursor] = numpy.nan
+                if valid:
+                    destination[cursor:event_cursor] = source[
+                        cursor:event_cursor
+                    ]
+                    if event_cursor > cursor:
+                        self._last_valid[:] = source[event_cursor - 1]
+                else:
+                    destination[cursor:event_cursor] = self._last_valid
                 cursor = event_cursor
                 valid = bool(pmt.to_bool(tag.value))
-            if not valid:
-                destination[cursor:item_count] = numpy.nan
+            if valid:
+                destination[cursor:item_count] = source[cursor:item_count]
+                if item_count > cursor:
+                    self._last_valid[:] = source[item_count - 1]
+            else:
+                destination[cursor:item_count] = self._last_valid
             self._valid = valid
 
         return item_count
-

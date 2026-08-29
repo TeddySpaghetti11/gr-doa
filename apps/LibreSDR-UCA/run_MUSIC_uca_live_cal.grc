@@ -654,7 +654,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: Replace invalid or transition-contaminated bearings with NaN.
+    comment: Hold the most recent valid bearing through invalid intervals.
     maxoutbuf: '0'
     minoutbuf: '0'
     validity_tag_key: doa_valid
@@ -798,7 +798,7 @@ blocks:
     minoutbuf: '0'
     pilot_bandwidth_hz: pilot_passband
     pilot_offset_hz: pilot_offset
-    post_lock_tracking_window_samples: '4096'
+    post_lock_tracking_window_samples: '2048'
     residual_tolerance_hz: cfo_residual_tolerance_hz
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
@@ -809,11 +809,11 @@ blocks:
     tracking_gain: '1.0'
     tracking_lock_tolerance_hz: '0.15'
     tracking_lock_windows: '2'
-    tracking_max_residual_hz: '80.0'
+    tracking_max_residual_hz: '150.0'
     tracking_min_coherence: '0.9'
     tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
-    transition_confirm_windows: '2'
+    transition_confirm_windows: '1'
     transition_frequency_gain: '1.0'
     transition_threshold_hz: '5.0'
     validation_settling_samples: cfo_validation_settling_samples

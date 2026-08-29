@@ -146,12 +146,13 @@ samples. It refines the one common correction up to three times and declares
 lock only when the averaged residual is at most `1 Hz`. The final measured
 residual is included even when already inside that bound. Lock is qualified with
 `16,384`-sample tracking windows (about `31.2 ms`). Once qualified, the live
-graph switches to `4,096`-sample post-lock windows (about `7.8 ms`) so the common
+graph switches to `2,048`-sample post-lock windows (about `3.9 ms`) so the common
 rotator can detect short-lived state changes. Ordinary residual updates use a
 `0.25` frequency gain to avoid chasing estimator jitter. Residuals above `5 Hz`
-are treated as transition candidates and require two coherent, same-direction
-windows before the full `1.0` transition gain is applied; a coherent window
-immediately after a low-coherence transition window may confirm the change.
+that pass the coherence and two-Bravo agreement checks use the full `1.0`
+transition gain immediately. The live residual ceiling is `150 Hz`: the
+hardware log showed repeated, mutually agreeing `107--127 Hz` states, so the
+old `80 Hz` ceiling incorrectly forced long recovery cycles.
 A direct phase-feedback term returns the output to the captured non-zero
 lock-time phase instead of turning phase error into another frequency ramp. It
 does not force absolute Alpha-vs-Bravo phase to zero and is applied identically
@@ -199,7 +200,9 @@ discarded and retried instead of freezing a biased correction. MUSIC uses a
 (about `31.2 ms`). The covariance block accepts only a snapshot wholly inside a
 `calibration_valid` interval; a snapshot crossing a degraded, unlocked, or
 recalibration interval is zeroed and tagged invalid. The bearing gate displays
-`NaN` instead of a plausible stale direction for those matrices.
+the most recent valid bearing (or zero before the first valid result) for those
+matrices. This is required because GNU Radio 3.11's compass crashes when given
+`NaN`; the propagated `doa_valid` tag still marks the held interval invalid.
 
 ## AD9361 settings
 
