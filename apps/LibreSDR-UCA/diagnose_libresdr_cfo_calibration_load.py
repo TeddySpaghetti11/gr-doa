@@ -137,10 +137,15 @@ class diagnose_libresdr_cfo_calibration_load(gr.top_block):
             tracking_window_samples=16384,
             post_lock_tracking_window_samples=4096,
             tracking_warmup_samples=4096,
-            tracking_lock_tolerance_hz=0.05,
-            tracking_agreement_tolerance_hz=0.25,
+            tracking_lock_tolerance_hz=0.15,
+            tracking_agreement_tolerance_hz=1.0,
             tracking_max_residual_hz=80.0,
             tracking_gain=1.0,
+            tracking_frequency_gain=0.25,
+            transition_frequency_gain=1.0,
+            transition_threshold_hz=5.0,
+            transition_confirm_windows=2,
+            tracking_bad_window_grace=3,
             tracking_lock_windows=2,
             tracking_min_coherence=0.9)
         self.calibrated_sink = blocks.null_sink(gr.sizeof_gr_complex*1)

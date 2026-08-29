@@ -307,14 +307,19 @@ blocks:
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
-    tracking_agreement_tolerance_hz: '0.25'
+    tracking_agreement_tolerance_hz: '1.0'
+    tracking_bad_window_grace: '3'
+    tracking_frequency_gain: '0.25'
     tracking_gain: '1.0'
-    tracking_lock_tolerance_hz: '0.05'
+    tracking_lock_tolerance_hz: '0.15'
     tracking_lock_windows: '2'
     tracking_max_residual_hz: '80.0'
     tracking_min_coherence: '0.9'
     tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
+    transition_confirm_windows: '2'
+    transition_frequency_gain: '1.0'
+    transition_threshold_hz: '5.0'
     validation_settling_samples: cfo_validation_settling_samples
   states: {bus_sink: false, bus_source: false, bus_structure: null, coordinate: [520, 448], rotation: 0, state: enabled}
 - name: pilot_filter_0

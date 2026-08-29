@@ -6,23 +6,83 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-from gnuradio import gr, gr_unittest
-from gnuradio import blocks
 import itertools
-import oct2py
+import gnuradio
 import numpy
 import os
-# from gnuradio import blocks
+import pmt
+import sys
+import unittest
+
+for search_path in sys.path:
+    test_gnuradio = os.path.join(search_path, "gnuradio")
+    test_doa = os.path.join(test_gnuradio, "doa")
+    if os.path.isdir(test_doa) and any(
+            name.startswith("doa_python") for name in os.listdir(test_doa)):
+        gnuradio.__path__.insert(0, test_gnuradio)
+        break
+
+from gnuradio import blocks
+from gnuradio import gr, gr_unittest
+from gnuradio.doa import autocorrelate
+
 try:
-    from gnuradio.doa import autocorrelate
-except ImportError:
-    import sys
-    dirname, filename = os.path.split(os.path.abspath(__file__))
-    sys.path.append(os.path.join(dirname, "bindings"))
-    from gnuradio.doa import autocorrelate
-
-
+    import oct2py
+except ModuleNotFoundError:
+    oct2py = None
 class qa_autocorrelate(gr_unittest.TestCase):
+
+    @staticmethod
+    def _tag(offset, key):
+        tag = gr.tag_t()
+        tag.offset = offset
+        tag.key = pmt.intern(key)
+        tag.value = pmt.PMT_T
+        tag.srcid = pmt.intern("qa")
+        return tag
+
+    def test_validity_tags_require_a_complete_clean_snapshot(self):
+        snapshot_size = 8
+        sample_count = 32
+        data = numpy.exp(1j * 0.1 * numpy.arange(sample_count)).astype(
+            numpy.complex64
+        )
+        covariance = autocorrelate(
+            2,
+            snapshot_size,
+            0,
+            False,
+            "calibration_valid",
+            "calibration_invalid",
+            "doa_valid",
+        )
+        source0 = blocks.vector_source_c(
+            data,
+            False,
+            1,
+            [
+                self._tag(4, "calibration_valid"),
+                self._tag(18, "calibration_invalid"),
+            ],
+        )
+        source1 = blocks.vector_source_c(data * numpy.exp(0.3j), False)
+        sink = blocks.vector_sink_c(4)
+        self.tb.connect(source0, (covariance, 0))
+        self.tb.connect(source1, (covariance, 1))
+        self.tb.connect(covariance, sink)
+        self.tb.run()
+
+        matrices = numpy.asarray(sink.data(), dtype=numpy.complex64).reshape(-1, 4)
+        self.assertEqual(matrices.shape[0], 4)
+        self.assertTrue(numpy.allclose(matrices[0], 0.0))
+        self.assertFalse(numpy.allclose(matrices[1], 0.0))
+        self.assertTrue(numpy.allclose(matrices[2:], 0.0))
+        validity = [
+            pmt.to_bool(tag.value)
+            for tag in sink.tags()
+            if pmt.symbol_to_string(tag.key) == "doa_valid"
+        ]
+        self.assertEqual(validity, [False, True, False, False])
 
     def setUp(self):
         self.tb = gr.top_block()
@@ -30,6 +90,7 @@ class qa_autocorrelate(gr_unittest.TestCase):
     def tearDown(self):
         self.tb = None
 
+    @unittest.skipIf(oct2py is None, "oct2py is not installed")
     def test_001_t (self):
         # length of each snapshot
         len_ss = 2048
@@ -105,6 +166,7 @@ class qa_autocorrelate(gr_unittest.TestCase):
 
             self.assertTrue(expected_S_x_equals_observed_S_x)
 
+    @unittest.skipIf(oct2py is None, "oct2py is not installed")
     def test_002_t (self):
         # length of each snapshot
         len_ss = 1024
@@ -177,6 +239,7 @@ class qa_autocorrelate(gr_unittest.TestCase):
 
             self.assertTrue(expected_S_x_equals_observed_S_x)
 
+    @unittest.skipIf(oct2py is None, "oct2py is not installed")
     def test_003_t (self):
         # length of each snapshot
         len_ss = 256

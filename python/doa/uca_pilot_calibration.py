@@ -33,6 +33,9 @@ class uca_pilot_calibration(gr.sync_block):
     provide wideband sample-time alignment.
     """
 
+    _CALIBRATION_VALID_TAG = "calibration_valid"
+    _CALIBRATION_INVALID_TAG = "calibration_invalid"
+
     def __init__(self,
                  num_inputs=4,
                  norm_radius=0.34638,
@@ -88,6 +91,8 @@ class uca_pilot_calibration(gr.sync_block):
         self._coefficients = numpy.ones(self.num_inputs, dtype=numpy.complex64)
         self._coherences = numpy.zeros(self.num_inputs, dtype=numpy.float64)
         self._state = "collecting"
+        self._data_valid = False
+        self._scheduler_running = False
         self._failure_reason = ""
         self._lock = threading.Lock()
 
@@ -145,6 +150,34 @@ class uca_pilot_calibration(gr.sync_block):
         """Return normalized pilot coherence relative to channel 0."""
         with self._lock:
             return self._coherences.copy()
+
+    def data_valid(self):
+        """Return True while calibrated target samples are bearing-safe."""
+        with self._lock:
+            return bool(self._state == "calibrated" and self._data_valid)
+
+    def start(self):
+        self._scheduler_running = True
+        return True
+
+    def stop(self):
+        self._scheduler_running = False
+        return True
+
+    def _emit_validity_tag(self, relative_offset, valid, reason=""):
+        # A number of unit tests exercise the DSP state machine by invoking
+        # work() directly. Stream tags require a live block detail and must only
+        # be emitted while the GNU Radio scheduler is running.
+        if not self._scheduler_running:
+            return
+        absolute_offset = self.nitems_written(0) + int(relative_offset)
+        key = pmt.intern(
+            self._CALIBRATION_VALID_TAG
+            if valid else self._CALIBRATION_INVALID_TAG
+        )
+        value = pmt.from_bool(True) if valid else pmt.intern(str(reason))
+        for port in range(self.num_inputs):
+            self.add_item_tag(port, absolute_offset, key, value)
 
     def _fail_calibration(self, reason, coherences):
         with self._lock:
@@ -251,6 +284,7 @@ class uca_pilot_calibration(gr.sync_block):
             self._coefficients = coefficients.astype(numpy.complex64)
             self._coherences = coherences
             self._state = "calibrated"
+            self._data_valid = True
 
         for channel, coefficient in enumerate(coefficients):
             print(
@@ -291,6 +325,7 @@ class uca_pilot_calibration(gr.sync_block):
             self._coefficients.fill(1.0)
             self._coherences.fill(0.0)
             self._state = "collecting"
+            self._data_valid = False
             self._failure_reason = ""
             self._armed = bool(armed)
 
@@ -330,6 +365,8 @@ class uca_pilot_calibration(gr.sync_block):
             cursor += used
             if self._samples_accumulated == self.calibration_samples:
                 self._finish_calibration()
+                if self.status() == "calibrated":
+                    self._emit_validity_tag(cursor, True)
 
         state = self.status()
         if state == "calibrated" and cursor < stop:
@@ -362,6 +399,8 @@ class uca_pilot_calibration(gr.sync_block):
         event_keys = [(self.start_tag_key, "lock")]
         if self.start_tag_key == "cfo_locked":
             event_keys.append(("cfo_unlocked", "unlock"))
+            event_keys.append(("cfo_tracking_degraded", "degraded"))
+            event_keys.append(("cfo_tracking_recovered", "recovered"))
         for key, event_type in event_keys:
             for tag in self.get_tags_in_range(
                     0, absolute_start, absolute_stop, pmt.intern(key)):
@@ -376,11 +415,44 @@ class uca_pilot_calibration(gr.sync_block):
             )
             cursor = event_cursor
             if event_type == "unlock":
+                was_valid = self.data_valid()
                 self._reset_calibration(armed=False)
+                if was_valid:
+                    self._emit_validity_tag(
+                        event_cursor,
+                        False,
+                        "cross-SDR phase epoch lost",
+                    )
                 print(
                     f"UCA calibration: received 'cfo_unlocked' at input sample "
                     f"{absolute_offset}; frozen phase correction discarded"
                 )
+            elif event_type == "degraded":
+                with self._lock:
+                    was_valid = self._data_valid
+                    self._data_valid = False
+                if was_valid:
+                    self._emit_validity_tag(
+                        event_cursor,
+                        False,
+                        "cross-SDR tracking degraded",
+                    )
+                print(
+                    "UCA calibration: cross-SDR tracking degraded at input "
+                    f"sample {absolute_offset}; frozen coefficients retained "
+                    "and bearing output marked invalid"
+                )
+            elif event_type == "recovered":
+                with self._lock:
+                    recovered = self._state == "calibrated"
+                    self._data_valid = recovered
+                if recovered:
+                    self._emit_validity_tag(event_cursor, True)
+                    print(
+                        "UCA calibration: original cross-SDR phase reference "
+                        f"restored at input sample {absolute_offset}; frozen "
+                        "coefficients re-enabled"
+                    )
             else:
                 self._reset_calibration(armed=True)
                 print(

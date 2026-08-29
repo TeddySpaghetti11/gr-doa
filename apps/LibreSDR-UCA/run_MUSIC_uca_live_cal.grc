@@ -408,7 +408,7 @@ blocks:
   id: variable
   parameters:
     comment: Samples per MUSIC covariance estimate
-    value: 2**13
+    value: 2**11
   states:
     bus_sink: false
     bus_source: false
@@ -649,6 +649,23 @@ blocks:
     coordinate: [1600, 400]
     rotation: 0
     state: enabled
+- name: bearing_validity
+  id: doa_bearing_validity_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Replace invalid or transition-contaminated bearings with NaN.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    validity_tag_key: doa_valid
+    vector_length: num_targets
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1512, 352]
+    rotation: 0
+    state: enabled
 - name: bravo_internal_phase_display
   id: qtgui_time_sink_x
   parameters:
@@ -786,14 +803,19 @@ blocks:
     retry_delay_samples: cfo_retry_delay_samples
     samp_rate: samp_rate
     settling_samples: cfo_settling_samples
-    tracking_agreement_tolerance_hz: '0.25'
+    tracking_agreement_tolerance_hz: '1.0'
+    tracking_bad_window_grace: '3'
+    tracking_frequency_gain: '0.25'
     tracking_gain: '1.0'
-    tracking_lock_tolerance_hz: '0.05'
+    tracking_lock_tolerance_hz: '0.15'
     tracking_lock_windows: '2'
     tracking_max_residual_hz: '80.0'
     tracking_min_coherence: '0.9'
     tracking_warmup_samples: '4096'
     tracking_window_samples: '16384'
+    transition_confirm_windows: '2'
+    transition_frequency_gain: '1.0'
+    transition_threshold_hz: '5.0'
     validation_settling_samples: cfo_validation_settling_samples
   states:
     bus_sink: false
@@ -1023,10 +1045,13 @@ blocks:
     comment: Target-only forward covariance; the calibration pilot does not enter
       MUSIC.
     inputs: num_elements
+    invalid_tag_key: calibration_invalid
     maxoutbuf: '0'
     minoutbuf: '0'
     overlap_size: overlap_size
+    output_valid_tag_key: doa_valid
     snapshot_size: snapshot_size
+    valid_tag_key: calibration_valid
   states:
     bus_sink: false
     bus_source: false
@@ -1910,7 +1935,8 @@ connections:
 - [ota_calibration, '3', corrected_phase_estimator, '3']
 - [ota_calibration, '3', covariance, '3']
 - [peak_finder, '0', peak_magnitude_discard, '0']
-- [peak_finder, '1', bearing_streams, '0']
+- [peak_finder, '1', bearing_validity, '0']
+- [bearing_validity, '0', bearing_streams, '0']
 - [pilot_filter_0, '0', ota_calibration, '0']
 - [pilot_filter_0, '0', post_cfo_fft_display, '0']
 - [pilot_filter_0, '0', postfilter_phase_estimator, '0']

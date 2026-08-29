@@ -84,7 +84,7 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.pilot_decim = pilot_decim = 8
         self.array_radius = array_radius = 0.16263 / (2**0.5)
         self.target_norm_radius = target_norm_radius = array_radius * target_rf / 299792458.0
-        self.snapshot_size = snapshot_size = 2**13
+        self.snapshot_size = snapshot_size = 2**11
         self.rx_gain = rx_gain = 40
         self.rf_bandwidth = rf_bandwidth = int(2.8e6)
         self.pspectrum_len = pspectrum_len = 720
@@ -405,7 +405,14 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.libresdr_a.set_rfdc(True)
         self.libresdr_a.set_bbdc(True)
         self.libresdr_a.set_filter_params('Auto', '', 0, 0)
-        self.covariance = doa.autocorrelate(num_elements, snapshot_size, overlap_size, 0)
+        self.covariance = doa.autocorrelate(
+            num_elements,
+            snapshot_size,
+            overlap_size,
+            0,
+            'calibration_valid',
+            'calibration_invalid',
+            'doa_valid')
         self.corrected_phase_estimator = doa.phase_offset_est(num_elements, (calibration_skip + calibration_samples))
         self.corrected_phase_display = qtgui.time_sink_f(
             1024, #size
@@ -530,12 +537,19 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
             tracking_window_samples=16384,
             post_lock_tracking_window_samples=4096,
             tracking_warmup_samples=4096,
-            tracking_lock_tolerance_hz=0.05,
-            tracking_agreement_tolerance_hz=0.25,
+            tracking_lock_tolerance_hz=0.15,
+            tracking_agreement_tolerance_hz=1.0,
             tracking_max_residual_hz=80.0,
             tracking_gain=1.0,
+            tracking_frequency_gain=0.25,
+            transition_frequency_gain=1.0,
+            transition_threshold_hz=5.0,
+            transition_confirm_windows=2,
+            tracking_bad_window_grace=3,
             tracking_lock_windows=2,
             tracking_min_coherence=0.9)
+        self.bearing_validity = doa.bearing_validity_gate(
+            num_targets, 'doa_valid')
         self.bravo_internal_phase_estimator = doa.phase_offset_est(2, (calibration_skip * pilot_decim))
         self.bravo_internal_phase_display = qtgui.time_sink_f(
             1024, #size
@@ -731,7 +745,8 @@ class run_MUSIC_uca_live_cal(gr.top_block, Qt.QWidget):
         self.connect((self.ota_calibration, 0), (self.covariance, 0))
         self.connect((self.ota_calibration, 1), (self.covariance, 1))
         self.connect((self.ota_calibration, 2), (self.covariance, 2))
-        self.connect((self.peak_finder, 1), (self.bearing_streams, 0))
+        self.connect((self.peak_finder, 1), (self.bearing_validity, 0))
+        self.connect((self.bearing_validity, 0), (self.bearing_streams, 0))
         self.connect((self.peak_finder, 0), (self.peak_magnitude_discard, 0))
         self.connect((self.pilot_filter_0, 0), (self.ota_calibration, 0))
         self.connect((self.pilot_filter_0, 0), (self.post_cfo_fft_display, 0))

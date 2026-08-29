@@ -6,22 +6,37 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import gnuradio
 from gnuradio import gr, gr_unittest
 import scipy
-import oct2py
 from subprocess import Popen, PIPE
 import os
+import sys
+import unittest
+
+try:
+    import oct2py
+except ModuleNotFoundError:
+    oct2py = None
+
+for search_path in sys.path:
+    test_gnuradio = os.path.join(search_path, "gnuradio")
+    test_doa = os.path.join(test_gnuradio, "doa")
+    if os.path.isdir(test_doa) and any(
+            name.startswith("doa_python") for name in os.listdir(test_doa)):
+        gnuradio.__path__.insert(0, test_gnuradio)
+        break
 
 from gnuradio import blocks
 
 try:
     from doa import rootMUSIC_linear_array
 except ImportError:
-    import sys
     dirname, filename = os.path.split(os.path.abspath(__file__))
     sys.path.append(os.path.join(dirname, "bindings"))
     from gnuradio.doa import rootMUSIC_linear_array
     
+@unittest.skipIf(oct2py is None, "oct2py is not installed")
 class qa_rootMUSIC_linear_array(gr_unittest.TestCase):
 
     def setUp(self):

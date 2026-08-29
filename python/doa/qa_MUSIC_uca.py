@@ -4,7 +4,20 @@
 # Copyright 2026
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
+import sys
+
+import gnuradio
 import numpy
+
+for search_path in sys.path:
+    test_gnuradio = os.path.join(search_path, "gnuradio")
+    test_doa = os.path.join(test_gnuradio, "doa")
+    if os.path.isdir(test_doa) and any(
+            name.startswith("doa_python") for name in os.listdir(test_doa)):
+        gnuradio.__path__.insert(0, test_gnuradio)
+        break
+
 from gnuradio import blocks
 from gnuradio import doa
 from gnuradio import gr

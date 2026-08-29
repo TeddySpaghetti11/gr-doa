@@ -42,13 +42,18 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
                  tracking_window_samples=262144,
                  post_lock_tracking_window_samples=None,
                  tracking_warmup_samples=4096,
-                 tracking_lock_tolerance_hz=0.05,
-                 tracking_agreement_tolerance_hz=0.25,
+                 tracking_lock_tolerance_hz=0.15,
+                 tracking_agreement_tolerance_hz=1.0,
                  tracking_max_residual_hz=80.0,
                  tracking_gain=1.0,
                  tracking_lock_windows=2,
                  tracking_min_coherence=None,
-                 tracking_log_every=128):
+                 tracking_log_every=128,
+                 tracking_frequency_gain=0.25,
+                 transition_frequency_gain=1.0,
+                 transition_threshold_hz=5.0,
+                 transition_confirm_windows=2,
+                 tracking_bad_window_grace=3):
         if tracking_warmup_samples < 0:
             raise ValueError("Tracking warm-up must be non-negative")
         if post_lock_tracking_window_samples is None:
@@ -64,7 +69,17 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
         if tracking_max_residual_hz <= 0.0:
             raise ValueError("Tracking maximum residual must be positive")
         if not 0.0 < tracking_gain <= 1.0:
-            raise ValueError("Tracking gain must be in (0, 1]")
+            raise ValueError("Tracking phase gain must be in (0, 1]")
+        if not 0.0 < tracking_frequency_gain <= 1.0:
+            raise ValueError("Tracking frequency gain must be in (0, 1]")
+        if not 0.0 < transition_frequency_gain <= 1.0:
+            raise ValueError("Transition frequency gain must be in (0, 1]")
+        if transition_threshold_hz <= 0.0:
+            raise ValueError("Transition threshold must be positive")
+        if transition_confirm_windows < 1:
+            raise ValueError("Transition confirmation must use at least one window")
+        if tracking_bad_window_grace < 0:
+            raise ValueError("Tracking bad-window grace must be non-negative")
         if tracking_lock_windows < 1:
             raise ValueError("Tracking lock windows must be at least one")
         if tracking_min_coherence is None:
@@ -74,10 +89,10 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
         if tracking_log_every < 1:
             raise ValueError("Tracking log interval must be at least one")
 
-        # Apply accepted frequency residuals in full and use tracking_gain only
-        # for the slow phase-error servo. Post-lock residual, agreement, and
-        # coherence limits are passed into the parent so a suspect update is
-        # rejected before it can alter the common Bravo rotator.
+        # Frequency and phase gains are independent. Post-lock residual,
+        # agreement, and coherence limits are passed into the parent so a
+        # suspect update is rejected before it can alter the common Bravo
+        # rotator.
         super().__init__(
             samp_rate=samp_rate,
             pilot_offset_hz=pilot_offset_hz,
@@ -93,8 +108,12 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
             min_coherence=min_coherence,
             tracking_window_samples=tracking_window_samples,
             tracking_phase_gain=tracking_gain,
+            tracking_frequency_gain=tracking_frequency_gain,
+            transition_frequency_gain=transition_frequency_gain,
+            transition_threshold_hz=transition_threshold_hz,
+            transition_confirm_windows=transition_confirm_windows,
             phase_jump_threshold_rad=2.0,
-            tracking_bad_window_grace=1,
+            tracking_bad_window_grace=tracking_bad_window_grace,
             tracking_agreement_tolerance_hz=(
                 tracking_agreement_tolerance_hz
             ),
@@ -115,6 +134,11 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
         )
         self.tracking_max_residual_hz = float(tracking_max_residual_hz)
         self.tracking_gain = float(tracking_gain)
+        self.tracking_frequency_gain = float(tracking_frequency_gain)
+        self.transition_frequency_gain = float(transition_frequency_gain)
+        self.transition_threshold_hz = float(transition_threshold_hz)
+        self.transition_confirm_windows = int(transition_confirm_windows)
+        self.tracking_bad_window_grace = int(tracking_bad_window_grace)
         self.tracking_lock_windows = int(tracking_lock_windows)
         self.tracking_min_coherence = float(tracking_min_coherence)
         self.tracking_log_every = int(tracking_log_every)
@@ -211,6 +235,20 @@ class continuous_cross_sdr_cfo_corrector(_tracker):
     def _start_reacquire(self, reason):
         super()._start_reacquire(reason)
         self._reset_qualification()
+
+    def _start_soft_reacquire(self, reason):
+        with self._qualification_lock:
+            was_qualified = self._qualification_ready
+        super()._start_soft_reacquire(reason)
+        # A qualified phase epoch uses the longer window only while recovering,
+        # then the base class restores the saved post-lock window. Before the
+        # first public lock, restart qualification normally.
+        if was_qualified:
+            self.tracking_window_samples = (
+                self.qualification_tracking_window_samples
+            )
+        else:
+            self._reset_qualification()
 
     def _finish_tracking(self):
         self._start_qualification()

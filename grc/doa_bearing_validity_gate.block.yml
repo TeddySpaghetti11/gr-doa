@@ -1,0 +1,40 @@
+id: doa_bearing_validity_gate
+label: Bearing Validity Gate
+category: '[doa]'
+
+templates:
+  imports: from gnuradio import doa
+  make: doa.bearing_validity_gate(${vector_length}, ${validity_tag_key})
+
+parameters:
+- id: vector_length
+  label: Bearing Vector Length
+  dtype: int
+  default: 1
+- id: validity_tag_key
+  label: Validity Tag Key
+  dtype: string
+  default: doa_valid
+
+inputs:
+- label: bearing
+  domain: stream
+  dtype: float
+  vlen: ${vector_length}
+
+outputs:
+- label: gated
+  domain: stream
+  dtype: float
+  vlen: ${vector_length}
+
+asserts:
+- ${ vector_length > 0 }
+- ${ bool(validity_tag_key) }
+
+documentation: |-
+  Passes bearing vectors only when the latest boolean validity tag is true.
+  Invalid outputs are NaN so number and compass sinks cannot present a
+  plausible-looking bearing while calibration or tracking is invalid.
+
+file_format: 1

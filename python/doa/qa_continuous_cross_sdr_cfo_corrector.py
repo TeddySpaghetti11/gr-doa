@@ -107,6 +107,8 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             tracking_agreement_tolerance_hz=0.05,
             tracking_max_residual_hz=5.0,
             tracking_gain=1.0,
+            tracking_frequency_gain=1.0,
+            transition_confirm_windows=1,
             tracking_lock_windows=2,
             tracking_min_coherence=0.99,
             tracking_log_every=100,
@@ -141,17 +143,16 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
         self.assertEqual(len(lock_tags), 1)
         self.assertGreater(lock_tags[0].offset, acquisition_end)
 
-    def test_large_common_frequency_state_change_reacquires(self):
+    def test_large_common_frequency_state_change_soft_recovers(self):
         sample_rate = 100000.0
         window = 2048
         acquisition_end = 4 * window
         transition_at = acquisition_end + 4 * window
         sample_count = transition_at + 10 * window
 
-        # A large common slope can be genuine hardware drift, but it can also
-        # be a stream/state discontinuity whose fitted slope looks coherent.
-        # Above the configured post-lock limit it must disarm downstream
-        # calibration and reacquire instead of silently changing the rotator.
+        # Above the configured post-lock limit the tracker gates bearings and
+        # validates a longer window, but it retains the original phase epoch
+        # and frozen calibration unless a structural discontinuity is found.
         cfo = numpy.full(sample_count, 180.0, dtype=numpy.float64)
         cfo[:transition_at] = 100.0
         inputs = _pilot_channels(sample_rate, sample_count, cfo)
@@ -177,6 +178,9 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             # Deliberately below the later +80 Hz state change.
             tracking_max_residual_hz=5.0,
             tracking_gain=1.0,
+            tracking_frequency_gain=1.0,
+            transition_confirm_windows=1,
+            tracking_bad_window_grace=1,
             tracking_lock_windows=2,
             tracking_min_coherence=0.99,
             tracking_log_every=100,
@@ -186,8 +190,8 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
 
         self.assertTrue(corrector.locked())
         self.assertAlmostEqual(corrector.accepted_cfo_hz(), 180.0, places=1)
-        self.assertEqual(corrector.discontinuity_count(), 1)
-        self.assertEqual(corrector.relock_count(), 1)
+        self.assertEqual(corrector.discontinuity_count(), 0)
+        self.assertEqual(corrector.relock_count(), 0)
         self.assertGreaterEqual(corrector.tracking_rejection_count(), 2)
         self.assertEqual(corrector.tracking_window_samples, 128)
         numpy.testing.assert_array_equal(outputs[0], inputs[0])
@@ -201,10 +205,68 @@ class qa_continuous_cross_sdr_cfo_corrector(gr_unittest.TestCase):
             tag for tag in sinks[0].tags()
             if pmt.symbol_to_string(tag.key) == "cfo_unlocked"
         ]
-        self.assertEqual(len(lock_tags), 2)
-        self.assertEqual(len(unlock_tags), 1)
-        self.assertLess(lock_tags[0].offset, unlock_tags[0].offset)
-        self.assertLess(unlock_tags[0].offset, lock_tags[1].offset)
+        degraded_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_tracking_degraded"
+        ]
+        recovered_tags = [
+            tag for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key) == "cfo_tracking_recovered"
+        ]
+        self.assertEqual(len(lock_tags), 1)
+        self.assertEqual(len(unlock_tags), 0)
+        self.assertEqual(len(degraded_tags), 1)
+        self.assertEqual(len(recovered_tags), 1)
+        self.assertLess(degraded_tags[0].offset, recovered_tags[0].offset)
+
+    def test_common_transition_requires_confirmation_without_unlock(self):
+        sample_rate = 100000.0
+        window = 2048
+        transition_at = 6 * window
+        sample_count = transition_at + 8 * window
+        cfo = numpy.full(sample_count, 110.0, dtype=numpy.float64)
+        cfo[:transition_at] = 100.0
+        inputs = _pilot_channels(sample_rate, sample_count, cfo)
+
+        corrector = doa.continuous_cross_sdr_cfo_corrector(
+            samp_rate=sample_rate,
+            pilot_offset_hz=4100.0,
+            pilot_bandwidth_hz=1000.0,
+            settling_samples=0,
+            estimation_samples=window,
+            validation_settling_samples=0,
+            residual_tolerance_hz=0.05,
+            max_refinement_rounds=2,
+            retry_delay_samples=10000,
+            agreement_tolerance_hz=0.1,
+            max_abs_cfo_hz=1000.0,
+            min_coherence=0.99,
+            tracking_window_samples=window,
+            post_lock_tracking_window_samples=window,
+            tracking_warmup_samples=0,
+            tracking_lock_tolerance_hz=0.05,
+            tracking_agreement_tolerance_hz=0.05,
+            tracking_max_residual_hz=20.0,
+            tracking_gain=1.0,
+            tracking_frequency_gain=0.25,
+            transition_frequency_gain=1.0,
+            transition_threshold_hz=5.0,
+            transition_confirm_windows=2,
+            tracking_bad_window_grace=3,
+            tracking_lock_windows=2,
+            tracking_min_coherence=0.99,
+            tracking_log_every=100,
+        )
+
+        _, sinks = _run_block(corrector, inputs)
+
+        self.assertTrue(corrector.locked())
+        self.assertAlmostEqual(corrector.accepted_cfo_hz(), 110.0, places=1)
+        tag_keys = [pmt.symbol_to_string(tag.key) for tag in sinks[0].tags()]
+        self.assertEqual(tag_keys.count("cfo_locked"), 1)
+        self.assertEqual(tag_keys.count("cfo_unlocked"), 0)
+        self.assertEqual(tag_keys.count("cfo_tracking_degraded"), 1)
+        self.assertEqual(tag_keys.count("cfo_tracking_recovered"), 1)
 
 
 if __name__ == "__main__":

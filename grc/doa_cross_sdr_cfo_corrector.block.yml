@@ -25,6 +25,11 @@ templates:
         tracking_agreement_tolerance_hz=${tracking_agreement_tolerance_hz},
         tracking_max_residual_hz=${tracking_max_residual_hz},
         tracking_gain=${tracking_gain},
+        tracking_frequency_gain=${tracking_frequency_gain},
+        transition_frequency_gain=${transition_frequency_gain},
+        transition_threshold_hz=${transition_threshold_hz},
+        transition_confirm_windows=${transition_confirm_windows},
+        tracking_bad_window_grace=${tracking_bad_window_grace},
         tracking_lock_windows=${tracking_lock_windows},
         tracking_min_coherence=${tracking_min_coherence})
 
@@ -92,19 +97,39 @@ parameters:
 - id: tracking_lock_tolerance_hz
   label: Continuous Lock Residual Tolerance (Hz)
   dtype: float
-  default: 0.05
+  default: 0.15
 - id: tracking_agreement_tolerance_hz
   label: Tracking Estimate Agreement (Hz)
   dtype: float
-  default: 0.25
+  default: 1.0
 - id: tracking_max_residual_hz
   label: Maximum Trackable Residual CFO (Hz)
   dtype: float
   default: 80.0
 - id: tracking_gain
-  label: Tracking Frequency Update Gain
+  label: Tracking Phase Update Gain
   dtype: float
   default: 1.0
+- id: tracking_frequency_gain
+  label: Small-Residual Frequency Gain
+  dtype: float
+  default: 0.25
+- id: transition_frequency_gain
+  label: Confirmed-Transition Frequency Gain
+  dtype: float
+  default: 1.0
+- id: transition_threshold_hz
+  label: Frequency-State Threshold (Hz)
+  dtype: float
+  default: 5.0
+- id: transition_confirm_windows
+  label: Coherent Windows to Confirm Transition
+  dtype: int
+  default: 2
+- id: tracking_bad_window_grace
+  label: Consecutive Bad-Window Grace
+  dtype: int
+  default: 3
 - id: tracking_lock_windows
   label: Stable Windows Before cfo_locked
   dtype: int
@@ -134,6 +159,11 @@ asserts:
 - ${ tracking_agreement_tolerance_hz >= 0.0 }
 - ${ tracking_max_residual_hz > 0.0 and tracking_max_residual_hz <= max_abs_cfo_hz }
 - ${ tracking_gain > 0.0 and tracking_gain <= 1.0 }
+- ${ tracking_frequency_gain > 0.0 and tracking_frequency_gain <= 1.0 }
+- ${ transition_frequency_gain > 0.0 and transition_frequency_gain <= 1.0 }
+- ${ transition_threshold_hz > 0.0 }
+- ${ transition_confirm_windows >= 1 }
+- ${ tracking_bad_window_grace >= 0 }
 - ${ tracking_lock_windows >= 1 }
 - ${ tracking_min_coherence >= 0.0 and tracking_min_coherence <= 1.0 }
 
@@ -171,5 +201,9 @@ documentation: |-
   the continuous phase ramp seen with the old frozen correction. A separate,
   shorter post-lock window can react quickly to coherent frequency-state
   transitions after the longer qualification window has established lock.
+  Small residuals use a damped frequency gain. Large common slopes require
+  coherent confirmation before the full transition gain is applied. Temporary
+  quality loss emits cfo_tracking_degraded/recovered while preserving the old
+  phase reference; cfo_unlocked is reserved for a hard phase-epoch loss.
 
 file_format: 1

@@ -11,6 +11,7 @@ install(FILES
     doa_autocorrelate.block.yml
     doa_save_antenna_calib.block.yml
     doa_MUSIC_lin_array.block.yml
+    doa_bearing_validity_gate.block.yml
     doa_MUSIC_uca.block.yml
     doa_find_local_max.block.yml
     doa_antenna_correction.block.yml

@@ -30,6 +30,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
 
     _LOCK_TAG = "cfo_locked"
     _UNLOCK_TAG = "cfo_unlocked"
+    _DEGRADED_TAG = "cfo_tracking_degraded"
+    _RECOVERED_TAG = "cfo_tracking_recovered"
 
     def __init__(self,
                  samp_rate=2.8e6,
@@ -50,7 +52,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                  tracking_bad_window_grace=1,
                  tracking_agreement_tolerance_hz=None,
                  tracking_max_residual_hz=None,
-                 tracking_min_coherence=None):
+                 tracking_min_coherence=None,
+                 tracking_frequency_gain=1.0,
+                 transition_frequency_gain=1.0,
+                 transition_threshold_hz=None,
+                 transition_confirm_windows=1):
         if samp_rate <= 0.0:
             raise ValueError("Sample rate must be positive")
         if pilot_bandwidth_hz <= 0.0:
@@ -79,6 +85,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             raise ValueError("Tracking window must contain at least 64 samples")
         if tracking_phase_gain < 0.0 or tracking_phase_gain > 1.0:
             raise ValueError("Tracking phase gain must be in [0, 1]")
+        if tracking_frequency_gain <= 0.0 or tracking_frequency_gain > 1.0:
+            raise ValueError("Tracking frequency gain must be in (0, 1]")
+        if transition_frequency_gain <= 0.0 or transition_frequency_gain > 1.0:
+            raise ValueError("Transition frequency gain must be in (0, 1]")
+        if transition_threshold_hz is None:
+            transition_threshold_hz = max(4.0 * residual_tolerance_hz, 1.0)
+        if transition_threshold_hz <= 0.0:
+            raise ValueError("Transition threshold must be positive")
+        if transition_confirm_windows < 1:
+            raise ValueError("Transition confirmation must use at least one window")
         if phase_jump_threshold_rad <= 0.0 or phase_jump_threshold_rad > numpy.pi:
             raise ValueError("Phase-jump threshold must be in (0, pi]")
         if tracking_bad_window_grace < 0:
@@ -124,6 +140,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self.min_coherence = float(min_coherence)
         self.tracking_window_samples = int(tracking_window_samples)
         self.tracking_phase_gain = float(tracking_phase_gain)
+        self.tracking_frequency_gain = float(tracking_frequency_gain)
+        self.transition_frequency_gain = float(transition_frequency_gain)
+        self.transition_threshold_hz = float(transition_threshold_hz)
+        self.transition_confirm_windows = int(transition_confirm_windows)
         self.phase_jump_threshold_rad = float(phase_jump_threshold_rad)
         self.tracking_bad_window_grace = int(tracking_bad_window_grace)
         self.tracking_agreement_tolerance_hz = float(
@@ -147,10 +167,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._refinement_round = 0
         self._locked = False
         self._reacquiring = False
+        self._soft_reacquiring = False
+        self._soft_phase_references = None
+        self._soft_tracking_window_samples = None
         self._phase_references = None
         self._last_tracked_phase = None
         self._last_tracked_tail_samples = None
         self._tracking_bad_windows = 0
+        self._tracking_degraded = False
+        self._pending_transition_hz = None
+        self._pending_transition_windows = 0
         self._relock_count = 0
         self._discontinuity_count = 0
         self._failed = False
@@ -158,6 +184,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._last_failure_reason = ""
         self._lock_tag_pending = False
         self._unlock_tag_pending = False
+        self._degraded_tag_pending = False
+        self._recovered_tag_pending = False
         self._lock = threading.Lock()
 
         # Estimate from the configured OTA pilot only. The earlier full-band
@@ -204,7 +232,11 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         print(
             "Cross-SDR CFO continuous tracking: "
             f"{self.tracking_window_samples} samples/window, phase gain "
-            f"{self.tracking_phase_gain:.3f}, discontinuity threshold "
+            f"{self.tracking_phase_gain:.3f}, frequency gain "
+            f"{self.tracking_frequency_gain:.3f}, transition gain "
+            f"{self.transition_frequency_gain:.3f} after "
+            f"{self.transition_confirm_windows} coherent window(s), "
+            "discontinuity threshold "
             f"{self.phase_jump_threshold_rad:.3f} rad, bad-window grace "
             f"{self.tracking_bad_window_grace}"
         )
@@ -579,6 +611,38 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         )
         if abs(residual_hz) <= self.residual_tolerance_hz:
             with self._lock:
+                soft_recovery = self._soft_reacquiring
+                saved_phase_references = self._soft_phase_references
+
+            phase_feedback = 0.0
+            corrected_endpoint_phases = tuple(endpoint_phases)
+            if soft_recovery and saved_phase_references is not None:
+                phase_errors = [
+                    self._wrapped_phase(phase - reference)
+                    for phase, reference in zip(
+                        endpoint_phases, saved_phase_references
+                    )
+                ]
+                differential_error = abs(self._wrapped_phase(
+                    phase_errors[0] - phase_errors[1]
+                ))
+                if differential_error > self.phase_jump_threshold_rad:
+                    self._start_reacquire(
+                        "soft recovery found a differential phase-epoch "
+                        f"change of {differential_error:.6f} rad"
+                    )
+                    return
+                # Soft recovery must return to the original lock-time phase
+                # datum before calibrated target samples become valid again.
+                phase_feedback = float(numpy.angle(numpy.mean(numpy.exp(
+                    1j * numpy.asarray(phase_errors)
+                ))))
+                corrected_endpoint_phases = tuple(
+                    self._wrapped_phase(phase - phase_feedback)
+                    for phase in endpoint_phases
+                )
+
+            with self._lock:
                 # The tolerance is an acceptance bound, not a reason to leave
                 # a known residual unapplied. Fold the final measured residual
                 # into the tracked total while retaining instantaneous phase.
@@ -586,19 +650,43 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 self._set_correction_frequency(
                     self._accepted_cfo_hz, reset_phase=False
                 )
+                if soft_recovery:
+                    self._correction_phase = self._wrapped_phase(
+                        self._correction_phase - phase_feedback
+                    )
                 self._locked = True
                 was_reacquiring = self._reacquiring
                 self._reacquiring = False
-                self._phase_references = tuple(endpoint_phases)
-                self._last_tracked_phase = tuple(endpoint_phases)
+                if soft_recovery:
+                    self._phase_references = tuple(saved_phase_references)
+                    self._last_tracked_phase = corrected_endpoint_phases
+                    self._soft_reacquiring = False
+                    self._soft_phase_references = None
+                    if self._soft_tracking_window_samples is not None:
+                        self.tracking_window_samples = int(
+                            self._soft_tracking_window_samples
+                        )
+                    self._soft_tracking_window_samples = None
+                    self._recovered_tag_pending = True
+                else:
+                    self._phase_references = tuple(endpoint_phases)
+                    self._last_tracked_phase = tuple(endpoint_phases)
                 self._last_tracked_tail_samples = tuple(endpoint_tail_samples)
                 self._tracking_bad_windows = 0
+                self._tracking_degraded = False
+                self._pending_transition_hz = None
+                self._pending_transition_windows = 0
                 self._failed = False
-                self._lock_tag_pending = True
-                if was_reacquiring:
+                if not soft_recovery:
+                    self._lock_tag_pending = True
+                if was_reacquiring and not soft_recovery:
                     self._relock_count += 1
                 accepted = self._accepted_cfo_hz
                 correction_step = self._correction_step
+            if soft_recovery:
+                feedback_factor = numpy.exp(-1j * phase_feedback)
+                self._pilot_filter_states[1] *= feedback_factor
+                self._pilot_filter_states[2] *= feedback_factor
             self._samples_accumulated = 0
             print(f"Cross-SDR CFO final accepted CFO: {accepted:+.6f} Hz")
             print(
@@ -606,10 +694,18 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 f"phase step {correction_step:+.12g} rad/sample, identically "
                 "on ch2 and ch3"
             )
-            print(
-                "Cross-SDR CFO lock established; continuous pilot tracking is "
-                "active. Downstream constant phase calibration may now begin."
-            )
+            if soft_recovery:
+                print(
+                    "Cross-SDR CFO TRACKING RECOVERED: the original phase "
+                    "reference has been restored; frozen calibration remains "
+                    "valid."
+                )
+            else:
+                print(
+                    "Cross-SDR CFO lock established; continuous pilot tracking "
+                    "is active. Downstream constant phase calibration may now "
+                    "begin."
+                )
             return
 
         if self._refinement_round >= self.max_refinement_rounds:
@@ -748,9 +844,8 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             residual_spans[0],
             residual_spans[1],
         )
-        common_frequency_transition = abs(residual_hz) > max(
-            4.0 * self.residual_tolerance_hz,
-            1.0,
+        common_frequency_transition = (
+            abs(residual_hz) > self.transition_threshold_hz
         )
         if structural_jump > self.phase_jump_threshold_rad:
             self._start_reacquire(
@@ -770,13 +865,59 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             return
 
         self._tracking_bad_windows = 0
+        transition_confirmed = not common_frequency_transition
         if common_frequency_transition:
+            same_candidate = (
+                self._pending_transition_hz is not None
+                and numpy.sign(self._pending_transition_hz)
+                == numpy.sign(residual_hz)
+            )
+            if same_candidate:
+                self._pending_transition_windows += 1
+            else:
+                self._pending_transition_hz = residual_hz
+                self._pending_transition_windows = 1
+
+            transition_confirmed = (
+                skipped_bad_windows > 0
+                or self._pending_transition_windows
+                >= self.transition_confirm_windows
+            )
+            if not transition_confirmed:
+                # A single coherent slope can still be a phase step close to a
+                # window boundary. Hold the rotator for one more observation;
+                # a real frequency state remains visible with the same sign.
+                with self._lock:
+                    if not self._tracking_degraded:
+                        self._tracking_degraded = True
+                        self._last_failure_reason = (
+                            "unconfirmed common frequency-state candidate "
+                            f"{residual_hz:+.6f} Hz"
+                        )
+                        self._degraded_tag_pending = True
+                    self._estimates_hz = tuple(estimates)
+                    self._coherences = tuple(coherences)
+                    self._last_tracked_phase = tuple(endpoint_phases)
+                    self._last_tracked_tail_samples = tuple(
+                        endpoint_tail_samples
+                    )
+                print(
+                    "Cross-SDR CFO frequency-state candidate held for "
+                    f"confirmation ({self._pending_transition_windows}/"
+                    f"{self.transition_confirm_windows}): common residual "
+                    f"{residual_hz:+.6f} Hz, agreement {disagreement:.6f} Hz"
+                )
+                return
+
             print(
                 "Cross-SDR CFO frequency-state transition accepted without "
                 f"dropping lock: common residual {residual_hz:+.6f} Hz, "
                 f"agreement {disagreement:.6f} Hz, skipped bad windows "
                 f"{skipped_bad_windows}"
             )
+        else:
+            self._pending_transition_hz = None
+            self._pending_transition_windows = 0
 
         phase_feedback = self.tracking_phase_gain * common_phase_error
         feedback_factor = numpy.exp(-1j * phase_feedback)
@@ -784,13 +925,19 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._wrapped_phase(phase - phase_feedback)
             for phase in endpoint_phases
         )
+        frequency_gain = (
+            self.transition_frequency_gain
+            if common_frequency_transition and transition_confirmed
+            else self.tracking_frequency_gain
+        )
+        applied_residual_hz = frequency_gain * residual_hz
         with self._lock:
             # Frequency feedback removes the measured phase slope. Phase
             # feedback separately returns the next output window to the
             # captured, non-zero pilot phase. Converting phase error into
             # another frequency term made the recurring LibreSDR frequency
             # states overshoot for several windows and contaminate MUSIC.
-            self._accepted_cfo_hz += residual_hz
+            self._accepted_cfo_hz += applied_residual_hz
             accepted = self._accepted_cfo_hz
             self._set_correction_frequency(accepted, reset_phase=False)
             self._correction_phase = self._wrapped_phase(
@@ -800,6 +947,13 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._coherences = tuple(coherences)
             self._last_tracked_phase = corrected_endpoint_phases
             self._last_tracked_tail_samples = tuple(endpoint_tail_samples)
+            if self._tracking_degraded:
+                self._tracking_degraded = False
+                self._recovered_tag_pending = True
+
+        if common_frequency_transition:
+            self._pending_transition_hz = None
+            self._pending_transition_windows = 0
 
         # The estimator filters see the same corrected Bravo streams as the
         # outputs. Rotate their internal states by the identical common factor
@@ -809,8 +963,16 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         self._pilot_filter_states[2] *= feedback_factor
 
     def _handle_bad_tracking_window(self, reason):
-        """Hold lock briefly across one mixed hardware transition window."""
+        """Hold lock briefly, then enter calibration-preserving recovery."""
         self._tracking_bad_windows += 1
+        if not self._tracking_degraded:
+            # A rejected estimate means the just-observed interval cannot be
+            # certified as phase-stationary. Preserve the calibration epoch,
+            # but gate subsequent covariance/bearing output immediately rather
+            # than waiting for the grace counter to expire.
+            self._tracking_degraded = True
+            self._last_failure_reason = reason
+            self._degraded_tag_pending = True
         if self._tracking_bad_windows <= self.tracking_bad_window_grace:
             print(
                 "Cross-SDR CFO tracking transition window rejected; holding "
@@ -819,44 +981,89 @@ class cross_sdr_cfo_corrector(gr.sync_block):
                 f"{self.tracking_bad_window_grace}): {reason}"
             )
             return
-        self._start_reacquire(
+        self._start_soft_reacquire(
             f"{self._tracking_bad_windows} consecutive invalid tracking "
             f"windows: {reason}"
         )
 
-    def _start_reacquire(self, reason):
-        """Drop lock, retain the common rotator, and validate it again."""
+    def _start_soft_reacquire(self, reason):
+        """Temporarily gate bearings while preserving the calibrated phase epoch."""
         with self._lock:
             if not self._locked:
                 return
             self._locked = False
             self._reacquiring = True
+            self._soft_reacquiring = True
+            self._soft_phase_references = tuple(self._phase_references)
+            self._soft_tracking_window_samples = self.tracking_window_samples
+            self._last_tracked_tail_samples = None
+            self._tracking_bad_windows = 0
+            self._tracking_degraded = True
+            self._pending_transition_hz = None
+            self._pending_transition_windows = 0
+            self._estimating_residual = True
+            self._refinement_round = 1
+            self._failed = False
+            self._last_failure_reason = reason
+        self._samples_accumulated = 0
+        self._relative_samples = [[], []]
+        self.settling_remaining = self._next_validation_settling_samples()
+        self._reset_pilot_filters()
+        print(f"Cross-SDR CFO TRACKING DEGRADED: {reason}")
+        print(
+            "Cross-SDR CFO: correction and original phase reference are held "
+            "while a longer pilot window is validated; calibration "
+            "coefficients are retained and bearings are gated"
+        )
+
+    def _start_reacquire(self, reason):
+        """Declare a hard phase-epoch loss and require fresh calibration."""
+        with self._lock:
+            if not self._locked and not self._soft_reacquiring:
+                return
+            self._locked = False
+            self._reacquiring = True
+            self._soft_reacquiring = False
+            self._soft_phase_references = None
+            self._soft_tracking_window_samples = None
             self._phase_references = None
             self._last_tracked_tail_samples = None
             self._tracking_bad_windows = 0
+            self._tracking_degraded = False
+            self._pending_transition_hz = None
+            self._pending_transition_windows = 0
             self._estimating_residual = True
             self._refinement_round = 1
             self._failed = False
             self._last_failure_reason = reason
             self._discontinuity_count += 1
             self._unlock_tag_pending = True
+            self._degraded_tag_pending = False
+            self._recovered_tag_pending = False
         self._samples_accumulated = 0
         self._relative_samples = [[], []]
         self.settling_remaining = self._next_validation_settling_samples()
         self._reset_pilot_filters()
-        print(f"Cross-SDR CFO LOCK LOST: {reason}")
+        print(f"Cross-SDR CFO PHASE EPOCH LOST: {reason}")
         print(
             "Cross-SDR CFO: common correction remains phase-continuous while "
-            "the pilot is reacquired; downstream calibration is disarmed"
+            "the pilot is reacquired; downstream calibration is invalidated"
         )
 
     def _reject(self, reason):
         with self._lock:
+            was_soft_reacquiring = self._soft_reacquiring
             self._locked = False
             self._reacquiring = False
+            self._soft_reacquiring = False
+            self._soft_phase_references = None
+            self._soft_tracking_window_samples = None
             self._phase_references = None
             self._last_tracked_tail_samples = None
             self._tracking_bad_windows = 0
+            self._tracking_degraded = False
+            self._pending_transition_hz = None
+            self._pending_transition_windows = 0
             self._failed = True
             self._rejection_count += 1
             rejection_count = self._rejection_count
@@ -867,6 +1074,12 @@ class cross_sdr_cfo_corrector(gr.sync_block):
             self._refinement_round = 0
             self._correction_phase = 0.0
             self._correction_step = 0.0
+            if was_soft_reacquiring:
+                # Soft recovery could not preserve the old frequency/phase
+                # datum. Escalate to a hard invalidation before retrying.
+                self._unlock_tag_pending = True
+            self._degraded_tag_pending = False
+            self._recovered_tag_pending = False
         self._samples_accumulated = 0
         self._relative_samples = [[], []]
         self.retry_remaining = self.retry_delay_samples
@@ -893,6 +1106,21 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         for port in range(4):
             self.add_item_tag(port, absolute_offset, key, value)
         self._unlock_tag_pending = False
+
+    def _emit_tracking_state_tags(self, relative_offset, recovered):
+        absolute_offset = self.nitems_written(0) + int(relative_offset)
+        key_name = self._RECOVERED_TAG if recovered else self._DEGRADED_TAG
+        key = pmt.intern(key_name)
+        if recovered:
+            value = pmt.from_double(float(self._accepted_cfo_hz))
+        else:
+            value = pmt.intern(self._last_failure_reason)
+        for port in range(4):
+            self.add_item_tag(port, absolute_offset, key, value)
+        if recovered:
+            self._recovered_tag_pending = False
+        else:
+            self._degraded_tag_pending = False
 
     def _apply_correction(self, input_items, output_items, start, stop):
         count = stop - start
@@ -939,6 +1167,10 @@ class cross_sdr_cfo_corrector(gr.sync_block):
         while cursor < item_count:
             if self._unlock_tag_pending:
                 self._emit_unlock_tags(cursor)
+            if self._degraded_tag_pending:
+                self._emit_tracking_state_tags(cursor, recovered=False)
+            if self._recovered_tag_pending:
+                self._emit_tracking_state_tags(cursor, recovered=True)
             if self._lock_tag_pending:
                 self._emit_lock_tags(cursor)
 

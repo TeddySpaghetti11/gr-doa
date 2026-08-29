@@ -36,11 +36,21 @@ void bind_autocorrelate(py::module& m)
     py::class_<autocorrelate, gr::block, gr::basic_block, std::shared_ptr<autocorrelate>>(
         m, "autocorrelate", D(autocorrelate))
 
-        .def(py::init(&autocorrelate::make),
+        .def(py::init(static_cast<autocorrelate::sptr (*)(
+                 int,
+                 int,
+                 int,
+                 int,
+                 const std::string&,
+                 const std::string&,
+                 const std::string&)>(&autocorrelate::make)),
              py::arg("inputs"),
              py::arg("snapshot_size"),
              py::arg("overlap_size"),
              py::arg("avg_method"),
+             py::arg("valid_tag_key") = "",
+             py::arg("invalid_tag_key") = "",
+             py::arg("output_valid_tag_key") = "doa_valid",
              D(autocorrelate, make))
 
 

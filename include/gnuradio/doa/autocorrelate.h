@@ -10,6 +10,7 @@
 
 #include <gnuradio/block.h>
 #include <gnuradio/doa/api.h>
+#include <string>
 
 namespace gr {
 namespace doa {
@@ -37,7 +38,28 @@ public:
      * \param overlap_size    Size of the overlap between successive snapshots
      * \param avg_method      Use Forward Averaging or Forward-Backward Averaging
      */
-    static sptr make(int inputs, int snapshot_size, int overlap_size, int avg_method);
+    // Preserve the original four-argument factory ABI for existing compiled
+    // callers while exposing validity gating to new flowgraphs.
+    static sptr make(int inputs,
+                     int snapshot_size,
+                     int overlap_size,
+                     int avg_method);
+
+    /*!
+     * \brief Create a validity-gated autocorrelation block.
+     *
+     * The first four parameters have the same meaning as the legacy factory.
+     * \param valid_tag_key   Optional tag that starts a valid input interval
+     * \param invalid_tag_key Optional tag that ends a valid input interval
+     * \param output_valid_tag_key Boolean validity tag for each output matrix
+     */
+    static sptr make(int inputs,
+                     int snapshot_size,
+                     int overlap_size,
+                     int avg_method,
+                     const std::string& valid_tag_key,
+                     const std::string& invalid_tag_key,
+                     const std::string& output_valid_tag_key);
 };
 
 } // namespace doa

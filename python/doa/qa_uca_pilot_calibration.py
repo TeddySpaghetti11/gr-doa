@@ -10,6 +10,7 @@ import tempfile
 
 import gnuradio
 import numpy
+import pmt
 
 # Ensure GR_ADD_TEST exercises the source package copied under
 # test_modules/gnuradio, not an older system-installed gr-doa package.
@@ -19,11 +20,93 @@ for search_path in sys.path:
         gnuradio.__path__.insert(0, test_gnuradio)
         break
 
+from gnuradio import blocks
 from gnuradio import doa
+from gnuradio import gr
 from gnuradio import gr_unittest
 
 
 class qa_uca_pilot_calibration(gr_unittest.TestCase):
+    @staticmethod
+    def _tag(offset, key):
+        tag = gr.tag_t()
+        tag.offset = offset
+        tag.key = pmt.intern(key)
+        tag.value = pmt.PMT_T
+        tag.srcid = pmt.intern("qa")
+        return tag
+
+    def test_soft_tracking_degradation_preserves_coefficients(self):
+        sample_count = 256
+        calibration_samples = 64
+        tone = numpy.exp(1j * 0.03 * numpy.arange(sample_count)).astype(
+            numpy.complex64
+        )
+        hardware = numpy.exp(1j * numpy.asarray([0.0, 0.4, -0.8, 1.2]))
+        element_angles = numpy.deg2rad(numpy.arange(4) * 90.0)
+        steering = numpy.exp(
+            1j * 2.0 * numpy.pi * 0.25 * numpy.cos(-element_angles)
+        )
+        inputs = [
+            (hardware[channel] * steering[channel] * tone).astype(
+                numpy.complex64
+            )
+            for channel in range(4)
+        ]
+        target_inputs = [channel.copy() for channel in inputs]
+        control_tags = [
+            self._tag(0, "cfo_locked"),
+            self._tag(96, "cfo_tracking_degraded"),
+            self._tag(128, "cfo_tracking_recovered"),
+        ]
+
+        calibration = doa.uca_pilot_calibration(
+            num_inputs=4,
+            norm_radius=0.25,
+            pilot_angle=0.0,
+            element0_angle=0.0,
+            element_angle_step=90.0,
+            skip_samples=0,
+            calibration_samples=calibration_samples,
+            start_tag_key="cfo_locked",
+            separate_data_inputs=True,
+        )
+        sources = []
+        sinks = []
+        flowgraph = gr.top_block()
+        for channel, data in enumerate(inputs + target_inputs):
+            tags = control_tags if channel == 0 else []
+            source = blocks.vector_source_c(data, False, 1, tags)
+            sources.append(source)
+            flowgraph.connect(source, (calibration, channel))
+        for channel in range(4):
+            sink = blocks.vector_sink_c()
+            sinks.append(sink)
+            flowgraph.connect((calibration, channel), sink)
+        flowgraph.run(max_noutput_items=37)
+
+        self.assertTrue(calibration.calibrated())
+        self.assertTrue(calibration.data_valid())
+        numpy.testing.assert_allclose(
+            calibration.coefficients(),
+            numpy.conj(hardware).astype(numpy.complex64),
+            rtol=0.0,
+            atol=2e-5,
+        )
+        output_tags = [
+            (tag.offset, pmt.symbol_to_string(tag.key))
+            for tag in sinks[0].tags()
+            if pmt.symbol_to_string(tag.key).startswith("calibration_")
+        ]
+        self.assertEqual(
+            output_tags,
+            [
+                (calibration_samples, "calibration_valid"),
+                (96, "calibration_invalid"),
+                (128, "calibration_valid"),
+            ],
+        )
+
     def test_pilot_coefficients_are_applied_to_separate_target(self):
         num_elements = 4
         norm_radius = 0.26857

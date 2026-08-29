@@ -15,11 +15,14 @@ differences:
    channel phase without removing the UCA manifold phase; and
 3. MUSIC uses physical four-element UCA positions and scans 0-360 degrees.
 
-The repair restores Ettus's `32768/16384` covariance window, removes the two
+The repair retains Ettus's covariance and MUSIC algorithms, removes the two
 independent GUI smoothers, and reuses Ettus's `Phase Offset Est` block before
-and after same-session OTA correction. The three AD9361 tracking loops are
-disabled because they can move relative phase after calibration. No covariance
-or MUSIC subspace rewrite was added.
+and after same-session OTA correction. The live graph uses a shorter 2,048-sample
+non-overlapping covariance window so a bearing spans about 31.2 ms at the
+65.625-kS/s target-processing rate. Validity tags now prevent a covariance
+matrix from crossing a tracking or calibration state boundary. The three AD9361
+tracking loops are disabled because they can move relative phase after
+calibration. The MUSIC subspace implementation remains unchanged.
 
 ## Files changed by the correction
 
@@ -32,7 +35,16 @@ or MUSIC subspace rewrite was added.
 - `python/doa/qa_MUSIC_uca.py`: added an end-to-end test through the unchanged
   Ettus covariance block.
 - `python/doa/qa_uca_pilot_calibration.py`: verifies phase removal, geometry
-  retention, and no amplitude equalization.
+  retention, no amplitude equalization, and calibration preservation across a
+  soft tracking degradation.
+- `python/doa/cross_sdr_cfo_corrector.py` and
+  `continuous_cross_sdr_cfo_corrector.py`: separate phase and frequency gains,
+  confirm large common frequency transitions, relax estimator-noise tolerance,
+  and distinguish calibration-preserving soft recovery from hard phase-epoch
+  loss.
+- `lib/autocorrelate_impl.cc` and `python/doa/bearing_validity_gate.py`: require
+  a completely valid calibrated snapshot and replace invalid directions with
+  an explicit `NaN` marker.
 - `grc/doa_uca_pilot_calibration.block.yml`, `README.md`, and
   `apps/LibreSDR-UCA/README.md`: corrected the calibration contract and recorded
   equations, ordering, and limitations.
@@ -137,9 +149,10 @@ different startup phase.
 
 ## Ettus algorithm preservation
 
-- Covariance implementation: unchanged from upstream. Snapshot length, overlap,
-  matrix layout, and `X^T conj(X) / N` calculation remain Ettus code. The active
-  graph again uses Ettus's `32768` snapshot and `16384` overlap values.
+- Covariance calculation: matrix layout and `X^T conj(X) / N` calculation remain
+  Ettus code. The active graph uses 2,048-sample, non-overlapping snapshots and
+  adds state-tag gating around that calculation; invalid snapshots produce a
+  zero matrix plus `doa_valid=false` rather than mixing phase epochs.
 - Averaging selection: forward-only for the UCA. Ettus forward-backward mode
   uses a reversal matrix for ULA ordering. With UCA order 0, 90, 180, 270
   degrees, that reversal introduces the manifold for `90 degrees - theta`; it
@@ -195,11 +208,22 @@ hardware phase remains available to the downstream OTA calibration.
 
 Acquisition and post-lock quality limits are separate. Residual slope,
 two-channel agreement, and coherence are checked before a post-lock estimate
-can update the Bravo rotator. A rejected update cannot briefly corrupt the
-array phase and only then cause an unlock. Phase jumps, differential jumps,
-out-of-limit residual slopes, and persistent bad windows emit `cfo_unlocked`
-and take the short reacquisition path; a later qualified lock emits a new
-`cfo_locked` tag so downstream OTA calibration starts a fresh measurement.
+can update the Bravo rotator. The live settings allow 1 Hz disagreement and
+three bad windows, damp ordinary residual updates with a 0.25 frequency gain,
+and require two coherent, same-direction observations before treating an
+uninterrupted residual above 5 Hz as a real frequency-state transition. This
+prevents a single phase-step-contaminated fit from being misclassified as a
+lasting 5--60 Hz frequency state.
+
+A rejected tracking interval now emits `cfo_tracking_degraded`, which gates
+covariance and bearings while preserving the common rotator, original phase
+reference, and frozen UCA coefficients. Successful validation restores that
+same phase datum and emits `cfo_tracking_recovered`. Only a structural or
+differential phase discontinuity emits `cfo_unlocked`; that hard phase-epoch
+loss discards calibration and requires a later qualified `cfo_locked` plus a
+fresh OTA measurement. Consequently the historical log's frequent coherent
+0.25--0.4 Hz estimator disagreements no longer cause calibration churn, while
+uncertain samples are not presented as usable bearings.
 
 On 2026-08-28 the dual-channel B210 graph was run on the attached B210 over USB
 2: UHD accepted both TX channels at `40 dB`, and a 15-second run produced no

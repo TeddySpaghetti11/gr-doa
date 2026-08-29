@@ -129,9 +129,14 @@ documentation: |-
   When Required Start Tag is non-empty, this block emits zeros and does not
   count its skip or calibration samples until that tag arrives on input 0. Use
   cfo_locked after a Cross-SDR CFO Corrector so constant phase calibration can
-  never begin before a valid CFO correction is tracking. A cfo_unlocked tag
-  discards partial or frozen calibration state and silences output; a later
-  cfo_locked tag restarts the complete skip/calibration interval.
+  never begin before a valid CFO correction is tracking. A
+  cfo_tracking_degraded tag retains the frozen coefficients but marks output
+  invalid until cfo_tracking_recovered restores the same phase reference. A
+  cfo_unlocked tag is reserved for a hard phase-epoch loss: it discards partial
+  or frozen calibration state and silences output; a later cfo_locked tag
+  restarts the complete skip/calibration interval. The block emits
+  calibration_valid/calibration_invalid tags so covariance and bearing blocks
+  can reject snapshots that cross any invalid interval.
 
   Compute norm_radius at the actual pilot RF frequency. A pure tone corrects fixed
   delay only at that tone frequency; this block is
